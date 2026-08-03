@@ -1,12 +1,18 @@
 <!DOCTYPE html>
-<html lang="hu"><head><meta charset="UTF-8">
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Recepttár — receptek makrókkal</title>
-<meta name="description" content="Recepttár: 22 recept két kalóriakerethez, étrendtervvel és naptárral.">
+<meta name="description" content="43 recept két kalóriakerethez, étrendtervvel és naptárral.">
+<meta name="theme-color" content="#F5F0E3">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Recepttár">
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-database-compat.js"></script>
-</head><body>
+</head>
+<body>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;600;700&family=Karla:wght@400;500;600;700&display=swap');
 
@@ -111,6 +117,30 @@
 .rt-search::placeholder { color: var(--ink-30); }
 .rt-search:focus { outline: none; border-color: var(--blue); }
 
+/* rendezés + "belefér ma" szűrő */
+.rt-sort {
+  border: 1.5px solid var(--hair); background: var(--card); border-radius: 999px;
+  min-height: 40px; padding: 0 34px 0 14px; font-size: 13px; font-weight: 600;
+  appearance: none; cursor: pointer;
+  background-image: linear-gradient(45deg, transparent 50%, var(--ink-60) 50%), linear-gradient(135deg, var(--ink-60) 50%, transparent 50%);
+  background-position: calc(100% - 17px) 17px, calc(100% - 12px) 17px;
+  background-size: 5px 5px, 5px 5px; background-repeat: no-repeat;
+}
+.rt-sort:focus { outline: none; border-color: var(--blue); }
+.rt .rt-fit {
+  min-height: 40px; padding: 0 15px; border-radius: 999px; font-size: 13px; font-weight: 700;
+  border: 1.5px solid var(--hair); background: var(--card); color: var(--ink-60);
+  display: inline-flex; align-items: center; gap: 7px;
+}
+.rt .rt-fit:hover { border-color: var(--ink-60); color: var(--ink); }
+.rt .rt-fit[aria-pressed="true"] { background: var(--blue); border-color: var(--blue); color: #fff; }
+.rt-budget {
+  margin: 0 0 14px; padding: 11px 14px; background: var(--blue-soft);
+  border-radius: 10px; font-size: 13.5px; display: flex; gap: 16px; flex-wrap: wrap; align-items: baseline;
+}
+.rt-budget b { font-family: var(--disp); font-weight: 700; font-size: 17px; letter-spacing: -.02em; }
+.rt-budget .tele { color: var(--tomato); }
+
 .rt-key { max-width: 1160px; margin: 0 auto; padding: 16px 26px 0; display: flex; align-items: center; gap: 15px; flex-wrap: wrap; font-size: 12.5px; color: var(--ink-60); }
 .rt-key span { display: inline-flex; align-items: center; gap: 6px; }
 .rt-key i { width: 10px; height: 10px; border-radius: 3px; display: block; }
@@ -208,6 +238,29 @@
 .rt-over { color: var(--tomato) !important; }
 
 /* ---------- naptár ---------- */
+/* heti összegzés */
+.rt-wksum { display: flex; gap: 22px; flex-wrap: wrap; margin: 0 0 20px; }
+.rt-wksum div b { font-family: var(--disp); font-weight: 700; font-size: 20px; line-height: 1; letter-spacing: -.02em; display: block; }
+.rt-wksum div u { text-decoration: none; display: block; margin-top: 5px; }
+
+/* nap-műveletek a napkártya alján */
+.rt-dact { display: flex; gap: 3px; margin-top: 12px; padding-top: 10px; border-top: 1.5px dashed var(--hair); }
+.rt .rt-dact button {
+  flex: 1; min-height: 36px; border-radius: 9px; font-size: 12px; font-weight: 700;
+  color: var(--ink-60); transition: all .15s;
+}
+.rt .rt-dact button:hover { background: rgba(43,38,32,.08); color: var(--ink); }
+.rt .rt-dact button.d:hover { background: var(--tomato-soft); color: var(--tomato); }
+
+/* nap-választó lista a másoláshoz */
+.rt-pickday { list-style: none; margin: 12px 0 0; padding: 0; }
+.rt-pickday li { border-bottom: 1.5px dashed var(--hair); }
+.rt .rt-pickday button { width: 100%; display: flex; align-items: center; gap: 12px; padding: 12px 8px; text-align: left; border-radius: 9px; min-height: 44px; }
+.rt .rt-pickday button:hover { background: var(--blue-soft); }
+.rt-pickday .nm { flex: 1; font-size: 14.5px; font-weight: 600; }
+.rt-pickday .st { font-size: 12px; font-weight: 700; color: var(--ink-30); white-space: nowrap; }
+.rt-pickday .st.van { color: var(--tomato); }
+
 .rt-cal { max-width: 1160px; margin: 0 auto; padding: 20px 26px 40px; }
 .rt-cal-hd { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
 .rt-cal-hd h2 { font-family: var(--disp); font-weight: 700; font-size: 21px; letter-spacing: -.02em; margin: 0; min-width: 190px; }
@@ -359,7 +412,7 @@
 <div class="rt">
   <header class="rt-hd">
     <h1 class="rt-title">Recepttár</h1>
-    <p class="rt-lede">Huszonkét recept, minden kártyán mindkét keret makrói és elkészítése. Lidl-es alapanyagokra számolva.</p>
+    <p class="rt-lede">43 recept, mindegyiken mindkét keret makrói. A mennyiségek grammra kimérve, Lidl-es alapanyagokra számolva.</p>
   </header>
 
   <div class="rt-tabs" role="group" aria-label="Nézet">
@@ -379,6 +432,14 @@
         <input class="rt-search" id="q" type="search" placeholder="Keresés recept vagy hozzávaló" aria-label="Keresés recept vagy hozzávaló szerint">
         <button class="rt-clearq" id="clearq" aria-label="Keresés törlése" hidden>✕</button>
       </span>
+      <button class="rt-fit" id="fitBtn" aria-pressed="false">Csak ami ma belefér</button>
+      <select class="rt-sort" id="sortSel" aria-label="Sorrend">
+        <option value="alap">Étkezés szerint</option>
+        <option value="kcalUp">Kalória — növekvő</option>
+        <option value="kcalDown">Kalória — csökkenő</option>
+        <option value="prot">Fehérje — csökkenő</option>
+        <option value="perc">Elkészítési idő</option>
+      </select>
       <button class="btn btn-p" id="new">+ Új recept</button>
     </div>
     <div class="rt-key">
@@ -388,6 +449,7 @@
       <span style="color:var(--ink-30)">— a csík hossza a kalória</span>
     </div>
     <main class="rt-main">
+      <div id="budget"></div>
       <p class="rt-count rt-label" id="count"></p>
       <div class="rt-grid" id="grid"></div>
     </main>
@@ -399,7 +461,9 @@
       <h2 id="wkTitle"></h2>
       <button class="btn btn-s btn-ico" id="wnext" aria-label="Következő hét">›</button>
       <button class="btn btn-s btn-sm" id="wtoday">Mai hét</button>
+      <button class="btn btn-s btn-sm" id="wdup" style="margin-left:auto">Hét másolása a következőre</button>
     </div>
+    <div class="rt-wksum" id="wksum"></div>
     <div class="rt-days-grid" id="week"></div>
   </section>
 
@@ -437,9 +501,16 @@ const DATA = [
  {
   "id": "r0",
   "nev": "Görög joghurtos-szilvás zabpehely fahéjjal",
-  "kat": "Reggeli",
+  "slots": [
+   "reggeli"
+  ],
   "perc": 5,
-  "megj": "Kiváló, gyors reggeli opció. A szilva szezonon kívül helyettesíthető bogyós gyümölcsökkel (áfonya, málna). Alacsonyabb szénhidrát- és kalóriatartalmú verzió.",
+  "megj": "Reggel gyors, mert nem kell hozzá tűzhely. Szezonon kívül a szilvát cseréld fagyasztott áfonyára vagy málnára.",
+  "lep": [
+   "Szeleteld fel a szilvát, a magját dobd ki.",
+   "Egy tálban keverd össze a görög joghurtot a zabpehellyel.",
+   "Forgasd bele a szilvát, szórd meg fahéjjal, és hagyd állni 5 percet, hogy a zab megszívja magát."
+  ],
   "a1": {
    "makro": {
     "kcal": 444,
@@ -448,15 +519,10 @@ const DATA = [
     "f": 14.8
    },
    "hozz": [
-    "200 g görög joghurt",
+    "200 g görög joghurt, natúr (~5%)",
     "50 g zabpehely",
-    "4 szem friss szilva (felezve)",
-    "1 csipet fahéj"
-   ],
-   "lep": [
-    "Egy tálba mard ki a 200 g görög joghurtot és keverd hozzá az 50 g zabpelyhet.",
-    "Mosa meg és felezd meg a 4 szem friss szilvát, majd rendezd a joghurtos zabpehely tetejére.",
-    "Szórd meg egy csipet fahéjjal, és azonnal fogyasztható."
+    "160 g friss szilva",
+    "fahéj"
    ]
   },
   "a2": {
@@ -467,120 +533,121 @@ const DATA = [
     "f": 11.3
    },
    "hozz": [
-    "150 g görög joghurt",
+    "150 g görög joghurt, natúr (~5%)",
     "40 g zabpehely",
-    "3–4 szem friss szilva (felezve)",
-    "1 csipet fahéj"
-   ],
-   "lep": [
-    "Egy tálban keverd össze a 150 g görög joghurtot a 40 g zabpehellyel.",
-    "Mosa meg és felezd meg a 3–4 szem szilvát, majd tedd a joghurt tetejére.",
-    "Szórd meg egy csipet fahéjjal."
+    "140 g friss szilva",
+    "fahéj"
    ]
   }
  },
  {
   "id": "r1",
   "nev": "Meleg szilvás zabkása",
-  "kat": "Reggeli",
+  "slots": [
+   "reggeli"
+  ],
   "perc": 10,
-  "megj": "Laktató, melengető reggeli.",
+  "megj": "Ha vízzel főzöd tej helyett, keretenként kb. 70, illetve 55 kcal-lal kevesebb lesz.",
+  "lep": [
+   "Tedd a zabpelyhet egy lábasba, öntsd fel a tejjel.",
+   "Közepes lángon, folyamatos keverés mellett főzd 4-5 percig, amíg besűrűsödik.",
+   "Vedd le a tűzről, keverd bele a szilva felét és a fahéjat.",
+   "Tálalás előtt kanalazd rá a görög joghurtot és a maradék szilvát."
+  ],
   "a1": {
    "makro": {
-    "kcal": 435,
-    "p": 17.9,
-    "c": 57.1,
-    "f": 12.8
+    "kcal": 421,
+    "p": 17.8,
+    "c": 60.9,
+    "f": 10.1
    },
    "hozz": [
     "60 g zabpehely",
-    "kb. 1,5–2 dl víz vagy tej",
-    "150 g görög joghurt",
-    "4 szem friss szilva (aprítva)",
-    "Csipet fahéj (ízlés szerint)"
-   ],
-   "lep": [
-    "A 60 g zabpelyhet egy kis lábosban öntsd fel annyi vízzel vagy tejjel, amennyi éppen ellepi.",
-    "Alacsony lángon, folyamatos kevergetés mellett főzd puhára és krémesre (kb. 3–5 perc).",
-    "Húzd le a tűzről, keverd bele a 150 g görög joghurtot és az aprított szilvaszemeket.",
-    "Szórd meg fahéjjal a tetejét és tálald melegen."
+    "150 ml 1,5%-os tej",
+    "160 g friss szilva",
+    "60 g görög joghurt, natúr (~5%)",
+    "fahéj"
    ]
   },
   "a2": {
    "makro": {
-    "kcal": 324,
-    "p": 12.9,
-    "c": 44.4,
-    "f": 8.9
+    "kcal": 333,
+    "p": 14.0,
+    "c": 48.2,
+    "f": 8.0
    },
    "hozz": [
     "45 g zabpehely",
-    "kb. 1,5 dl víz vagy tej",
-    "100 g görög joghurt",
-    "3–4 szem friss szilva (aprítva)"
-   ],
-   "lep": [
-    "A 45 g zabpelyhet öntsd fel vízzel vagy tejjel egy lábosban.",
-    "Kis lángon főzd krémesre (kb. 3–5 perc).",
-    "Vedd le a tűzről, keverd hozzá a 100 g görög joghurtot és az aprított szilvaszemeket."
+    "120 ml 1,5%-os tej",
+    "140 g friss szilva",
+    "50 g görög joghurt, natúr (~5%)",
+    "fahéj"
    ]
   }
  },
  {
   "id": "r2",
   "nev": "Sütőben sült szilvás zabkása",
-  "kat": "Reggeli",
+  "slots": [
+   "reggeli"
+  ],
   "perc": 25,
-  "megj": "Különleges textúrájú, süteményes jellegű reggeli.",
+  "megj": "Este összeállítható, reggel csak be a sütőbe. Duplázva két napra elég.",
+  "lep": [
+   "Melegítsd elő a sütőt 180 °C-ra.",
+   "Keverd össze a zabpelyhet, a tejet és a tojást, sózd meg egy csipettel.",
+   "Simítsd egy kis hőálló formába, tedd a tetejére a felszeletelt szilvát, szórd meg fahéjjal.",
+   "Süsd 20 percig, amíg a teteje megszilárdul.",
+   "Melegen kanalazd rá a görög joghurtot."
+  ],
   "a1": {
    "makro": {
-    "kcal": 389,
-    "p": 15.0,
-    "c": 55.2,
-    "f": 10.0
+    "kcal": 451,
+    "p": 21.8,
+    "c": 56.5,
+    "f": 13.7
    },
    "hozz": [
-    "60 g zabpehely",
-    "4 szem friss szilva (összenyomkodva/villával összetörve)",
-    "1 csipet fahéj",
-    "Kevés víz a lazításhoz",
-    "100 g hideg görög joghurt (tálaláshoz)"
-   ],
-   "lep": [
-    "Melegítsd elő a sütőt 180 °C-ra.",
-    "Egy kis hőálló tálban keverd össze a 60 g zabpelyhet, az összenyomkodott szilvát, a fahéjat és egy pici vizet, hogy nedves masszát kapj.",
-    "Süsd a sütőben kb. 15–20 percig, amíg a teteje enyhén megpirul.",
-    "Vedd ki a sütőből, és kanalazd a tetejére a 100 g hideg görög joghurtot."
+    "55 g zabpehely",
+    "120 ml 1,5%-os tej",
+    "1 tojás (M-es, ~50 g)",
+    "160 g friss szilva",
+    "50 g görög joghurt, natúr (~5%)",
+    "fahéj"
    ]
   },
   "a2": {
    "makro": {
-    "kcal": 315,
-    "p": 12.7,
-    "c": 42.3,
-    "f": 8.9
+    "kcal": 351,
+    "p": 18.0,
+    "c": 41.1,
+    "f": 11.6
    },
    "hozz": [
-    "45 g zabpehely",
-    "3 szem friss szilva (összenyomkodva)",
-    "1 csipet fahéj",
-    "Pici víz",
-    "100 g hideg görög joghurt (tálaláshoz)"
-   ],
-   "lep": [
-    "Melegítsd elő a sütőt 180 °C-ra.",
-    "Keverd össze a 45 g zabpelyhet, az összenyomkodott szilvát, a fahéjat és a pici vizet egy kis sütőtálban.",
-    "Süsd 15–20 percig, amíg megszilárdul.",
-    "Tálaláskor tegyél a tetejére 100 g hideg görög joghurtot."
+    "38 g zabpehely",
+    "100 ml 1,5%-os tej",
+    "1 tojás (M-es, ~50 g)",
+    "120 g friss szilva",
+    "40 g görög joghurt, natúr (~5%)",
+    "fahéj"
    ]
   }
  },
  {
   "id": "r3",
   "nev": "Sonkás-paradicsomos rántotta",
-  "kat": "Reggeli",
+  "slots": [
+   "reggeli"
+  ],
   "perc": 10,
-  "megj": "Fehérjedús, kiadós reggeli. Teljesen szénhidrátszegény reggeli verzió.",
+  "megj": "A paradicsomot a végén add hozzá, különben elereszti a vizét és felhígítja a tojást.",
+  "lep": [
+   "Kockázd fel a sonkát, szeleteld fel a paradicsomot.",
+   "Az olajon pirítsd meg a sonkát 1-2 percig.",
+   "Verd fel a tojásokat egy csipet sóval, öntsd a serpenyőbe.",
+   "Kis lángon, kevergetve süsd krémesre, a végén forgasd bele a paradicsomot.",
+   "Tálald a teljes kiőrlésű kenyérrel."
+  ],
   "a1": {
    "makro": {
     "kcal": 425,
@@ -589,45 +656,44 @@ const DATA = [
     "f": 21.7
    },
    "hozz": [
-    "3 db tojás",
-    "60 g jó minőségű sonka (kockázva vagy csíkozva)",
-    "1–2 db friss paradicsom (szeletelve)",
-    "1 szelet teljes kiőrlésű kenyér",
-    "Pici olaj a serpenyő kenéséhez"
-   ],
-   "lep": [
-    "Egy serpenyőt enyhén kiolajozunk és átpirítjuk benne a 60 g kockázott sonkát.",
-    "A 3 tojást egy tálban felverjük egy csipet sóval, majd a sonkára öntjük.",
-    "Lassú tűzön, folyamatosan kevergetve krémes rántottát sütünk.",
-    "Friss paradicsomszeletekkel és 1 szelet teljes kiőrlésű kenyérrel tálaljuk."
+    "3 tojás (M-es, ~50 g)",
+    "60 g sovány gépsonka",
+    "180 g paradicsom",
+    "1 szelet teljes kiőrlésű kenyér (~35 g)",
+    "3 g olívaolaj",
+    "só, bors és fűszerek"
    ]
   },
   "a2": {
    "makro": {
-    "kcal": 248,
-    "p": 22.7,
-    "c": 5.8,
-    "f": 15.0
+    "kcal": 337,
+    "p": 26.2,
+    "c": 19.8,
+    "f": 16.2
    },
    "hozz": [
-    "2 db tojás",
-    "50 g sonka",
-    "1 db friss paradicsom",
-    "Pici olaj a serpenyő kenéséhez"
-   ],
-   "lep": [
-    "Pirítsd meg az 50 g kockázott sonkát a serpenyőben.",
-    "Öntsd rá a 2 felvert tojást, és süss krémes rántottát.",
-    "1 friss paradicsommal tálald. *(Kenyér nélkül!)*"
+    "2 tojás (M-es, ~50 g)",
+    "50 g sovány gépsonka",
+    "150 g paradicsom",
+    "1 szelet teljes kiőrlésű kenyér (~35 g)",
+    "3 g olívaolaj",
+    "só, bors és fűszerek"
    ]
   }
  },
  {
   "id": "r4",
   "nev": "Tükörtojás sonkával és paradicsommal",
-  "kat": "Reggeli",
+  "slots": [
+   "reggeli"
+  ],
   "perc": 10,
-  "megj": "",
+  "megj": "Fedő alatt fél perc alatt átsül a tojás felszíne anélkül, hogy a sárgája megkeményedne.",
+  "lep": [
+   "Az olajon melegítsd át a sonkaszeleteket mindkét oldalon.",
+   "Told félre őket, és süsd meg a tojásokat úgy, hogy a sárgájuk folyós maradjon.",
+   "Sózd, borsozd, és tálald a friss paradicsommal meg a kenyérrel."
+  ],
   "a1": {
    "makro": {
     "kcal": 436,
@@ -636,85 +702,236 @@ const DATA = [
     "f": 21.8
    },
    "hozz": [
-    "3 db tojás",
-    "3 szelet sonka",
-    "2 db friss paradicsom",
-    "1 szelet teljes kiőrlésű kenyér"
-   ],
-   "lep": [
-    "Egy serpenyőben átsütjük a 3 szelet sonkát.",
-    "A sonkák mellé vagy tetejére ráütjük a 3 tojást, és ízlés szerinti keménységűre sütjük a tükörtojásokat.",
-    "A szeletelt friss paradicsommal és 1 szelet teljes kiőrlésű kenyérrel fogyasztjuk."
+    "3 tojás (M-es, ~50 g)",
+    "60 g sovány gépsonka",
+    "240 g paradicsom",
+    "1 szelet teljes kiőrlésű kenyér (~35 g)",
+    "3 g olívaolaj",
+    "só, bors és fűszerek"
    ]
   },
   "a2": {
    "makro": {
-    "kcal": 215,
-    "p": 21.2,
-    "c": 6.7,
-    "f": 11.7
+    "kcal": 346,
+    "p": 26.6,
+    "c": 21.6,
+    "f": 16.4
    },
    "hozz": [
-    "2 db tojás",
-    "2 szelet sonka",
-    "1 nagy paradicsom"
-   ],
-   "lep": [
-    "Süsd át a 2 szelet sonkát a serpenyőben.",
-    "Üsd rá a 2 tojást és süsd készre a tükörtojásokat.",
-    "Tálald 1 nagy szeletelt paradicsommal. *(Kenyér nélkül!)*"
+    "2 tojás (M-es, ~50 g)",
+    "50 g sovány gépsonka",
+    "200 g paradicsom",
+    "1 szelet teljes kiőrlésű kenyér (~35 g)",
+    "3 g olívaolaj",
+    "só, bors és fűszerek"
    ]
   }
  },
  {
   "id": "r5",
   "nev": "Reggeli sonkatál",
-  "kat": "Reggeli",
+  "slots": [
+   "reggeli"
+  ],
   "perc": 15,
-  "megj": "",
+  "megj": "Nincs benne főzés a tojáson kívül, és hidegen is jó — vihető magaddal.",
+  "lep": [
+   "Tedd fel a tojásokat hideg vízben, forrás után főzd 8-9 percig, majd hűtsd le hideg vízben.",
+   "Vágd fel a paradicsomot, az uborkát és a paprikát.",
+   "Rendezd tálra a felezett tojással és a sonkával, sózd, borsozd.",
+   "Tálald a teljes kiőrlésű kenyérrel."
+  ],
   "a1": {
    "makro": {
-    "kcal": 348,
-    "p": 29.0,
-    "c": 24.9,
-    "f": 13.9
+    "kcal": 432,
+    "p": 32.2,
+    "c": 37.9,
+    "f": 15.1
    },
    "hozz": [
-    "2 db főtt tojás",
-    "60 g sonka",
-    "Friss paradicsom, uborka, paprika (tetszőleges mennyiségben)",
-    "1 szelet teljes kiőrlésű kenyér"
-   ],
-   "lep": [
-    "Főzd meg a 2 tojást keményre (kb. 8–10 perc forrástól számítva), majd hámozd meg.",
-    "Rendezd tálra a 60 g sonkát, a félbevágott főtt tojásokat és a felszeletelt friss zöldségeket.",
-    "1 szelet teljes kiőrlésű kenyérrel fogyaszd."
+    "2 tojás (M-es, ~50 g)",
+    "60 g sovány gépsonka",
+    "120 g paradicsom",
+    "80 g kígyóuborka",
+    "80 g kaliforniai paprika",
+    "2 szelet teljes kiőrlésű kenyér (~35 g)",
+    "só, bors és fűszerek"
    ]
   },
   "a2": {
    "makro": {
-    "kcal": 230,
-    "p": 23.2,
-    "c": 7.3,
-    "f": 12.1
+    "kcal": 337,
+    "p": 27.2,
+    "c": 24.8,
+    "f": 13.5
    },
    "hozz": [
-    "2 db főtt tojás",
-    "50 g sonka",
-    "Friss paradicsom és uborka"
-   ],
-   "lep": [
-    "Főzz meg 2 tojást keményre.",
-    "Tálald az 50 g sonkával, valamint frissen szeletelt paradicsommal és uborkával. *(Kenyér nélkül!)*"
+    "2 tojás (M-es, ~50 g)",
+    "50 g sovány gépsonka",
+    "120 g paradicsom",
+    "80 g kígyóuborka",
+    "80 g kaliforniai paprika",
+    "1 szelet teljes kiőrlésű kenyér (~35 g)",
+    "só, bors és fűszerek"
    ]
   }
  },
  {
   "id": "r6",
+  "nev": "Skyres áfonyás zabpehely chiával",
+  "slots": [
+   "reggeli"
+  ],
+  "perc": 5,
+  "megj": "A skyrtől nagyon magas a fehérjetartalma, a chia és a zab pedig sokáig eltelít — fogyókúra alatt ez az egyik legjobb reggeli.",
+  "lep": [
+   "Keverd össze a zabpelyhet, a chia magot és a skyrt.",
+   "Forgasd bele az áfonyát, és tedd a hűtőbe legalább 20 percre, de akár egész éjszakára.",
+   "Ha túl sűrűnek találod, lazítsd fel egy-két kanál tejjel."
+  ],
+  "a1": {
+   "makro": {
+    "kcal": 425,
+    "p": 31.8,
+    "c": 50.2,
+    "f": 7.7
+   },
+   "hozz": [
+    "200 g skyr, natúr",
+    "55 g zabpehely",
+    "100 g áfonya (fagyasztott)",
+    "10 g chia mag",
+    "fahéj vagy vaníliás őrlemény"
+   ]
+  },
+  "a2": {
+   "makro": {
+    "kcal": 339,
+    "p": 26.3,
+    "c": 39.4,
+    "f": 6.0
+   },
+   "hozz": [
+    "170 g skyr, natúr",
+    "42 g zabpehely",
+    "80 g áfonya (fagyasztott)",
+    "8 g chia mag",
+    "fahéj vagy vaníliás őrlemény"
+   ]
+  }
+ },
+ {
+  "id": "r7",
+  "nev": "Spenótos-gombás rántotta fetával",
+  "slots": [
+   "reggeli"
+  ],
+  "perc": 12,
+  "megj": "A feta sós, ezért óvatosan a sóval. Fagyasztott spenóttal is működik, csak előbb csepegtesd le.",
+  "lep": [
+   "Szeleteld fel a gombát.",
+   "Az olajon pirítsd a gombát 3-4 percig, amíg elfőzi a vizét.",
+   "Add hozzá a spenótot, és kevergesd, amíg összeesik.",
+   "Öntsd rá a felvert tojást, kis lángon süsd krémesre.",
+   "Morzsold rá a fetát, borsozd meg, és tálald a kenyérrel."
+  ],
+  "a1": {
+   "makro": {
+    "kcal": 437,
+    "p": 31.5,
+    "c": 17.2,
+    "f": 25.2
+   },
+   "hozz": [
+    "3 tojás (M-es, ~50 g)",
+    "100 g levélspenót (fagyasztott)",
+    "120 g csiperkegomba",
+    "20 g feta sajt",
+    "1 szelet teljes kiőrlésű kenyér (~35 g)",
+    "4 g olívaolaj",
+    "só, bors és fűszerek"
+   ]
+  },
+  "a2": {
+   "makro": {
+    "kcal": 343,
+    "p": 24.5,
+    "c": 16.7,
+    "f": 18.1
+   },
+   "hozz": [
+    "2 tojás (M-es, ~50 g)",
+    "100 g levélspenót (fagyasztott)",
+    "120 g csiperkegomba",
+    "15 g feta sajt",
+    "1 szelet teljes kiőrlésű kenyér (~35 g)",
+    "3 g olívaolaj",
+    "só, bors és fűszerek"
+   ]
+  }
+ },
+ {
+  "id": "r8",
+  "nev": "Túrókrém retekkel, teljes kiőrlésű kenyérrel",
+  "slots": [
+   "reggeli"
+  ],
+  "perc": 8,
+  "megj": "Ha krémesebbre szeretnéd, keverj bele egy kanál skyrt vagy görög joghurtot.",
+  "lep": [
+   "Villával törd össze a túrót, sózd, borsozd.",
+   "Vágd apró kockára a retket és az uborkát, keverd a túróba.",
+   "Kend a teljes kiőrlésű kenyérre."
+  ],
+  "a1": {
+   "makro": {
+    "kcal": 408,
+    "p": 37.3,
+    "c": 35.8,
+    "f": 10.5
+   },
+   "hozz": [
+    "200 g félzsíros túró",
+    "80 g hónapos retek",
+    "60 g kígyóuborka",
+    "2 szelet teljes kiőrlésű kenyér (~35 g)",
+    "metélőhagyma vagy petrezselyem",
+    "só, bors és fűszerek"
+   ]
+  },
+  "a2": {
+   "makro": {
+    "kcal": 353,
+    "p": 29.8,
+    "c": 34.0,
+    "f": 8.5
+   },
+   "hozz": [
+    "150 g félzsíros túró",
+    "80 g hónapos retek",
+    "60 g kígyóuborka",
+    "2 szelet teljes kiőrlésű kenyér (~35 g)",
+    "metélőhagyma vagy petrezselyem",
+    "só, bors és fűszerek"
+   ]
+  }
+ },
+ {
+  "id": "r9",
   "nev": "Sült csirkeszárny csöves kukoricával és paradicsomsalátával",
-  "kat": "Ebéd / Vacsora",
+  "slots": [
+   "ebed",
+   "vacsora"
+  ],
   "perc": 50,
-  "megj": "",
+  "megj": "A megadott mennyiség a CSONT NÉLKÜLI, ehető részre értendő: 175 g ehető rész kb. 250 g nyers, csontos szárny, a 140 g pedig kb. 200 g.",
+  "lep": [
+   "Melegítsd elő a sütőt 200 °C-ra.",
+   "Töröld szárazra a szárnyakat, fűszerezd be sóval, borssal és füstölt paprikával.",
+   "Tedd rácsra vagy sütőpapíros tepsibe, és süsd 35-40 percig, félidőben fordítsd meg.",
+   "Közben főzd meg a csöves kukoricát sós vízben 8-10 perc alatt.",
+   "A paradicsomot szeleteld fel, sózd, csepegtess rá pár csepp ecetet, és tálald a szárnyak mellé."
+  ],
   "a1": {
    "makro": {
     "kcal": 522,
@@ -723,422 +940,894 @@ const DATA = [
     "f": 24.6
    },
    "hozz": [
-    "kb. 250 g csirkeszárny (kb. 4 db)",
-    "Só, bors, fűszerpaprika, csirke fűszerkeverék",
-    "1 cső főtt kukorica",
-    "Friss paradicsomsaláta (2-3 paradicsom, kevés só, pici ecet/citromlé)"
-   ],
-   "lep": [
-    "A csirkeszárnyakat tisztítsd meg, töröld szárazra, majd fűszerezd be sóval, borssal, fűszerpaprikával.",
-    "Sütőben 200 °C-on kb. 35–40 perc alatt süsd aranybarnára és ropogósra.",
-    "A csöves kukoricát sós vízben főzd puhára.",
-    "Szeleteld fel a paradicsomot a salátához, és a sült szárnyakkal, valamint a kukoricával tálald."
+    "175 g csirkeszárny, bőrrel, csont nélkül",
+    "150 g főtt csöves kukorica, csak a szem",
+    "250 g paradicsom",
+    "füstölt paprika",
+    "só, bors és fűszerek"
    ]
   },
   "a2": {
    "makro": {
-    "kcal": 446,
-    "p": 32.8,
-    "c": 35.5,
-    "f": 20.1
+    "kcal": 427,
+    "p": 32.1,
+    "c": 31.7,
+    "f": 19.8
    },
    "hozz": [
-    "kb. 200 g csirkeszárny (kb. 3–4 db)",
-    "Só, bors, fűszerpaprika",
-    "1 cső főtt kukorica",
-    "Friss paradicsomsaláta"
-   ],
-   "lep": [
-    "Fűszerezd be a csirkeszárnyakat sóval, borssal, fűszerpaprikával.",
-    "Süsd 200 °C-os sütőben ropogósra (kb. 35 perc).",
-    "Tálald 1 cső főtt kukoricával és friss paradicsomsalátával."
-   ]
-  }
- },
- {
-  "id": "r7",
-  "nev": "Darált húsos rakott cukkini & borsó",
-  "kat": "Ebéd / Vacsora",
-  "perc": 45,
-  "megj": "Köret és rizs nélkül készítendő, nagyon alacsony szénhidráttartalmú, laktató ebéd.",
-  "a1": {
-   "makro": {
-    "kcal": 446,
-    "p": 53.8,
-    "c": 18.9,
-    "f": 15.3
-   },
-   "hozz": [
-    "200 g sovány darált hús (marha vagy pulyka)",
-    "80 g zöldborsó",
-    "1-2 db cukkini (szeletelve)",
-    "2-3 ek. görög joghurt",
-    "Só, bors, fokhagyma, zöldfűszerek"
-   ],
-   "lep": [
-    "A 200 g darált húst egy serpenyőben sóval, borssal, fokhagymával pirítsd át teljesen.",
-    "Egy kis tepsiben vagy jenaiban rétegezd a felszeletelt cukkinit, a pirított darált húst és a 80 g zöldborsót.",
-    "A tetejét kend meg 2-3 evőkanál görög joghurttal.",
-    "190 °C-os sütőben süsd kb. 25–30 percig, amíg a cukkini megpuhul és a joghurt átpirul."
-   ]
-  },
-  "a2": {
-   "makro": {
-    "kcal": 332,
-    "p": 40.2,
-    "c": 13.8,
-    "f": 11.6
-   },
-   "hozz": [
-    "150 g sovány darált hús",
-    "50 g zöldborsó",
-    "1-2 db cukkini (szeletelve)",
-    "2 ek görög joghurt",
-    "Só, bors, fűszerek"
-   ],
-   "lep": [
-    "Pirítsd át a 150 g darált húst fűszerekkel.",
-    "Rétegezd a cukkinit, a húst és az 50 g zöldborsót egy kis tepsiben.",
-    "Kend meg a tetejét 2 evőkanál görög joghurttal, és süsd 190 °C-on 25–30 percig."
-   ]
-  }
- },
- {
-  "id": "r8",
-  "nev": "Pirított csirkemell csíkok zöldborsóval és kukoricával",
-  "kat": "Ebéd / Vacsora",
-  "perc": 20,
-  "megj": "",
-  "a1": {
-   "makro": {
-    "kcal": 314,
-    "p": 47.5,
-    "c": 19.8,
-    "f": 4.0
-   },
-   "hozz": [
-    "180 g csirkemell filé (csíkokra vágva)",
-    "100 g párolt zöldborsó és csemegekukorica vegyesen (vagy 1 főtt csöves kukorica + borsó)",
-    "Só, bors, zöldfűszerek",
-    "Friss paradicsomsaláta"
-   ],
-   "lep": [
-    "A csirkemell csíkokat fűszerezd sóval, borssal, zöldfűszerekkel, majd egy tapadásmentes serpenyőben pirítsd készre.",
-    "Keverd hozzá a párolt zöldborsót és kukoricát (vagy tálald mellé a főtt kukoricát és borsót).",
-    "Frissen szeletelt paradicsomsalátával tálald."
-   ]
-  },
-  "a2": {
-   "makro": {
-    "kcal": 265,
-    "p": 39.8,
-    "c": 17.2,
-    "f": 3.3
-   },
-   "hozz": [
-    "150 g csirkemell filé (csíkokra vágva)",
-    "80 g párolt zöldborsó és csemegekukorica vegyesen (vagy 1 főtt csöves kukorica + borsó)",
-    "Friss paradicsomsaláta"
-   ],
-   "lep": [
-    "Pirítsd meg a fűszerezett csirkemell csíkokat serpenyőben.",
-    "Keverd hozzá a párolt zöldborsót és kukoricát.",
-    "Tálald friss paradicsomsalátával."
-   ]
-  }
- },
- {
-  "id": "r9",
-  "nev": "Darált húsos-kukoricás ragu cukkini- vagy karfiolágyon",
-  "kat": "Ebéd / Vacsora",
-  "perc": 25,
-  "megj": "",
-  "a1": {
-   "makro": {
-    "kcal": 416,
-    "p": 49.9,
-    "c": 22.0,
-    "f": 12.6
-   },
-   "hozz": [
-    "200 g sovány darált hús",
-    "80 g fagyasztott kukorica és borsó vegyesen",
-    "100 g pasztírozott paradicsom / paradicsomszósz",
-    "Só, bors, bazsalikom, oregano",
-    "Cukkini (spirálozva/szeletelve) vagy párolt karfiol köretként"
-   ],
-   "lep": [
-    "A darált húst pirítsd fehéredésig egy serpenyőben.",
-    "Öntsd hozzá a paradicsomszószt, ízesítsd sóval, borssal, bazsalikommal és oregánóval.",
-    "Add hozzá a 80 g kukoricát és borsót, majd kis lángon főzd össze 10–12 perc alatt.",
-    "Tálald párolt cukkiniszeleteken/cukkinitésztán vagy párolt karfiolágyon."
-   ]
-  },
-  "a2": {
-   "makro": {
-    "kcal": 322,
-    "p": 38.1,
-    "c": 18.1,
-    "f": 9.6
-   },
-   "hozz": [
-    "150 g sovány darált hús",
-    "50 g fagyasztott kukorica és borsó",
-    "Paradicsomszósz",
-    "Párolt cukkini vagy karfiol köretként"
-   ],
-   "lep": [
-    "Pirítsd meg a 150 g darált húst, öntsd rá a paradicsomszószt.",
-    "Add hozzá az 50 g kukoricát és borsót, főzd össze.",
-    "Tálald párolt cukkini- vagy karfiolágyon."
+    "140 g csirkeszárny, bőrrel, csont nélkül",
+    "130 g főtt csöves kukorica, csak a szem",
+    "200 g paradicsom",
+    "füstölt paprika",
+    "só, bors és fűszerek"
    ]
   }
  },
  {
   "id": "r10",
-  "nev": "Darált hússal és borsóval töltött kaliforniai paprika (vagy cukkini)",
-  "kat": "Ebéd / Vacsora",
+  "nev": "Darált húsos rakott cukkini & borsó",
+  "slots": [
+   "ebed",
+   "vacsora"
+  ],
   "perc": 45,
-  "megj": "",
+  "megj": "A cukkini sózása és kinyomkodása nélkül a rakott íz vizes lesz.",
+  "lep": [
+   "Melegítsd elő a sütőt 190 °C-ra.",
+   "Szeleteld a cukkinit kb. fél centis karikákra, sózd meg, és hagyd állni 10 percet, majd nyomkodd ki a vizét.",
+   "Az olajon pirítsd meg a darált húst, sózd, borsozd, fűszerezd.",
+   "Keverd hozzá a zöldborsót.",
+   "Rétegezd egy hőálló formába: cukkini, húsos borsó, cukkini.",
+   "Süsd 25 percig, majd tálalás előtt kanalazd rá a görög joghurtot."
+  ],
   "a1": {
    "makro": {
-    "kcal": 409,
-    "p": 48.4,
-    "c": 23.0,
-    "f": 12.2
+    "kcal": 482,
+    "p": 53.8,
+    "c": 18.9,
+    "f": 19.3
    },
    "hozz": [
-    "1,5–2 nagy db kaliforniai paprika",
-    "200 g sovány darált hús",
-    "Zöldborsó (a raguba keverve)",
-    "Hagymás-fűszeres alappor vagy só, bors, pirospaprika, fokhagyma"
-   ],
-   "lep": [
-    "A darált húst dinszteld meg a fűszerekkel és a zöldborsóval egy serpenyőben.",
-    "A kaliforniai paprikákat vágd félbe vagy fejezd le, és magozd ki.",
-    "Töltsd meg a paprikákat a fűszeres darált húsos-borsós keverékkel.",
-    "Helyezd sütőtálba, és 180 °C-on süsd kb. 30–35 percig, amíg a paprika megpuhul."
+    "200 g darált marha, 5% zsír",
+    "80 g zöldborsó (fagyasztott)",
+    "375 g cukkini",
+    "50 g görög joghurt, natúr (~5%)",
+    "4 g olívaolaj",
+    "só, bors és fűszerek"
    ]
   },
   "a2": {
    "makro": {
-    "kcal": 295,
-    "p": 36.0,
+    "kcal": 394,
+    "p": 44.9,
     "c": 14.7,
-    "f": 9.0
+    "f": 15.8
    },
    "hozz": [
-    "1 nagy kaliforniai paprika (vagy cukkini)",
-    "150 g sovány darált hús",
-    "Zöldborsó",
-    "Fűszerek"
-   ],
-   "lep": [
-    "Dinszteld meg a 150 g darált húst a borsóval és fűszerekkel.",
-    "Töltsd meg vele a félbevágott paprikát vagy cukkinit.",
-    "Süsd 180 °C-on kb. 30 percig."
+    "170 g darált marha, 5% zsír",
+    "60 g zöldborsó (fagyasztott)",
+    "300 g cukkini",
+    "40 g görög joghurt, natúr (~5%)",
+    "3 g olívaolaj",
+    "só, bors és fűszerek"
    ]
   }
  },
  {
   "id": "r11",
-  "nev": "Sütőben sült darált húsgolyók borsóval és kukoricával",
-  "kat": "Ebéd / Vacsora",
-  "perc": 35,
-  "megj": "",
+  "nev": "Pirított csirkemell csíkok zöldborsóval és kukoricával",
+  "slots": [
+   "ebed",
+   "vacsora"
+  ],
+  "perc": 25,
+  "megj": "A rizst nyersen mérd — főzés után a súlya kb. háromszorosára nő, de a makró a nyers mennyiségre vonatkozik.",
+  "lep": [
+   "Tedd fel a rizst sós vízben főni a csomagoláson jelzett ideig.",
+   "Vágd a csirkemellet csíkokra, sózd, borsozd.",
+   "Erős lángon, olajon pirítsd 5-6 percig, amíg megkapja a színét.",
+   "Add hozzá a zöldborsót és a kukoricát, és pirítsd további 3-4 percig.",
+   "Tálald a rizzsel és a felszeletelt friss paradicsommal."
+  ],
   "a1": {
    "makro": {
-    "kcal": 408,
-    "p": 49.0,
-    "c": 20.4,
-    "f": 12.4
+    "kcal": 534,
+    "p": 51.3,
+    "c": 58.2,
+    "f": 9.5
    },
    "hozz": [
-    "200 g sovány darált hús",
-    "Só, bors, fokhagyma, kömény, fűszerpaprika",
-    "Párolt zöldborsó és fagyasztott csemegekukorica köretnek"
-   ],
-   "lep": [
-    "A 200 g darált húst fűszerezd sóval, borssal, zúzott fokhagymával és fűszerpaprikával.",
-    "Formázz belőle kis golyókat, majd sütőpapírral bélelt tepsiben 190 °C-on süsd készre kb. 20–25 perc alatt.",
-    "Köretként kínálj mellé párolt zöldborsót és fagyasztott csemegekukoricát."
+    "180 g csirkemellfilé, nyers",
+    "50 g zöldborsó (fagyasztott)",
+    "50 g csemegekukorica",
+    "50 g basmati rizs, nyersen mérve",
+    "200 g paradicsom",
+    "5 g olívaolaj",
+    "só, bors és fűszerek"
    ]
   },
   "a2": {
    "makro": {
-    "kcal": 306,
-    "p": 36.7,
-    "c": 15.3,
-    "f": 9.3
+    "kcal": 424,
+    "p": 42.4,
+    "c": 44.1,
+    "f": 7.7
    },
    "hozz": [
-    "150 g sovány darált hús",
-    "Só, bors, fokhagyma, fűszerpaprika",
-    "Párolt zöldborsó és fagyasztott kukorica köretnek"
-   ],
-   "lep": [
-    "Fűszerezd a 150 g darált húst, formázz golyókat.",
-    "Süsd sütőben 190 °C-on 20–25 percig.",
-    "Tálald párolt borsóval és kukoricával."
+    "150 g csirkemellfilé, nyers",
+    "40 g zöldborsó (fagyasztott)",
+    "40 g csemegekukorica",
+    "35 g basmati rizs, nyersen mérve",
+    "200 g paradicsom",
+    "4 g olívaolaj",
+    "só, bors és fűszerek"
    ]
   }
  },
  {
   "id": "r12",
-  "nev": "Sonkás-tojásos saláta",
-  "kat": "Ebéd / Vacsora",
-  "perc": 20,
-  "megj": "",
+  "nev": "Darált húsos-kukoricás ragu cukkiniágyon",
+  "slots": [
+   "ebed",
+   "vacsora"
+  ],
+  "perc": 30,
+  "megj": "A cukkini helyett párolt karfiol is jó alá — kb. ugyanannyi kalória.",
+  "lep": [
+   "Az olajon pirítsd meg a darált húst, sózd, borsozd.",
+   "Add hozzá a kukoricát és a zöldborsót, majd öntsd fel a passatával.",
+   "Fedő alatt, kis lángon rotyogtasd 12-15 percig.",
+   "Közben a cukkinit vágd nagyobb kockára, és párold puhára egy kevés sós vízben, vagy pirítsd serpenyőben.",
+   "A ragut szedd a cukkiniágyra."
+  ],
   "a1": {
    "makro": {
-    "kcal": 430,
-    "p": 36.5,
-    "c": 29.1,
-    "f": 17.5
+    "kcal": 488,
+    "p": 54.1,
+    "c": 22.0,
+    "f": 18.7
    },
    "hozz": [
-    "2 db főtt tojás",
-    "80 g jó minőségű sonka (kockázva)",
-    "Nagy adag friss paradicsom, zöldsaláta, uborka, paprika",
-    "Görög joghurtos öntet (optional: 2-3 ek görög joghurt, só, bors, zöldfűszerek)",
-    "1 szelet teljes kiőrlésű kenyér"
-   ],
-   "lep": [
-    "Főzd meg a 2 tojást keményre, hámozd meg és szeleteld fel.",
-    "Vágd kockákra a 80 g sonkát.",
-    "Egy nagy tálban keverd össze a friss zöldsalátát, paradicsomot, uborkát és paprikát.",
-    "Halmozd rá a sonkát és a tojást, locsold meg görög joghurtos öntettel, és 1 szelet teljes kiőrlésű kenyérrel kísérve fogyaszd."
+    "220 g darált marha, 5% zsír",
+    "40 g csemegekukorica",
+    "40 g zöldborsó (fagyasztott)",
+    "100 g passata (szűrt paradicsom)",
+    "250 g cukkini",
+    "5 g olívaolaj",
+    "őrölt kömény vagy oregánó",
+    "só, bors és fűszerek"
    ]
   },
   "a2": {
    "makro": {
-    "kcal": 272,
-    "p": 26.0,
-    "c": 9.2,
-    "f": 14.4
+    "kcal": 421,
+    "p": 46.9,
+    "c": 19.4,
+    "f": 15.9
    },
    "hozz": [
-    "2 db főtt tojás (vagy 1 főtt tojás + 50–60 g sonka)",
-    "50 g sonka",
-    "Nagy adag friss paradicsom, zöldsaláta",
-    "Görög joghurtos öntet"
-   ],
-   "lep": [
-    "Szeleteld fel a főtt tojásokat és vágd kockákra a sonkát.",
-    "Keverd össze a friss zöldsalátával és paradicsommal.",
-    "Locsold meg görög joghurtos öntettel. *(Kenyér nélkül!)*"
+    "190 g darált marha, 5% zsír",
+    "30 g csemegekukorica",
+    "30 g zöldborsó (fagyasztott)",
+    "100 g passata (szűrt paradicsom)",
+    "250 g cukkini",
+    "4 g olívaolaj",
+    "őrölt kömény vagy oregánó",
+    "só, bors és fűszerek"
    ]
   }
  },
  {
   "id": "r13",
-  "nev": "Szardíniás (vagy tonhalas / csirkemelles) saláta",
-  "kat": "Ebéd / Vacsora",
-  "perc": 10,
-  "megj": "",
+  "nev": "Töltött kaliforniai paprika darált hússal és borsóval",
+  "slots": [
+   "ebed",
+   "vacsora"
+  ],
+  "perc": 45,
+  "megj": "A 315 g kb. másfél-két nagy paprika, a 240 g kb. egy és egy negyed.",
+  "lep": [
+   "Melegítsd elő a sütőt 190 °C-ra.",
+   "Vágd le a paprikák tetejét, és tisztítsd ki a magházat.",
+   "Az olajon pirítsd meg a darált húst, sózd, borsozd, majd keverd hozzá a zöldborsót.",
+   "Töltsd meg vele a paprikákat, állítsd őket hőálló formába.",
+   "Öntsd körbe a passatát, és süsd 25-30 percig, amíg a paprika megpuhul."
+  ],
   "a1": {
    "makro": {
-    "kcal": 395,
-    "p": 30.8,
-    "c": 30.9,
-    "f": 14.5
+    "kcal": 468,
+    "p": 49.8,
+    "c": 28.5,
+    "f": 15.4
    },
    "hozz": [
-    "1 doboz szardínia (vagy tonhal konzerv)",
-    "Friss paradicsom, zöldsaláta, uborka",
-    "Optional: 80 g párolt kukorica és borsó",
-    "1 szelet teljes kiőrlésű kenyér"
-   ],
-   "lep": [
-    "Csepegtesd le a szardíniát (vagy tonhalat).",
-    "Vágd fel a friss paradicsomot és készíts elő egy nagy adag zöldsalátát.",
-    "Halmozd a halat a zöldségekre (ha meleg köretet szeretnél, a 80g párolt kukoricát-borsót is add hozzá).",
-    "1 szelet teljes kiőrlésű kenyérrel fogyaszd."
+    "315 g kaliforniai paprika",
+    "200 g darált marha, 5% zsír",
+    "60 g zöldborsó (fagyasztott)",
+    "100 g passata (szűrt paradicsom)",
+    "3 g olívaolaj",
+    "só, bors és fűszerek"
    ]
   },
   "a2": {
    "makro": {
-    "kcal": 279,
-    "p": 23.7,
-    "c": 6.2,
-    "f": 17.6
+    "kcal": 396,
+    "p": 44.1,
+    "c": 22.4,
+    "f": 13.0
    },
    "hozz": [
-    "1 doboz szardínia (vagy tonhal konzerv / 150 g csirkemell)",
-    "Friss paradicsom, zöldsaláta",
-    "1 tk olívaolaj"
-   ],
-   "lep": [
-    "Csepegtesd le a halat.",
-    "Halmozd a friss zöldsalátára és paradicsomra.",
-    "Locsold meg 1 teáskanál olívaolajjal. *(Kenyér nélkül!)*"
+    "240 g kaliforniai paprika",
+    "180 g darált marha, 5% zsír",
+    "50 g zöldborsó (fagyasztott)",
+    "80 g passata (szűrt paradicsom)",
+    "2 g olívaolaj",
+    "só, bors és fűszerek"
    ]
   }
  },
  {
   "id": "r14",
-  "nev": "Grillezett csirkemell fokhagymás-joghurtos öntettel",
-  "kat": "Ebéd / Vacsora",
-  "perc": 20,
-  "megj": "",
+  "nev": "Sütőben sült darált húsgolyók borsóval és kukoricával",
+  "slots": [
+   "ebed",
+   "vacsora"
+  ],
+  "perc": 35,
+  "megj": "A tojás fogja össze a golyókat, ezért ne hagyd ki. Duplázva remek másnapi ebéd.",
+  "lep": [
+   "Melegítsd elő a sütőt 200 °C-ra.",
+   "Keverd össze a darált húst a tojással, sóval, borssal és fűszerekkel, majd formálj belőle golyókat.",
+   "Tedd sütőpapíros tepsibe, csepegtess rá olajat, és süsd 20-22 percig.",
+   "Közben párold meg a zöldborsót és a kukoricát sós vízben 5-6 perc alatt.",
+   "Tálald a golyókat a párolt zöldségekkel."
+  ],
   "a1": {
    "makro": {
-    "kcal": 276,
-    "p": 46.4,
-    "c": 8.1,
-    "f": 5.9
+    "kcal": 507,
+    "p": 55.3,
+    "c": 20.8,
+    "f": 20.4
    },
    "hozz": [
-    "180 g csirkemell filé",
-    "2-3 ek görög joghurt",
-    "1 gerezd zúzott fokhagyma, só, bors",
-    "Friss paradicsom és zöldsaláta",
-    "1 szelet teljes kiőrlésű kenyér"
-   ],
-   "lep": [
-    "A 180 g csirkemellet fűszerezd sóval, borssal, és grillserpenyőben süsd készre mindkét oldalát.",
-    "Készítsd el az öntetet: a görög joghurtot keverd össze a zúzott fokhagymával és egy csipet sóval.",
-    "Tálald a csirkemellet friss paradicsommal és salátával, meglocsolva a fokhagymás öntettel, 1 szelet kenyér kíséretében."
+    "200 g darált marha, 5% zsír",
+    "1 tojás (M-es, ~50 g)",
+    "80 g zöldborsó (fagyasztott)",
+    "80 g csemegekukorica",
+    "3 g olívaolaj",
+    "só, bors és fűszerek"
    ]
   },
   "a2": {
    "makro": {
-    "kcal": 235,
-    "p": 38.9,
-    "c": 7.7,
-    "f": 4.9
+    "kcal": 410,
+    "p": 45.1,
+    "c": 15.7,
+    "f": 16.8
    },
    "hozz": [
-    "150 g csirkemell filé",
-    "Görög joghurtos-fokhagymás öntet (2 ek görög joghurt, fokhagyma)",
-    "Friss paradicsom és saláta"
-   ],
-   "lep": [
-    "Süsd meg a 150 g csirkemellet grillserpenyőben.",
-    "Keverd össze a görög joghurtot zúzott fokhagymával.",
-    "Tálald a csirkét friss salátával és paradicsommal, az öntettel meglocsolva. *(Kenyér nélkül!)*"
+    "160 g darált marha, 5% zsír",
+    "1 tojás (M-es, ~50 g)",
+    "60 g zöldborsó (fagyasztott)",
+    "60 g csemegekukorica",
+    "2 g olívaolaj",
+    "só, bors és fűszerek"
+   ]
+  }
+ },
+ {
+  "id": "r15",
+  "nev": "Sonkás-tojásos saláta",
+  "slots": [
+   "ebed",
+   "vacsora"
+  ],
+  "perc": 20,
+  "megj": "A joghurtos öntet kiváltja a majonézt, és sokkal kevesebb zsírt ad.",
+  "lep": [
+   "Főzd keményre a tojásokat: forrás után 8-9 perc, majd hideg víz.",
+   "Vágd csíkokra a sonkát, kockázd a paradicsomot, az uborkát és a paprikát.",
+   "Tépd a salátaleveleket a tál aljára, rendezd rá a zöldségeket, a sonkát és a felszeletelt tojást.",
+   "A görög joghurtot keverd el egy csipet sóval, borssal és pár csepp citromlével, és csorgasd a salátára.",
+   "Tálald a teljes kiőrlésű kenyérrel."
+  ],
+  "a1": {
+   "makro": {
+    "kcal": 514,
+    "p": 39.6,
+    "c": 42.0,
+    "f": 18.7
+   },
+   "hozz": [
+    "2 tojás (M-es, ~50 g)",
+    "80 g sovány gépsonka",
+    "150 g paradicsom",
+    "60 g zöldsaláta",
+    "80 g kígyóuborka",
+    "80 g kaliforniai paprika",
+    "50 g görög joghurt, natúr (~5%)",
+    "2 szelet teljes kiőrlésű kenyér (~35 g)",
+    "citromlé",
+    "só, bors és fűszerek"
+   ]
+  },
+  "a2": {
+   "makro": {
+    "kcal": 382,
+    "p": 30.3,
+    "c": 27.1,
+    "f": 15.8
+   },
+   "hozz": [
+    "2 tojás (M-es, ~50 g)",
+    "50 g sovány gépsonka",
+    "150 g paradicsom",
+    "60 g zöldsaláta",
+    "80 g kígyóuborka",
+    "60 g kaliforniai paprika",
+    "40 g görög joghurt, natúr (~5%)",
+    "1 szelet teljes kiőrlésű kenyér (~35 g)",
+    "citromlé",
+    "só, bors és fűszerek"
+   ]
+  }
+ },
+ {
+  "id": "r16",
+  "nev": "Tonhalas-csicseriborsós saláta",
+  "slots": [
+   "ebed",
+   "vacsora"
+  ],
+  "perc": 12,
+  "megj": "Sajátszaftos tonhalat válassz, ne olajban lévőt — a lecsepegtetett olajos változat kb. kétszer annyi kalória.",
+  "lep": [
+   "Csepegtesd le a tonhalat és a csicseriborsót.",
+   "Kockázd a paradicsomot és az uborkát, tépd fel a salátaleveleket.",
+   "Keverd össze mindent egy nagy tálban.",
+   "Csorgasd rá az olívaolajat és a citromlevet, sózd, borsozd, és forgasd át."
+  ],
+  "a1": {
+   "makro": {
+    "kcal": 482,
+    "p": 49.9,
+    "c": 41.5,
+    "f": 11.4
+   },
+   "hozz": [
+    "140 g tonhalkonzerv sajátszaftban, lecsepegtetve",
+    "130 g csicseriborsó konzerv, lecsepegtetve",
+    "150 g paradicsom",
+    "60 g zöldsaláta",
+    "80 g kígyóuborka",
+    "1 szelet teljes kiőrlésű kenyér (~35 g)",
+    "5 g olívaolaj",
+    "citromlé",
+    "vöröshagyma karikák",
+    "só, bors és fűszerek"
+   ]
+  },
+  "a2": {
+   "makro": {
+    "kcal": 394,
+    "p": 37.8,
+    "c": 36.8,
+    "f": 9.2
+   },
+   "hozz": [
+    "100 g tonhalkonzerv sajátszaftban, lecsepegtetve",
+    "100 g csicseriborsó konzerv, lecsepegtetve",
+    "150 g paradicsom",
+    "60 g zöldsaláta",
+    "80 g kígyóuborka",
+    "1 szelet teljes kiőrlésű kenyér (~35 g)",
+    "4 g olívaolaj",
+    "citromlé",
+    "vöröshagyma karikák",
+    "só, bors és fűszerek"
+   ]
+  }
+ },
+ {
+  "id": "r17",
+  "nev": "Grillezett csirkemell fokhagymás-joghurtos öntettel",
+  "slots": [
+   "ebed",
+   "vacsora"
+  ],
+  "perc": 25,
+  "megj": "A húst sütés után hagyd 2-3 percig pihenni, így nem szárad ki.",
+  "lep": [
+   "Tedd fel a rizst sós vízben főni.",
+   "Vágd a csirkemellet hosszában két lapra, hogy egyenletesen süljön, majd sózd, borsozd.",
+   "Grillserpenyőben, kevés olajon süsd oldalanként 4-5 percig.",
+   "Az öntethez keverd össze a görög joghurtot a zúzott fokhagymával, sóval és citromlével.",
+   "Tálald a rizzsel, a friss paradicsommal és a salátával, az öntetet csorgasd a húsra."
+  ],
+  "a1": {
+   "makro": {
+    "kcal": 506,
+    "p": 51.1,
+    "c": 48.7,
+    "f": 10.9
+   },
+   "hozz": [
+    "180 g csirkemellfilé, nyers",
+    "60 g görög joghurt, natúr (~5%)",
+    "6 g fokhagyma",
+    "50 g basmati rizs, nyersen mérve",
+    "150 g paradicsom",
+    "60 g zöldsaláta",
+    "4 g olívaolaj",
+    "citromlé",
+    "só, bors és fűszerek"
+   ]
+  },
+  "a2": {
+   "makro": {
+    "kcal": 401,
+    "p": 42.4,
+    "c": 36.5,
+    "f": 8.8
+   },
+   "hozz": [
+    "150 g csirkemellfilé, nyers",
+    "50 g görög joghurt, natúr (~5%)",
+    "5 g fokhagyma",
+    "35 g basmati rizs, nyersen mérve",
+    "150 g paradicsom",
+    "60 g zöldsaláta",
+    "3 g olívaolaj",
+    "citromlé",
+    "só, bors és fűszerek"
+   ]
+  }
+ },
+ {
+  "id": "r18",
+  "nev": "Citromos-fokhagymás sült lazac brokkolival",
+  "slots": [
+   "ebed",
+   "vacsora"
+  ],
+  "perc": 35,
+  "megj": "A lazac zsírja nagyrészt omega-3, de kalóriában így is sűrű — ezért van pontosan kimérve.",
+  "lep": [
+   "Melegítsd elő a sütőt 200 °C-ra.",
+   "A burgonyát vágd cikkekre, forgasd össze az olaj felével, sózd, és tedd a tepsibe.",
+   "Süsd 15 percig, majd tedd mellé a lazacot, csorgasd rá a maradék olajat, a citromlevet és a zúzott fokhagymát.",
+   "Süsd további 12-14 percig, amíg a lazac villával könnyen szétnyílik.",
+   "Közben a brokkolit párold 5-6 percig, hogy roppanós maradjon."
+  ],
+  "a1": {
+   "makro": {
+    "kcal": 554,
+    "p": 40.4,
+    "c": 35.8,
+    "f": 25.7
+   },
+   "hozz": [
+    "150 g lazacfilé",
+    "250 g brokkoli",
+    "150 g burgonya",
+    "6 g fokhagyma",
+    "5 g olívaolaj",
+    "citromlé",
+    "só, bors és fűszerek"
+   ]
+  },
+  "a2": {
+   "makro": {
+    "kcal": 445,
+    "p": 33.3,
+    "c": 27.5,
+    "f": 20.7
+   },
+   "hozz": [
+    "120 g lazacfilé",
+    "250 g brokkoli",
+    "100 g burgonya",
+    "5 g fokhagyma",
+    "4 g olívaolaj",
+    "citromlé",
+    "só, bors és fűszerek"
+   ]
+  }
+ },
+ {
+  "id": "r19",
+  "nev": "Sütőben sült fehér halfilé cukkinivel és paradicsommal",
+  "slots": [
+   "ebed",
+   "vacsora"
+  ],
+  "perc": 35,
+  "megj": "A fehér halfilé a legkevesebb kalóriát adó állati fehérje a Lidl kínálatában — fogyókúra alatt nagyon jól jön.",
+  "lep": [
+   "Melegítsd elő a sütőt 200 °C-ra.",
+   "A burgonyát vágd vékony cikkekre, forgasd össze az olaj felével és sóval, majd tedd a tepsibe 15 percre.",
+   "A cukkinit és a paradicsomot szeleteld fel, rendezd a burgonya mellé.",
+   "Tedd rá a halfiléket, sózd, borsozd, csorgasd rá a maradék olajat és a citromlevet.",
+   "Süsd 15-18 percig, a végén morzsold rá a fetát."
+  ],
+  "a1": {
+   "makro": {
+    "kcal": 502,
+    "p": 49.5,
+    "c": 44.3,
+    "f": 12.9
+   },
+   "hozz": [
+    "220 g fehér halfilé (alaszkai tőkehal)",
+    "200 g cukkini",
+    "200 g paradicsom",
+    "200 g burgonya",
+    "20 g feta sajt",
+    "6 g olívaolaj",
+    "citromlé",
+    "oregánó",
+    "só, bors és fűszerek"
+   ]
+  },
+  "a2": {
+   "makro": {
+    "kcal": 401,
+    "p": 40.8,
+    "c": 36.2,
+    "f": 9.6
+   },
+   "hozz": [
+    "180 g fehér halfilé (alaszkai tőkehal)",
+    "200 g cukkini",
+    "200 g paradicsom",
+    "150 g burgonya",
+    "15 g feta sajt",
+    "4 g olívaolaj",
+    "citromlé",
+    "oregánó",
+    "só, bors és fűszerek"
+   ]
+  }
+ },
+ {
+  "id": "r20",
+  "nev": "Csirkemelles quinoa-bowl paprikával és rukkolával",
+  "slots": [
+   "ebed",
+   "vacsora"
+  ],
+  "perc": 30,
+  "megj": "A quinoát nyersen mérd. Teljes értékű fehérjét ad, ezért a hús mellé is jó választás.",
+  "lep": [
+   "Öblítsd le a quinoát, majd főzd sós vízben 12-15 percig, és csepegtesd le.",
+   "A csirkemellet kockázd fel, sózd, borsozd, és olajon pirítsd 6-7 percig.",
+   "A paprikát vágd csíkokra, és a hús mellé dobva pirítsd 3 percig.",
+   "Egy tálba szedd a quinoát, rá a húst és a paprikát, a tetejére a rukkolát.",
+   "Kanalazd rá a görög joghurtot, csorgasd meg citromlével."
+  ],
+  "a1": {
+   "makro": {
+    "kcal": 538,
+    "p": 52.4,
+    "c": 45.4,
+    "f": 14.1
+   },
+   "hozz": [
+    "170 g csirkemellfilé, nyers",
+    "60 g quinoa, nyersen mérve",
+    "150 g kaliforniai paprika",
+    "40 g rukkola",
+    "40 g görög joghurt, natúr (~5%)",
+    "5 g olívaolaj",
+    "citromlé",
+    "só, bors és fűszerek"
+   ]
+  },
+  "a2": {
+   "makro": {
+    "kcal": 432,
+    "p": 42.8,
+    "c": 36.3,
+    "f": 11.2
+   },
+   "hozz": [
+    "140 g csirkemellfilé, nyers",
+    "45 g quinoa, nyersen mérve",
+    "150 g kaliforniai paprika",
+    "40 g rukkola",
+    "30 g görög joghurt, natúr (~5%)",
+    "4 g olívaolaj",
+    "citromlé",
+    "só, bors és fűszerek"
+   ]
+  }
+ },
+ {
+  "id": "r21",
+  "nev": "Vörös lencse dahl sárgarépával",
+  "slots": [
+   "ebed",
+   "vacsora"
+  ],
+  "perc": 30,
+  "megj": "Húsmentes, mégis sok fehérjét és rengeteg rostot ad — ez a rost az, ami órákra elveszi az éhséget.",
+  "lep": [
+   "Öblítsd át a vörös lencsét.",
+   "Az olajon fonnyaszd meg az apróra vágott vöröshagymát 3-4 percig, add hozzá a zúzott fokhagymát.",
+   "Szórd rá a fűszereket (kurkuma, kömény, füstölt paprika), és pirítsd 30 másodpercig.",
+   "Add hozzá a felkockázott sárgarépát, a lencsét és a paradicsomkonzervet, majd öntsd fel annyi vízzel, hogy ellepje.",
+   "Fedő alatt, kis lángon főzd 18-20 percig, amíg a lencse szétesik és besűrűsödik."
+  ],
+  "a1": {
+   "makro": {
+    "kcal": 486,
+    "p": 26.2,
+    "c": 69.6,
+    "f": 8.1
+   },
+   "hozz": [
+    "90 g vörös lencse, nyersen mérve",
+    "200 g darabolt paradicsomkonzerv",
+    "100 g sárgarépa",
+    "80 g vöröshagyma",
+    "6 g fokhagyma",
+    "6 g olívaolaj",
+    "kurkuma, őrölt kömény, füstölt paprika",
+    "só, bors és fűszerek"
+   ]
+  },
+  "a2": {
+   "makro": {
+    "kcal": 390,
+    "p": 21.1,
+    "c": 57.4,
+    "f": 5.7
+   },
+   "hozz": [
+    "70 g vörös lencse, nyersen mérve",
+    "200 g darabolt paradicsomkonzerv",
+    "100 g sárgarépa",
+    "60 g vöröshagyma",
+    "5 g fokhagyma",
+    "4 g olívaolaj",
+    "kurkuma, őrölt kömény, füstölt paprika",
+    "só, bors és fűszerek"
+   ]
+  }
+ },
+ {
+  "id": "r22",
+  "nev": "Pulykamell wrap joghurtos öntettel",
+  "slots": [
+   "ebed",
+   "vacsora"
+  ],
+  "perc": 20,
+  "megj": "Vihető ebéd. A pulykamell a legszárazabb húsok egyike, ezért ne süsd túl.",
+  "lep": [
+   "A pulykamellet vágd csíkokra, sózd, borsozd, és olaj nélkül, forró serpenyőben süsd 6-7 percig.",
+   "Az öntethez keverd össze a görög joghurtot a mustárral, sóval és citromlével.",
+   "Melegítsd át a tortillát egy száraz serpenyőben 20-20 másodpercig.",
+   "Rétegezd rá a jégsalátát, a paradicsomot, a paprikát és a húst, csorgasd rá az öntetet.",
+   "Hajtsd fel az alját, majd tekerd fel szorosan."
+  ],
+  "a1": {
+   "makro": {
+    "kcal": 475,
+    "p": 55.0,
+    "c": 40.4,
+    "f": 9.8
+   },
+   "hozz": [
+    "1 teljes kiőrlésű tortilla (~62 g)",
+    "180 g pulykamellfilé, nyers",
+    "50 g görög joghurt, natúr (~5%)",
+    "60 g jégsaláta",
+    "100 g paradicsom",
+    "60 g kaliforniai paprika",
+    "10 g mustár",
+    "citromlé",
+    "só, bors és fűszerek"
+   ]
+  },
+  "a2": {
+   "makro": {
+    "kcal": 412,
+    "p": 42.4,
+    "c": 39.9,
+    "f": 8.7
+   },
+   "hozz": [
+    "1 teljes kiőrlésű tortilla (~62 g)",
+    "130 g pulykamellfilé, nyers",
+    "40 g görög joghurt, natúr (~5%)",
+    "60 g jégsaláta",
+    "100 g paradicsom",
+    "60 g kaliforniai paprika",
+    "8 g mustár",
+    "citromlé",
+    "só, bors és fűszerek"
+   ]
+  }
+ },
+ {
+  "id": "r23",
+  "nev": "Garnélás cukkinispagetti paradicsomszósszal",
+  "slots": [
+   "ebed",
+   "vacsora"
+  ],
+  "perc": 25,
+  "megj": "Tészta helyett cukkini: nagy tányér, kevés szénhidrát. A garnéla fagyasztva mindig kapható.",
+  "lep": [
+   "A cukkinit gyaluld vagy spirálozd hosszú csíkokra, sózd meg, és hagyd állni 10 percet, majd nyomkodd ki a vizét.",
+   "Az olajon pirítsd meg a zúzott fokhagymát 30 másodpercig, öntsd rá a passatát, és rotyogtasd 8-10 percig.",
+   "Add a szószhoz a garnélát, és főzd 3-4 percig, amíg rózsaszínre vált.",
+   "Forgasd bele a cukkinicsíkokat, és melegítsd át 1-2 percig — ne főzd szét, roppanós maradjon.",
+   "Szórd meg a reszelt sajttal."
+  ],
+  "a1": {
+   "makro": {
+    "kcal": 476,
+    "p": 55.4,
+    "c": 22.1,
+    "f": 17.1
+   },
+   "hozz": [
+    "230 g garnélarák, tisztított",
+    "400 g cukkini",
+    "180 g passata (szűrt paradicsom)",
+    "25 g reszelt trappista sajt",
+    "6 g fokhagyma",
+    "7 g olívaolaj",
+    "bazsalikom",
+    "chilipehely",
+    "só, bors és fűszerek"
+   ]
+  },
+  "a2": {
+   "makro": {
+    "kcal": 404,
+    "p": 48.2,
+    "c": 20.1,
+    "f": 13.5
+   },
+   "hozz": [
+    "200 g garnélarák, tisztított",
+    "400 g cukkini",
+    "150 g passata (szűrt paradicsom)",
+    "20 g reszelt trappista sajt",
+    "5 g fokhagyma",
+    "5 g olívaolaj",
+    "bazsalikom",
+    "chilipehely",
+    "só, bors és fűszerek"
+   ]
+  }
+ },
+ {
+  "id": "r24",
+  "nev": "Töltött padlizsán darált pulykával",
+  "slots": [
+   "ebed",
+   "vacsora"
+  ],
+  "perc": 45,
+  "megj": "A padlizsán majdnem kalóriamentes, viszont sok olajat képes beszívni — ezért van pontosan kimérve.",
+  "lep": [
+   "Melegítsd elő a sütőt 190 °C-ra.",
+   "Vágd a padlizsánt hosszában félbe, a húsát kockázd ki egy kanállal, a héját hagyd épen.",
+   "Az olajon fonnyaszd meg az apróra vágott hagymát, add hozzá a darált pulykát, és pirítsd fehéredésig.",
+   "Keverd hozzá a padlizsán kikanalazott húsát és a passatát, sózd, borsozd, és főzd 5 percig.",
+   "Töltsd vissza a masszát a padlizsánhéjakba, szórd meg a reszelt sajttal.",
+   "Süsd 25-30 percig, amíg a padlizsán megpuhul és a sajt megpirul."
+  ],
+  "a1": {
+   "makro": {
+    "kcal": 515,
+    "p": 50.4,
+    "c": 23.5,
+    "f": 20.6
+   },
+   "hozz": [
+    "400 g padlizsán",
+    "180 g darált pulyka",
+    "120 g passata (szűrt paradicsom)",
+    "60 g vöröshagyma",
+    "25 g reszelt trappista sajt",
+    "6 g olívaolaj",
+    "oregánó",
+    "só, bors és fűszerek"
+   ]
+  },
+  "a2": {
+   "makro": {
+    "kcal": 405,
+    "p": 40.7,
+    "c": 20.0,
+    "f": 14.7
+   },
+   "hozz": [
+    "350 g padlizsán",
+    "150 g darált pulyka",
+    "100 g passata (szűrt paradicsom)",
+    "50 g vöröshagyma",
+    "15 g reszelt trappista sajt",
+    "4 g olívaolaj",
+    "oregánó",
+    "só, bors és fűszerek"
+   ]
+  }
+ },
+ {
+  "id": "r25",
+  "nev": "Csirkés-babos chili barna rizzsel",
+  "slots": [
+   "ebed",
+   "vacsora"
+  ],
+  "perc": 35,
+  "megj": "A bab rostja és a csirke fehérjéje együtt nagyon eltelítő. Másnap még jobb.",
+  "lep": [
+   "Tedd fel a barna rizst sós vízben főni (kb. 25 perc).",
+   "A csirkemellet kockázd fel, és olajon, erős lángon pirítsd 5 percig.",
+   "Add hozzá az apróra vágott hagymát és a csíkozott paprikát, pirítsd további 4 percig.",
+   "Szórd rá a fűszereket, öntsd fel a paradicsomkonzervvel, és add hozzá a lecsepegtetett vörösbabot.",
+   "Fedő nélkül, kis lángon főzd 12-15 percig, amíg besűrűsödik.",
+   "Tálald a barna rizzsel."
+  ],
+  "a1": {
+   "makro": {
+    "kcal": 545,
+    "p": 52.1,
+    "c": 56.6,
+    "f": 9.6
+   },
+   "hozz": [
+    "160 g csirkemellfilé, nyers",
+    "120 g vörösbab konzerv, lecsepegtetve",
+    "200 g darabolt paradicsomkonzerv",
+    "100 g kaliforniai paprika",
+    "60 g vöröshagyma",
+    "30 g barna rizs, nyersen mérve",
+    "5 g olívaolaj",
+    "őrölt kömény, füstölt paprika, chili",
+    "só, bors és fűszerek"
+   ]
+  },
+  "a2": {
+   "makro": {
+    "kcal": 454,
+    "p": 45.1,
+    "c": 45.6,
+    "f": 7.9
+   },
+   "hozz": [
+    "140 g csirkemellfilé, nyers",
+    "100 g vörösbab konzerv, lecsepegtetve",
+    "200 g darabolt paradicsomkonzerv",
+    "100 g kaliforniai paprika",
+    "50 g vöröshagyma",
+    "20 g barna rizs, nyersen mérve",
+    "4 g olívaolaj",
+    "őrölt kömény, füstölt paprika, chili",
+    "só, bors és fűszerek"
    ]
   }
  },
  {
   "id": "s15",
-  "nev": "Zabfalatkeksz + főtt tojás",
-  "kat": "Kisétkezés",
+  "nev": "Zabkeksz főtt tojással",
+  "slots": [
+   "kis"
+  ],
   "perc": 15,
-  "megj": "",
+  "megj": "Több tojást is főzhetsz előre — hűtőben 3-4 napig eláll.",
+  "lep": [
+   "Főzd keményre a tojást: forrás után 8-9 perc, majd hideg víz.",
+   "Tálald a zabkeksszel."
+  ],
   "a1": {
-   "makro": {
-    "kcal": 258,
-    "p": 14.8,
-    "c": 17.6,
-    "f": 14.4
-   },
-   "hozz": [
-    "2 db zabfalatkeksz + 2 db keményre főtt tojás"
-   ],
-   "lep": []
-  },
-  "a2": {
    "makro": {
     "kcal": 186,
     "p": 8.5,
@@ -1146,17 +1835,34 @@ const DATA = [
     "f": 9.4
    },
    "hozz": [
-    "2 db zabfalatkeksz + 1 db főtt tojás"
-   ],
-   "lep": []
+    "2 zabkeksz (~13 g)",
+    "1 tojás (M-es, ~50 g)"
+   ]
+  },
+  "a2": {
+   "makro": {
+    "kcal": 129,
+    "p": 7.4,
+    "c": 8.8,
+    "f": 7.2
+   },
+   "hozz": [
+    "1 zabkeksz (~13 g)",
+    "1 tojás (M-es, ~50 g)"
+   ]
   }
  },
  {
   "id": "s16",
-  "nev": "Zabfalatkeksz + gyümölcs",
-  "kat": "Kisétkezés",
+  "nev": "Zabkeksz almával",
+  "slots": [
+   "kis"
+  ],
   "perc": 5,
-  "megj": "Csak az 1800 kcal-os keretben szerepel.",
+  "megj": "",
+  "lep": [
+   "Szeleteld fel az almát, és tálald a zabkeksz mellé."
+  ],
   "a1": {
    "makro": {
     "kcal": 208,
@@ -1165,18 +1871,34 @@ const DATA = [
     "f": 4.8
    },
    "hozz": [
-    "2 db zabfalatkeksz + 1 db alma (180 g)"
-   ],
-   "lep": []
+    "2 zabkeksz (~13 g)",
+    "180 g alma"
+   ]
   },
-  "a2": null
+  "a2": {
+   "makro": {
+    "kcal": 135,
+    "p": 1.6,
+    "c": 26.4,
+    "f": 2.5
+   },
+   "hozz": [
+    "1 zabkeksz (~13 g)",
+    "150 g alma"
+   ]
+  }
  },
  {
   "id": "s17",
   "nev": "Görög joghurt szilvával",
-  "kat": "Kisétkezés",
+  "slots": [
+   "kis"
+  ],
   "perc": 5,
   "megj": "",
+  "lep": [
+   "Szeleteld fel a szilvát, keverd a joghurtba, és szórd meg fahéjjal."
+  ],
   "a1": {
    "makro": {
     "kcal": 202,
@@ -1185,112 +1907,673 @@ const DATA = [
     "f": 8.5
    },
    "hozz": [
-    "150 g görög joghurt + 3-4 szem friss szilva (140 g)"
-   ],
-   "lep": []
+    "150 g görög joghurt, natúr (~5%)",
+    "140 g friss szilva",
+    "fahéj"
+   ]
   },
   "a2": {
    "makro": {
-    "kcal": 193,
-    "p": 9.5,
-    "c": 17.7,
-    "f": 8.5
+    "kcal": 147,
+    "p": 6.6,
+    "c": 15.8,
+    "f": 5.7
    },
    "hozz": [
-    "150 g görög joghurt + 3 szem szilva (120 g), ízlés szerint fahéjjal"
-   ],
-   "lep": []
+    "100 g görög joghurt, natúr (~5%)",
+    "120 g friss szilva",
+    "fahéj"
+   ]
   }
  },
  {
   "id": "s18",
-  "nev": "Tojás zöldséggel",
-  "kat": "Kisétkezés",
+  "nev": "Főtt tojás koktélparadicsommal",
+  "slots": [
+   "kis"
+  ],
   "perc": 15,
-  "megj": "Csak az 1800 kcal-os keretben szerepel.",
-  "a1": {
-   "makro": {
-    "kcal": 162,
-    "p": 13.5,
-    "c": 3.8,
-    "f": 10.2
-   },
-   "hozz": [
-    "2 db főtt tojás + 150 g kígyóuborka vagy kaliforniai paprika"
-   ],
-   "lep": []
-  },
-  "a2": null
- },
- {
-  "id": "s19",
-  "nev": "Sima görög joghurt",
-  "kat": "Kisétkezés",
-  "perc": 5,
   "megj": "",
+  "lep": [
+   "Főzd keményre a tojást, hűtsd le, és tálald a paradicsommal.",
+   "Sózd, borsozd meg."
+  ],
   "a1": {
    "makro": {
-    "kcal": 138,
-    "p": 8.7,
-    "c": 5.7,
-    "f": 8.2
+    "kcal": 171,
+    "p": 13.9,
+    "c": 6.0,
+    "f": 10.3
    },
    "hozz": [
-    "150 g görög joghurt magában vagy fahéjjal"
-   ],
-   "lep": []
+    "2 tojás (M-es, ~50 g)",
+    "150 g paradicsom",
+    "só, bors és fűszerek"
+   ]
   },
   "a2": {
    "makro": {
-    "kcal": 115,
-    "p": 7.2,
-    "c": 4.8,
-    "f": 6.9
+    "kcal": 104,
+    "p": 7.9,
+    "c": 6.5,
+    "f": 5.3
    },
    "hozz": [
-    "100–150 g görög joghurt (125 g-mal számolva)"
-   ],
-   "lep": []
+    "1 tojás (M-es, ~50 g)",
+    "150 g paradicsom",
+    "40 g kígyóuborka",
+    "só, bors és fűszerek"
+   ]
+  }
+ },
+ {
+  "id": "s19",
+  "nev": "Sima görög joghurt fahéjjal",
+  "slots": [
+   "kis"
+  ],
+  "perc": 2,
+  "megj": "",
+  "lep": [
+   "Szórd meg a joghurtot fahéjjal."
+  ],
+  "a1": {
+   "makro": {
+    "kcal": 161,
+    "p": 10.2,
+    "c": 6.6,
+    "f": 9.6
+   },
+   "hozz": [
+    "175 g görög joghurt, natúr (~5%)",
+    "fahéj"
+   ]
+  },
+  "a2": {
+   "makro": {
+    "kcal": 129,
+    "p": 8.1,
+    "c": 5.3,
+    "f": 7.7
+   },
+   "hozz": [
+    "140 g görög joghurt, natúr (~5%)",
+    "fahéj"
+   ]
   }
  },
  {
   "id": "s20",
-  "nev": "Futás előtti uzsonna",
-  "kat": "Kisétkezés",
-  "perc": 15,
-  "megj": "Csak az 1450 kcal-os keretben szerepel.",
-  "a1": null,
-  "a2": {
+  "nev": "Sárgarépa hummusszal",
+  "slots": [
+   "kis"
+  ],
+  "perc": 5,
+  "megj": "A hummusz zsíros, ezért kanállal mérd, ne szemre.",
+  "lep": [
+   "Vágd a sárgarépát hasábokra, és tunkold a hummuszba."
+  ],
+  "a1": {
    "makro": {
-    "kcal": 105,
-    "p": 7.0,
-    "c": 6.8,
-    "f": 5.2
+    "kcal": 212,
+    "p": 5.1,
+    "c": 18.0,
+    "f": 12.3
    },
    "hozz": [
-    "1 db főtt tojás + kígyóuborka vagy 1 szál sárgarépa (80 g)"
-   ],
-   "lep": []
+    "150 g sárgarépa",
+    "50 g hummusz"
+   ]
+  },
+  "a2": {
+   "makro": {
+    "kcal": 152,
+    "p": 3.6,
+    "c": 15.6,
+    "f": 7.5
+   },
+   "hozz": [
+    "150 g sárgarépa",
+    "30 g hummusz"
+   ]
   }
  },
  {
   "id": "s21",
-  "nev": "Zabfalatkeksz tízóraira",
-  "kat": "Kisétkezés",
-  "perc": 5,
-  "megj": "Csak az 1450 kcal-os keretben szerepel.",
-  "a1": null,
-  "a2": {
+  "nev": "Skyr mandulával",
+  "slots": [
+   "kis"
+  ],
+  "perc": 3,
+  "megj": "A legjobb fehérje-kalória arányú nassolás a listán.",
+  "lep": [
+   "Kanalazd ki a skyrt, szórd rá a durvára vágott mandulát."
+  ],
+  "a1": {
    "makro": {
-    "kcal": 169,
-    "p": 3.0,
-    "c": 28.8,
-    "f": 4.6
+    "kcal": 184,
+    "p": 19.6,
+    "c": 6.9,
+    "f": 8.2
    },
    "hozz": [
-    "2 db zabfalatkeksz + 3 szem szilva (120 g)"
-   ],
-   "lep": []
+    "150 g skyr, natúr",
+    "15 g mandula"
+   ]
+  },
+  "a2": {
+   "makro": {
+    "kcal": 142,
+    "p": 16.4,
+    "c": 5.8,
+    "f": 5.6
+   },
+   "hozz": [
+    "130 g skyr, natúr",
+    "10 g mandula"
+   ]
+  }
+ },
+ {
+  "id": "s26",
+  "nev": "Cottage cheese paradicsommal",
+  "slots": [
+   "kis"
+  ],
+  "perc": 5,
+  "megj": "",
+  "lep": [
+   "Kockázd fel a paradicsomot, keverd a cottage cheese-hez.",
+   "Sózd, borsozd, és szórd meg metélőhagymával."
+  ],
+  "a1": {
+   "makro": {
+    "kcal": 220,
+    "p": 19.1,
+    "c": 20.1,
+    "f": 6.2
+   },
+   "hozz": [
+    "120 g cottage cheese",
+    "100 g paradicsom",
+    "1 szelet teljes kiőrlésű kenyér (~35 g)",
+    "metélőhagyma",
+    "só, bors és fűszerek"
+   ]
+  },
+  "a2": {
+   "makro": {
+    "kcal": 116,
+    "p": 13.4,
+    "c": 6.5,
+    "f": 4.2
+   },
+   "hozz": [
+    "100 g cottage cheese",
+    "100 g paradicsom",
+    "metélőhagyma",
+    "só, bors és fűszerek"
+   ]
+  }
+ },
+ {
+  "id": "s27",
+  "nev": "Almás-mogyoróvajas falatok",
+  "slots": [
+   "kis"
+  ],
+  "perc": 5,
+  "megj": "100%-os mogyoróvajat válassz, cukor és pálmazsír nélkül.",
+  "lep": [
+   "Szeleteld az almát karikákra.",
+   "Kenj mindegyikre egy kevés mogyoróvajat."
+  ],
+  "a1": {
+   "makro": {
+    "kcal": 187,
+    "p": 4.3,
+    "c": 23.4,
+    "f": 7.9
+   },
+   "hozz": [
+    "180 g alma",
+    "15 g 100%-os mogyoróvaj"
+   ]
+  },
+  "a2": {
+   "makro": {
+    "kcal": 140,
+    "p": 3.0,
+    "c": 19.2,
+    "f": 5.3
+   },
+   "hozz": [
+    "150 g alma",
+    "10 g 100%-os mogyoróvaj"
+   ]
+  }
+ },
+ {
+  "id": "s28",
+  "nev": "Túrós-áfonyás pohár",
+  "slots": [
+   "kis"
+  ],
+  "perc": 5,
+  "megj": "Az áfonya fagyasztva egész évben kapható, és felengedve is jó.",
+  "lep": [
+   "Villával lazítsd fel a túrót.",
+   "Rétegezd pohárba az áfonyával, a tetejére szórd a chia magot."
+  ],
+  "a1": {
+   "makro": {
+    "kcal": 204,
+    "p": 20.9,
+    "c": 12.2,
+    "f": 7.0
+   },
+   "hozz": [
+    "130 g félzsíros túró",
+    "80 g áfonya (fagyasztott)",
+    "5 g chia mag"
+   ]
+  },
+  "a2": {
+   "makro": {
+    "kcal": 152,
+    "p": 15.9,
+    "c": 9.1,
+    "f": 5.1
+   },
+   "hozz": [
+    "100 g félzsíros túró",
+    "60 g áfonya (fagyasztott)",
+    "3 g chia mag"
+   ]
+  }
+ },
+ {
+  "id": "r29",
+  "nev": "Csirkeleves zöldségekkel és levestésztával",
+  "slots": [
+   "ebed",
+   "vacsora"
+  ],
+  "perc": 50,
+  "megj": "A tésztát azért főzd külön, mert a levesben megdagad és másnapra felszívja az egész alaplevet. A hús csirkemellből a legszárazabb, de a legkevesebb zsírt adja.",
+  "lep": [
+   "Tedd a csirkemellet egy nagy lábasba, öntsd fel kb. 1,5 liter hideg vízzel, és sózd meg.",
+   "Lassan forrald fel, és a keletkező habot szedd le a tetejéről.",
+   "Karikázd fel a sárgarépát, a petrezselyemgyökeret, a zellert és a karalábét, a hagymát hagyd egészben.",
+   "Add a zöldségeket a leveshez a leveskockával együtt, és gyöngyöző lángon főzd 30 percig.",
+   "Vedd ki a húst, tépd vagy vágd csíkokra, majd tedd vissza.",
+   "A levestésztát külön, sós vízben főzd meg, és tálaláskor szedd a tányérba — így nem szívja tele magát."
+  ],
+  "a1": {
+   "makro": {
+    "kcal": 488,
+    "p": 51.6,
+    "c": 56.4,
+    "f": 4.5
+   },
+   "hozz": [
+    "180 g csirkemellfilé, nyers",
+    "120 g sárgarépa",
+    "60 g petrezselyemgyökér",
+    "50 g zellergumó",
+    "80 g karalábé",
+    "50 g vöröshagyma",
+    "40 g levestészta, nyersen mérve",
+    "1 leveskocka (~4 g)",
+    "petrezselyemzöld",
+    "só, bors és fűszerek"
+   ]
+  },
+  "a2": {
+   "makro": {
+    "kcal": 389,
+    "p": 42.5,
+    "c": 43.2,
+    "f": 3.8
+   },
+   "hozz": [
+    "150 g csirkemellfilé, nyers",
+    "100 g sárgarépa",
+    "50 g petrezselyemgyökér",
+    "40 g zellergumó",
+    "70 g karalábé",
+    "40 g vöröshagyma",
+    "28 g levestészta, nyersen mérve",
+    "1 leveskocka (~4 g)",
+    "petrezselyemzöld",
+    "só, bors és fűszerek"
+   ]
+  }
+ },
+ {
+  "id": "r30",
+  "nev": "Feltuningolt készleves csirkével és tojással",
+  "slots": [
+   "ebed",
+   "vacsora"
+  ],
+  "perc": 15,
+  "megj": "Magában a tasakos leves nagyrészt só és keményítő, alig van benne fehérje — ezért van benne a csirke, a tojás és a zöldség. Így 10 perc alatt kész, mégis rendes étkezés. Sózni már nem kell, a por sós.",
+  "lep": [
+   "Készítsd el a tasakos levest a csomagoláson leírtak szerint, de a jelzett vízmennyiség kb. 1,5-szeresével.",
+   "A csirkemellet vágd apró kockára, és tedd a forrásban lévő levesbe — 6-7 perc alatt megfő.",
+   "Add hozzá a karikázott sárgarépát és a zöldborsót, főzd további 4-5 percig.",
+   "Verd fel a tojást, és lassan, vékony szálban csorgasd a forró levesbe, közben kevergesd — így selymes szálak lesznek belőle.",
+   "Kapcsold le a lángot, és hagyd állni 2 percet tálalás előtt."
+  ],
+  "a1": {
+   "makro": {
+    "kcal": 468,
+    "p": 60.9,
+    "c": 28.0,
+    "f": 10.7
+   },
+   "hozz": [
+    "25 g tasakos készleves por",
+    "210 g csirkemellfilé, nyers",
+    "1 tojás (M-es, ~50 g)",
+    "80 g sárgarépa",
+    "60 g zöldborsó (fagyasztott)",
+    "petrezselyemzöld"
+   ]
+  },
+  "a2": {
+   "makro": {
+    "kcal": 395,
+    "p": 50.6,
+    "c": 23.1,
+    "f": 9.6
+   },
+   "hozz": [
+    "20 g tasakos készleves por",
+    "170 g csirkemellfilé, nyers",
+    "1 tojás (M-es, ~50 g)",
+    "70 g sárgarépa",
+    "50 g zöldborsó (fagyasztott)",
+    "petrezselyemzöld"
+   ]
+  }
+ },
+ {
+  "id": "r31",
+  "nev": "Karfiolkrémleves grillezett csirkecsíkokkal",
+  "slots": [
+   "ebed",
+   "vacsora"
+  ],
+  "perc": 35,
+  "megj": "A karfiol krémesíti a levest anélkül, hogy tejszín kellene bele. A csirke a tetején teszi étkezéssé.",
+  "lep": [
+   "Az olajon fonnyaszd meg az apróra vágott vöröshagymát 3-4 percig.",
+   "Add hozzá a karfiolrózsákat és a kockázott burgonyát, öntsd fel annyi vízzel, hogy ellepje, és tedd bele a leveskockát.",
+   "Fedő alatt főzd 18-20 percig, amíg minden puha.",
+   "Botmixerrel dolgozd simára, majd keverd bele a tejfölt, és már ne forrald.",
+   "A csirkemellet vágd csíkokra, sózd, borsozd, és forró serpenyőben süsd 5-6 percig.",
+   "A krémlevest szedd tányérba, és a csirkecsíkokat tedd a tetejére."
+  ],
+  "a1": {
+   "makro": {
+    "kcal": 485,
+    "p": 46.9,
+    "c": 38.1,
+    "f": 13.8
+   },
+   "hozz": [
+    "400 g karfiol",
+    "120 g burgonya",
+    "60 g vöröshagyma",
+    "40 g tejföl (12%)",
+    "150 g csirkemellfilé, nyers",
+    "5 g olívaolaj",
+    "1 leveskocka (~4 g)",
+    "szerecsendió",
+    "só, bors és fűszerek"
+   ]
+  },
+  "a2": {
+   "makro": {
+    "kcal": 412,
+    "p": 39.1,
+    "c": 33.8,
+    "f": 11.2
+   },
+   "hozz": [
+    "400 g karfiol",
+    "100 g burgonya",
+    "50 g vöröshagyma",
+    "30 g tejföl (12%)",
+    "120 g csirkemellfilé, nyers",
+    "4 g olívaolaj",
+    "1 leveskocka (~4 g)",
+    "szerecsendió",
+    "só, bors és fűszerek"
+   ]
+  }
+ },
+ {
+  "id": "r32",
+  "nev": "Zöldségleves húsgombóccal",
+  "slots": [
+   "ebed",
+   "vacsora"
+  ],
+  "perc": 40,
+  "megj": "A gombócokat ne forrald nagy lángon, mert szétesnek — gyöngyöző víz kell nekik.",
+  "lep": [
+   "A darált húst keverd össze a tojással, sóval, borssal, és formálj belőle kis gombócokat.",
+   "Tegyél fel kb. 1,5 liter vizet a leveskockával, és forrald fel.",
+   "Karikázd fel a sárgarépát és a karalábét, kockázd a burgonyát, a hagymát vágd apróra.",
+   "Tedd a zöldségeket a lobogó vízbe, és főzd 10 percig.",
+   "Óvatosan engedd bele a húsgombócokat és a zöldborsót, majd főzd további 12-15 percig, amíg a gombócok átfőnek."
+  ],
+  "a1": {
+   "makro": {
+    "kcal": 537,
+    "p": 49.4,
+    "c": 44.1,
+    "f": 15.0
+   },
+   "hozz": [
+    "160 g darált marha, 5% zsír",
+    "1 tojás (M-es, ~50 g)",
+    "120 g sárgarépa",
+    "100 g karalábé",
+    "60 g zöldborsó (fagyasztott)",
+    "120 g burgonya",
+    "50 g vöröshagyma",
+    "1 leveskocka (~4 g)",
+    "petrezselyemzöld",
+    "só, bors és fűszerek"
+   ]
+  },
+  "a2": {
+   "makro": {
+    "kcal": 455,
+    "p": 41.5,
+    "c": 36.8,
+    "f": 13.2
+   },
+   "hozz": [
+    "130 g darált marha, 5% zsír",
+    "1 tojás (M-es, ~50 g)",
+    "100 g sárgarépa",
+    "80 g karalábé",
+    "50 g zöldborsó (fagyasztott)",
+    "100 g burgonya",
+    "40 g vöröshagyma",
+    "1 leveskocka (~4 g)",
+    "petrezselyemzöld",
+    "só, bors és fűszerek"
+   ]
+  }
+ },
+ {
+  "id": "r33",
+  "nev": "Minestrone fehérbabbal",
+  "slots": [
+   "ebed",
+   "vacsora"
+  ],
+  "perc": 35,
+  "megj": "Húsmentes, mégis laktató a bab fehérjéje és rostja miatt. Másnap sűrűbb lesz — hígítsd fel egy kis vízzel.",
+  "lep": [
+   "Az olajon fonnyaszd meg az apróra vágott hagymát és a zúzott fokhagymát.",
+   "Add hozzá a kockázott sárgarépát és zellert, pirítsd 4-5 percig.",
+   "Öntsd rá a paradicsomkonzervet és kb. 8 dl vizet, sózd, borsozd, fűszerezd oregánóval.",
+   "Forrás után add hozzá a kockázott cukkinit és a lecsepegtetett fehérbabot, és főzd 12 percig.",
+   "A levestésztát főzd külön, és tálaláskor szedd a tányérba.",
+   "A tetejére szórd a reszelt sajtot."
+  ],
+  "a1": {
+   "makro": {
+    "kcal": 545,
+    "p": 25.3,
+    "c": 75.7,
+    "f": 12.3
+   },
+   "hozz": [
+    "150 g fehérbab konzerv, lecsepegtetve",
+    "200 g darabolt paradicsomkonzerv",
+    "100 g sárgarépa",
+    "150 g cukkini",
+    "50 g zellergumó",
+    "60 g vöröshagyma",
+    "35 g levestészta, nyersen mérve",
+    "15 g reszelt trappista sajt",
+    "5 g fokhagyma",
+    "6 g olívaolaj",
+    "oregánó, bazsalikom",
+    "só, bors és fűszerek"
+   ]
+  },
+  "a2": {
+   "makro": {
+    "kcal": 430,
+    "p": 20.3,
+    "c": 61.5,
+    "f": 8.7
+   },
+   "hozz": [
+    "120 g fehérbab konzerv, lecsepegtetve",
+    "200 g darabolt paradicsomkonzerv",
+    "90 g sárgarépa",
+    "150 g cukkini",
+    "40 g zellergumó",
+    "50 g vöröshagyma",
+    "25 g levestészta, nyersen mérve",
+    "10 g reszelt trappista sajt",
+    "4 g fokhagyma",
+    "4 g olívaolaj",
+    "oregánó, bazsalikom",
+    "só, bors és fűszerek"
+   ]
+  }
+ },
+ {
+  "id": "s36",
+  "nev": "Paradicsomleves",
+  "slots": [
+   "kis"
+  ],
+  "perc": 20,
+  "megj": "Előételként vagy délutáni meleg falatként. Nagy tányér, kevés kalória.",
+  "lep": [
+   "Az olajon fonnyaszd meg az apróra vágott hagymát és a kockázott sárgarépát 5 percig.",
+   "Öntsd rá a passatát és kb. 3 dl vizet, sózd, borsozd, tegyél bele egy csipet cukrot vagy édesítőt.",
+   "Add hozzá a rizst, és fedő alatt főzd 15 percig.",
+   "Tálaláskor kanalazd a tetejére a tejfölt."
+  ],
+  "a1": {
+   "makro": {
+    "kcal": 220,
+    "p": 5.7,
+    "c": 29.8,
+    "f": 7.6
+   },
+   "hozz": [
+    "250 g passata (szűrt paradicsom)",
+    "60 g sárgarépa",
+    "40 g vöröshagyma",
+    "10 g basmati rizs, nyersen mérve",
+    "15 g tejföl (12%)",
+    "5 g olívaolaj",
+    "bazsalikom",
+    "só, bors és fűszerek"
+   ]
+  },
+  "a2": {
+   "makro": {
+    "kcal": 164,
+    "p": 4.5,
+    "c": 23.8,
+    "f": 4.8
+   },
+   "hozz": [
+    "200 g passata (szűrt paradicsom)",
+    "50 g sárgarépa",
+    "30 g vöröshagyma",
+    "8 g basmati rizs, nyersen mérve",
+    "10 g tejföl (12%)",
+    "3 g olívaolaj",
+    "bazsalikom",
+    "só, bors és fűszerek"
+   ]
+  }
+ },
+ {
+  "id": "s37",
+  "nev": "Gyömbéres csirke-erőleves",
+  "slots": [
+   "kis"
+  ],
+  "perc": 25,
+  "megj": "Megfázás ellen és két főétkezés közé is jó — nagyon kevés kalóriából ad meleg, sós ételt.",
+  "lep": [
+   "Tedd fel kb. 7 dl vizet a leveskockával és a vékonyra szeletelt gyömbérrel.",
+   "Add hozzá a karikázott sárgarépát és a kockázott karalábét, főzd 12 percig.",
+   "Tedd bele a csíkokra vágott csirkemellet, és főzd további 6-7 percig.",
+   "Csepegtess bele citromlevet tálalás előtt."
+  ],
+  "a1": {
+   "makro": {
+    "kcal": 165,
+    "p": 25.2,
+    "c": 9.9,
+    "f": 2.1
+   },
+   "hozz": [
+    "100 g csirkemellfilé, nyers",
+    "60 g sárgarépa",
+    "60 g karalábé",
+    "8 g friss gyömbér",
+    "1 leveskocka (~4 g)",
+    "citromlé",
+    "petrezselyemzöld",
+    "só, bors és fűszerek"
+   ]
+  },
+  "a2": {
+   "makro": {
+    "kcal": 135,
+    "p": 20.3,
+    "c": 8.3,
+    "f": 1.8
+   },
+   "hozz": [
+    "80 g csirkemellfilé, nyers",
+    "50 g sárgarépa",
+    "50 g karalábé",
+    "6 g friss gyömbér",
+    "1 leveskocka (~4 g)",
+    "citromlé",
+    "petrezselyemzöld",
+    "só, bors és fűszerek"
+   ]
   }
  }
 ];
@@ -1388,13 +2671,15 @@ const SLOTS = [
 ];
 const SLOTHOZ = Object.fromEntries(SLOTS.map(s => [s.k, s.hoz]));
 const SLOTMAX = Object.fromEntries(SLOTS.map(s => [s.k, s.max]));
+/* "1800-as" / "1450-es" -- mindketto "ezer"-rel kezdodik, ezert a szocska "az" */
+const keretNev = cel => cel + (cel % 100 === 50 ? '-es' : '-as');
 const SLOTNEV = Object.fromEntries(SLOTS.map(s => [s.k, s.n]));
 const HO = ['január','február','március','április','május','június','július','augusztus','szeptember','október','november','december'];
 const NAPROVID = ['Hétfő','Kedd','Szerda','Csütörtök','Péntek','Szombat','Vasárnap'];
 
 /* az eredeti "Ebéd / Vacsora" kategoriabol ket onallo etkezes lesz */
 function slotsOf(r) {
-  if (r.slots) return r.slots;
+  if (r.slots && r.slots.length) return r.slots;
   if (r.kat === 'Reggeli') return ['reggeli'];
   if (r.kat === 'Kisétkezés') return ['kis'];
   return ['ebed', 'vacsora'];
@@ -1402,6 +2687,7 @@ function slotsOf(r) {
 DATA.forEach(r => { r.slots = slotsOf(r); });
 
 let filter = 'Mind', query = '', view = 'R';
+let sortBy = 'alap', csakBelefer = false;
 let favs = [], own = [], etrend = {};
 
 const el = id => document.getElementById(id);
@@ -1532,16 +2818,43 @@ function macroSpan(m) {
 }
 
 /* ---------- receptek nézet ---------- */
+/* mennyi kaloria maradt ma az egyes keretekben */
+function maradek() {
+  return FRAMES.map(f => ({ cel: f.cel, k: f.k, marad: f.cel - napOsszeg(ma(), f.k).kcal }));
+}
+/* belefer-e a recept a mai maradekba mindegyik keretben, ahol van valtozata */
+function beleferMa(r) {
+  return maradek().every(m => !r[m.k] || r[m.k].makro.kcal <= m.marad);
+}
+
 function visible() {
   const q = query.trim().toLowerCase();
-  return all().filter(r => {
+  let rows = all().filter(r => {
     const sl = slotsOf(r);
     if (filter === 'Kedvencek') { if (!favs.includes(r.id)) return false; }
     else if (filter !== 'Mind') { if (!sl.includes(filter)) return false; }
+    if (csakBelefer && !beleferMa(r)) return false;
     if (!q) return true;
     return [r.nev, ...sl.map(s => SLOTNEV[s]), r.a1 ? r.a1.hozz.join(' ') : '', r.a2 ? r.a2.hozz.join(' ') : '']
       .join(' ').toLowerCase().includes(q);
   });
+
+  const k = r => r.a1 ? r.a1.makro.kcal : (r.a2 ? r.a2.makro.kcal : 0);
+  const pr = r => r.a1 ? r.a1.makro.p : (r.a2 ? r.a2.makro.p : 0);
+  if (sortBy === 'kcalUp') rows = rows.slice().sort((a, b) => k(a) - k(b));
+  else if (sortBy === 'kcalDown') rows = rows.slice().sort((a, b) => k(b) - k(a));
+  else if (sortBy === 'prot') rows = rows.slice().sort((a, b) => pr(b) - pr(a));
+  else if (sortBy === 'perc') rows = rows.slice().sort((a, b) => (a.perc || 0) - (b.perc || 0));
+  return rows;
+}
+
+function drawBudget() {
+  if (!csakBelefer) { el('budget').innerHTML = ''; return; }
+  el('budget').innerHTML = `<div class="rt-budget">
+    <span class="rt-label" style="letter-spacing:.09em">Ma még belefér</span>
+    ${maradek().map(m => `<span><b class="${m.marad < 0 ? 'tele' : ''}">${m.marad}</b> kcal
+      <span style="color:var(--ink-60)">az ${keretNev(m.cel)} keretben</span></span>`).join('')}
+  </div>`;
 }
 function drawNav() {
   const opts = [{ k: 'Mind', n: 'Mind' }, ...SLOTS, { k: 'Kedvencek', n: 'Kedvencek' }];
@@ -1560,7 +2873,8 @@ function holCimke(id) {
 
 function drawGrid() {
   const rows = visible(), max = maxKcal();
-  el('count').textContent = `${rows.length} recept`;
+  drawBudget();
+  el('count').textContent = `${rows.length} recept${csakBelefer ? ' — ami ma még belefér' : ''}`;
   if (!rows.length) {
     let cim, mit, gomb;
     if (filter === 'Kedvencek' && !favs.length) {
@@ -1571,6 +2885,13 @@ function drawGrid() {
       cim = `Semmi sem passzol erre: „${esc(query)}”`;
       mit = 'A név és a hozzávalók között keresek. Próbáld rövidebb szóval, például „csirke” vagy „joghurt”.';
       gomb = `<button class="btn btn-p" id="emptyClear">Keresés törlése</button>`;
+    } else if (csakBelefer) {
+      const m = maradek();
+      cim = 'Ma már semmi nem fér bele';
+      mit = m.some(x => x.marad < 0)
+        ? 'Túllépted a keretet, így minden recept kiesett. Vedd ki valamit az étrendből, vagy kapcsold ki a szűrőt.'
+        : `A maradék ${m.map(x => x.marad + ' kcal').join(' / ')} kevesebb, mint a legkisebb adag. Kapcsold ki a szűrőt, vagy tervezz holnapra.`;
+      gomb = `<button class="btn btn-p" id="emptyFit">Szűrő kikapcsolása</button>`;
     } else {
       cim = `Nincs recept ehhez: ${esc(filter)}`;
       mit = 'Válts étkezést, vagy vedd fel a sajátodat — a makrókat te adod meg, a többit én számolom.';
@@ -1579,6 +2900,7 @@ function drawGrid() {
     el('grid').innerHTML = `<div class="rt-empty"><p>${cim}</p><small>${mit}</small>${gomb}</div>`;
     if (el('emptyClear')) el('emptyClear').onclick = () => { setQuery(''); el('q').focus(); };
     if (el('emptyNew')) el('emptyNew').onclick = () => openEditor(null);
+    if (el('emptyFit')) el('emptyFit').onclick = () => setFit(false);
     return;
   }
   el('grid').innerHTML = rows.map(r => {
@@ -1667,8 +2989,70 @@ function drawWeek() {
         ${isMa ? '<span class="rt-mabadge">ma</span>' : ''}</div>
       ${slots}
       <div class="rt-dsum">${sum}</div>
+      <div class="rt-dact">
+        <button data-autofill="${key}" title="Töltsd ki a hiányzó étkezéseket">Kitöltés</button>
+        <button data-copyday="${key}" title="Másold át egy másik napra">Másolás</button>
+        <button class="d" data-clearday="${key}" title="Vedd ki az összes ételt erről a napról">Ürítés</button>
+      </div>
     </div>`;
   }).join('');
+
+  drawWeekSum();
+}
+
+/* ---------- heti összegzés ---------- */
+function drawWeekSum() {
+  const napok = [0,1,2,3,4,5,6].map(i => iso(plusz(hetKezd, i))).filter(vanNap);
+  if (!napok.length) { el('wksum').innerHTML = ''; return; }
+  const t = FRAMES.map(f => {
+    const ossz = napok.map(k => napOsszeg(k, f.k));
+    return {
+      cel: f.cel,
+      atlag: Math.round(ossz.reduce((a, x) => a + x.kcal, 0) / napok.length),
+      belul: ossz.filter(x => x.kcal <= f.cel).length,
+    };
+  });
+  const atlagP = (napok.reduce((a, k) => a + napOsszeg(k, 'a1').p, 0) / napok.length).toFixed(1).replace('.', ',');
+  el('wksum').innerHTML = `
+    <div><b>${napok.length} / 7</b><u class="rt-label">betervezett nap</u></div>
+    ${t.map(x => `<div><b>${x.atlag}</b><u class="rt-label">átlag az ${keretNev(x.cel)} keretben</u></div>`).join('')}
+    <div><b>${atlagP} g</b><u class="rt-label">átlagos fehérje</u></div>
+    ${t.map(x => `<div><b>${x.belul} / ${napok.length}</b><u class="rt-label">az ${keretNev(x.cel)} keret alatt</u></div>`).join('')}`;
+}
+
+/* ---------- automatikus napkitöltés ----------
+   Az 1800-as keret a vezető: veletlen kombinaciokat probal, es azt tartja meg,
+   ami a kereten belul a legkozelebb van hozza, kozben sok feherjet ad. */
+function autoFillTerv(key) {
+  const meglevo = napja(key);
+  const cel = 1800;
+  const jelolt = s => all().filter(r => slotsOf(r).includes(s) && r.a1);
+  const fixKcal = SLOTS.reduce((a, s) => a + (meglevo[s.k] || [])
+    .reduce((x, id) => { const r = get(id); return x + (r && r.a1 ? r.a1.makro.kcal : 0); }, 0), 0);
+  const ures = ['reggeli','ebed','vacsora'].filter(s => !(meglevo[s] || []).length);
+  const kisJelolt = jelolt('kis');
+  if (!ures.length && !kisJelolt.length) return null;
+
+  let best = null;
+  for (let t = 0; t < 400; t++) {
+    const valasztas = {};
+    let sum = fixKcal, prot = 0;
+    for (const s of ures) {
+      const c = jelolt(s); if (!c.length) continue;
+      const r = c[Math.floor(Math.random() * c.length)];
+      valasztas[s] = [r.id]; sum += r.a1.makro.kcal; prot += r.a1.makro.p;
+    }
+    const snackek = [];
+    for (let g = 0; g < 3 && kisJelolt.length; g++) {
+      const r = kisJelolt[Math.floor(Math.random() * kisJelolt.length)];
+      if (sum + r.a1.makro.kcal > cel) break;
+      snackek.push(r.id); sum += r.a1.makro.kcal; prot += r.a1.makro.p;
+    }
+    if (snackek.length) valasztas.kis = (meglevo.kis || []).concat(snackek);
+    const pont = (sum <= cel ? sum : cel - (sum - cel) * 3) + prot * 2;
+    if (!best || pont > best.pont) best = { pont, valasztas, sum };
+  }
+  return best;
 }
 
 /* recept-választó egy naphoz és étkezéshez */
@@ -1707,6 +3091,29 @@ function renderPick() {
     </div>`;
   const inp = el('pq');
   inp.oninput = e => { pickQ = e.target.value; const p = inp.selectionStart; renderPick(); const n2 = el('pq'); n2.focus(); n2.setSelectionRange(p, p); };
+}
+
+/* ---------- nap másolása másik napra ---------- */
+function openCopyDay(key) {
+  const [y, mo, d] = key.split('-').map(Number);
+  const naplista = [];
+  for (let i = 0; i < 14; i++) {
+    const dt = plusz(hetKezd, i), k = iso(dt);
+    if (k === key) continue;
+    naplista.push({ k, dt, van: vanNap(k) });
+  }
+  el('sheet').innerHTML = `
+    <button class="rt-close" id="x" aria-label="Bezárás">✕</button>
+    <div class="rt-sh">
+      <p class="rt-label">${HO[mo-1]} ${d}. másolása</p>
+      <h2 id="shname">Melyik napra?</h2>
+      <p style="margin:12px 0 0;font-size:13.5px;color:var(--ink-60)">A célnapon lévő ételek helyére kerül, amit ezen a napon beállítottál.</p>
+      <ul class="rt-pickday">${naplista.map(n => `<li><button data-pasteday="${key}|${n.k}">
+        <span class="nm">${NAPROVID[hetIdx(n.dt)]} — ${HO[n.dt.getMonth()].slice(0,3)}. ${n.dt.getDate()}.</span>
+        <span class="st ${n.van ? 'van' : ''}">${n.van ? 'felülírja' : 'üres'}</span></button></li>`).join('')}</ul>
+    </div>`;
+  openScrim();
+  el('x').focus();
 }
 
 /* ---------- naptár ---------- */
@@ -1825,14 +3232,20 @@ function openSheet(id) {
     </div>`;
   }).join('');
 
-  const ing = `<p class="rt-h3 rt-label">Hozzávalók</p><div class="rt-two">
+  const ing = `<p class="rt-h3 rt-label">Hozzávalók — keretenként</p><div class="rt-two">
     ${FRAMES.map(f => r[f.k] ? `<div><p class="rt-h4">${f.cel} kcal-os keret</p>
       <ul class="rt-ing">${r[f.k].hozz.map(h => `<li>${esc(h)}</li>`).join('')}</ul></div>` : '').join('')}
   </div>`;
 
-  const lep = FRAMES.filter(f => r[f.k] && r[f.k].lep.length).map(f =>
-    `<p class="rt-h3 rt-label">Elkészítés — ${f.cel} kcal-os keret</p>
-     <ol class="rt-steps">${r[f.k].lep.map(s => `<li>${esc(s)}</li>`).join('')}</ol>`).join('');
+  /* Az elkeszites mindket keretnel ugyanaz -- csak a mennyisegek masok -,
+     ezert egyszer irjuk ki. A regi, keretenkent tarolt lepesekre is visszaesunk. */
+  const lepesek = (r.lep && r.lep.length) ? r.lep
+    : ((r.a1 && r.a1.lep) || (r.a2 && r.a2.lep) || []);
+  const lep = lepesek.length
+    ? `<p class="rt-h3 rt-label">Elkészítés</p>
+       <p style="margin:-4px 0 10px;font-size:12.5px;color:var(--ink-60)">Mindkét kerethez ugyanez a menet — csak a mennyiségek térnek el.</p>
+       <ol class="rt-steps">${lepesek.map(s => `<li>${esc(s)}</li>`).join('')}</ol>`
+    : '';
 
   el('sheet').innerHTML = `
     <button class="rt-close" id="x" aria-label="Bezárás">✕</button>
@@ -1929,7 +3342,7 @@ function openEditor(id) {
       <div class="rt-field"><label class="rt-label" for="f-hozz">Hozzávalók — egy sorba egy</label>
         <textarea id="f-hozz" placeholder="200 g csirkemell&#10;250 g brokkoli">${r && r.a1 ? esc(r.a1.hozz.join('\n')) : ''}</textarea></div>
       <div class="rt-field"><label class="rt-label" for="f-lep">Elkészítés — egy sorba egy lépés</label>
-        <textarea id="f-lep" placeholder="Fűszerezd be a csirkét.&#10;Süsd 200 fokon 25 percig.">${r && r.a1 ? esc(r.a1.lep.join('\n')) : ''}</textarea></div>
+        <textarea id="f-lep" placeholder="Fűszerezd be a csirkét.&#10;Süsd 200 fokon 25 percig.">${r ? esc(((r.lep && r.lep.length) ? r.lep : (r.a1 && r.a1.lep) || []).join('\n')) : ''}</textarea></div>
       <p class="rt-h3 rt-label">Makrók — 1800 kcal-os keret</p>
       <div class="rt-4">
         <div class="rt-field"><label class="rt-label" for="k1">kcal</label><input id="k1" type="number" min="0" value="${f('a1','kcal')}"></div>
@@ -1963,8 +3376,9 @@ function openEditor(id) {
     const slots = el('f-slot').value.split(',');
     const rec = { id: r ? r.id : 'o' + Date.now(), own: true, nev, slots,
       kat: slots.map(s => SLOTNEV[s]).join(' / '), perc: +el('f-perc').value || 0, megj: '',
-      a1: { makro: mk('k1','p1','c1','z1'), hozz, lep },
-      a2: el('k2').value.trim() ? { makro: mk('k2','p2','c2','z2'), hozz, lep } : null };
+      lep,
+      a1: { makro: mk('k1','p1','c1','z1'), hozz },
+      a2: el('k2').value.trim() ? { makro: mk('k2','p2','c2','z2'), hozz } : null };
     const uj = !r;
     own = r ? own.map(x => x.id === r.id ? rec : x) : own.concat([rec]);
     await save(KEYS.own, own);
@@ -1981,6 +3395,74 @@ function drawAccount() {
   else { dot.className = 'acc-dot-off'; label.textContent = 'Fiók'; }
 }
 
+/* ---------- biztonsági mentés fájlba ---------- */
+function backupBlokk() {
+  return `
+    <p class="rt-h3 rt-label">Biztonsági mentés</p>
+    <p style="margin:0 0 14px;font-size:13.5px;color:var(--ink-60)">
+      A kedvenceid, a saját receptjeid és az egész étrended egy fájlba. Jó, ha böngészőt cserélsz,
+      vagy ha valaha kitörlöd a böngésző tárolóját.</p>
+    <div class="rt-sh-act" style="margin-top:0">
+      <button class="btn btn-s" id="doExport">Mentés fájlba</button>
+      <button class="btn btn-s" id="doImportBtn">Visszatöltés fájlból</button>
+      <input type="file" id="importFile" accept=".json,application/json" hidden>
+    </div>
+    <div id="importBox"></div>`;
+}
+
+function bindBackup() {
+  const ex = el('doExport'); if (!ex) return;
+  ex.onclick = () => {
+    const adat = {
+      formatum: 'recepttar-mentes',
+      verzio: 1,
+      mentve: new Date().toISOString(),
+      favs, own, etrend,
+    };
+    const blob = new Blob([JSON.stringify(adat, null, 1)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `recepttar-mentes-${ma()}.json`;
+    document.body.appendChild(a); a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+    toast('Mentés letöltve');
+  };
+
+  el('doImportBtn').onclick = () => el('importFile').click();
+  el('importFile').onchange = async (ev) => {
+    const f = ev.target.files && ev.target.files[0]; if (!f) return;
+    let adat;
+    try { adat = JSON.parse(await f.text()); }
+    catch (e) { return hibaImport('Ez a fájl nem olvasható JSON-ként.'); }
+    if (!adat || adat.formatum !== 'recepttar-mentes')
+      return hibaImport('Ez nem a Recepttár mentése. Olyan fájlt válassz, amit innen mentettél.');
+
+    const dbRecept = Array.isArray(adat.own) ? adat.own.length : 0;
+    const dbNap = adat.etrend ? Object.keys(adat.etrend).length : 0;
+    const dbFav = Array.isArray(adat.favs) ? adat.favs.length : 0;
+    el('importBox').innerHTML = `<div class="rt-confirm">
+      <p>A mentésben ${dbNap} betervezett nap, ${dbRecept} saját recept és ${dbFav} kedvenc van.
+      A visszatöltés felülírja a mostani adataidat.</p>
+      <button class="btn btn-p btn-sm" id="confirmImport">Visszatöltöm</button>
+      <button class="btn btn-s btn-sm" id="cancelImport">Mégsem</button>
+    </div>`;
+    el('cancelImport').onclick = () => { el('importBox').innerHTML = ''; el('importFile').value = ''; };
+    el('confirmImport').onclick = async () => {
+      favs = Array.isArray(adat.favs) ? adat.favs : [];
+      own = Array.isArray(adat.own) ? adat.own : [];
+      own.forEach(r => { if (!r.slots) r.slots = slotsOf(r); });
+      etrend = (adat.etrend && typeof adat.etrend === 'object') ? adat.etrend : {};
+      await save(KEYS.fav, favs); await save(KEYS.own, own); await save(KEYS.etrend, etrend);
+      closeSheet(); drawNav(); redrawAll();
+      toast(`Visszatöltve: ${dbNap} nap, ${dbRecept} saját recept`);
+    };
+  };
+  function hibaImport(msg) {
+    el('importBox').innerHTML = `<p class="rt-err" style="margin-top:14px">${esc(msg)}</p>`;
+    el('importFile').value = '';
+  }
+}
+
 function openAccount() {
   if (!firebaseConfigured()) {
     el('sheet').innerHTML = `
@@ -1994,10 +3476,11 @@ function openAccount() {
           Firebase-projektet, és be kell másolnod a hozzáférési adatait a fájl elejére,
           a <code>FIREBASE_CONFIG</code> objektumba. Kérdezz rá, és lépésről lépésre végigviszlek rajta.
         </p>
-        <div class="rt-sh-act"><button class="btn btn-s" id="x2">Értem</button></div>
+        ${backupBlokk()}
       </div>`;
     openScrim();
-    el('x2').onclick = closeSheet;
+    el('x').focus();
+    bindBackup();
     return;
   }
   if (fbUser) {
@@ -2011,8 +3494,10 @@ function openAccount() {
           <span class="rt-sync-badge rt-sync-on">Élő</span>
         </div>
         <div class="rt-sh-act"><button class="btn btn-d" id="signout">Kijelentkezés</button></div>
+        ${backupBlokk()}
       </div>`;
     openScrim();
+    bindBackup();
     el('signout').onclick = async () => { await fbAuth.signOut(); fbUser = null; drawAccount(); closeSheet(); toast('Kijelentkeztél — az adatok ezen az eszközön maradnak'); };
     return;
   }
@@ -2035,8 +3520,10 @@ function renderAuthForm(mode, msg) {
         <button class="btn btn-p" id="authGo">${isSignin ? 'Belépés' : 'Fiók létrehozása'}</button>
         <button class="btn btn-g" id="authSwitch">${isSignin ? 'Nincs még fiókod? Regisztrálj' : 'Már van fiókod? Lépj be'}</button>
       </div>
+      ${backupBlokk()}
     </div>`;
   openScrim();
+  bindBackup();
   el('authEmail').focus();
   el('authSwitch').onclick = () => renderAuthForm(isSignin ? 'signup' : 'signin');
   el('authGo').onclick = async () => {
@@ -2084,6 +3571,13 @@ el('q').oninput = e => setQuery(e.target.value);
 el('q').onkeydown = e => { if (e.key === 'Escape' && query) { e.stopPropagation(); setQuery(''); } };
 el('clearq').onclick = () => { setQuery(''); el('q').focus(); };
 el('new').onclick = () => openEditor(null);
+function setFit(v) {
+  csakBelefer = v;
+  el('fitBtn').setAttribute('aria-pressed', v);
+  drawGrid();
+}
+el('fitBtn').onclick = () => setFit(!csakBelefer);
+el('sortSel').onchange = e => { sortBy = e.target.value; drawGrid(); };
 el('nav').onclick = e => { const b = e.target.closest('[data-c]'); if (!b) return; filter = b.dataset.c; drawNav(); drawGrid(); };
 document.addEventListener('click', e => {
   const rs = e.target.closest('[data-reset]');
@@ -2092,6 +3586,20 @@ document.addEventListener('click', e => {
 el('wprev').onclick = () => { hetKezd = plusz(hetKezd, -7); drawWeek(); };
 el('wnext').onclick = () => { hetKezd = plusz(hetKezd, 7); drawWeek(); };
 el('wtoday').onclick = () => { hetKezd = hetfoje(new Date()); drawWeek(); };
+el('wdup').onclick = async () => {
+  const forras = [0,1,2,3,4,5,6].map(i => iso(plusz(hetKezd, i)));
+  if (!forras.some(vanNap)) { toast('Ez a hét üres — nincs mit átmásolni'); return; }
+  snapshot();
+  forras.forEach((k, i) => {
+    const cel = iso(plusz(hetKezd, i + 7));
+    if (vanNap(k)) etrend[cel] = JSON.parse(JSON.stringify(napja(k)));
+    else delete etrend[cel];
+  });
+  await save(KEYS.etrend, etrend);
+  hetKezd = plusz(hetKezd, 7);
+  redrawAll();
+  toast('A hét átmásolva a következőre', true);
+};
 el('cprev').onclick = () => { calHo = new Date(calHo.getFullYear(), calHo.getMonth() - 1, 1); drawCal(); };
 el('cnext').onclick = () => { calHo = new Date(calHo.getFullYear(), calHo.getMonth() + 1, 1); drawCal(); };
 el('ctoday').onclick = () => { calHo = new Date(); drawCal(); };
@@ -2143,6 +3651,43 @@ document.addEventListener('click', async e => {
     snapshot();
     await setSlot(key, slot, arr);
     toast(`${kivett ? kivett.nev : 'Tétel'} kivéve`, true);
+    return;
+  }
+  const af = e.target.closest('[data-autofill]');
+  if (af) {
+    const key = af.dataset.autofill;
+    const best = autoFillTerv(key);
+    if (!best || !Object.keys(best.valasztas).length) { toast('Ezen a napon már minden étkezés be van állítva'); return; }
+    snapshot();
+    const n = { ...napja(key), ...best.valasztas };
+    etrend[key] = n;
+    await save(KEYS.etrend, etrend);
+    redrawAll();
+    const t = napOsszeg(key, 'a1');
+    toast(`A nap kitöltve — ${t.kcal} kcal az 1800-as keretben`, true);
+    return;
+  }
+  const cd = e.target.closest('[data-copyday]'); if (cd) return openCopyDay(cd.dataset.copyday);
+  const pd = e.target.closest('[data-pasteday]');
+  if (pd) {
+    const [src, dst] = pd.dataset.pasteday.split('|');
+    snapshot();
+    etrend[dst] = JSON.parse(JSON.stringify(napja(src)));
+    await save(KEYS.etrend, etrend);
+    closeSheet(); redrawAll();
+    const [yy, mm, dd] = dst.split('-').map(Number);
+    toast(`Átmásolva ide: ${HO[mm-1].slice(0,3)}. ${dd}.`, true);
+    return;
+  }
+  const cld = e.target.closest('[data-clearday]');
+  if (cld) {
+    const key = cld.dataset.clearday;
+    if (!vanNap(key)) { toast('Ez a nap már üres'); return; }
+    snapshot();
+    delete etrend[key];
+    await save(KEYS.etrend, etrend);
+    redrawAll();
+    toast('A nap kiürítve', true);
     return;
   }
   const day = e.target.closest('[data-day]'); if (day) return openDay(day.dataset.day);
@@ -2203,4 +3748,5 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSheet()
 })();
 </script>
 
-</body></html>
+</body>
+</html>
