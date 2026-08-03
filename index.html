@@ -1,0 +1,1930 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Recepttár — receptek makrókkal</title>
+<meta name="description" content="Recepttár: 22 recept két kalóriakerethez, étrendtervvel és naptárral.">
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-database-compat.js"></script>
+</head>
+<body>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;600;700&family=Karla:wght@400;500;600;700&display=swap');
+
+.rt, .rt *, .rt *::before, .rt *::after { box-sizing: border-box; }
+
+.rt {
+  --paper: #F5F0E3;
+  --card: #FFFDF7;
+  --ink: #2B2620;
+  --ink-60: #6C6355;
+  --ink-30: #A69B89;
+  --hair: #E3DAC5;
+  --blue: #2E6A8C;
+  --blue-soft: #E4EDF2;
+  --butter: #DFA229;
+  --tomato: #BE4A33;
+  --tomato-soft: #F8E6E1;
+
+  --disp: 'Bricolage Grotesque', 'Trebuchet MS', system-ui, sans-serif;
+  --body: 'Karla', ui-sans-serif, system-ui, -apple-system, sans-serif;
+
+  font-family: var(--body); color: var(--ink); background: var(--paper);
+  line-height: 1.5; font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased; min-height: 100%; padding-bottom: 128px;
+}
+.rt button, .rt input, .rt textarea, .rt select { font: inherit; color: inherit; }
+.rt button { cursor: pointer; background: none; border: 0; padding: 0; }
+.rt :focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; border-radius: 5px; }
+
+.rt-label { font-size: 10.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-60); }
+.mP { color: var(--blue); } .mC { color: var(--butter); } .mF { color: var(--tomato); }
+.kp { background: var(--blue); } .kc { background: var(--butter); } .kf { background: var(--tomato); }
+
+/* ---------- gombok: nagy, kényelmes felület ---------- */
+.rt .btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  min-height: 42px; padding: 0 20px; border-radius: 11px;
+  font-size: 14px; font-weight: 700; white-space: nowrap;
+  transition: background .16s, border-color .16s, color .16s, transform .12s;
+}
+.rt .btn:active { transform: translateY(1px); }
+.btn-p { background: var(--blue); color: #fff; box-shadow: 0 2px 0 #1F4E68; }
+.btn-p:hover { background: #35789D; }
+.btn-p:active { box-shadow: 0 1px 0 #1F4E68; }
+.btn-s { background: var(--card); color: var(--ink); border: 1.5px solid var(--hair); box-shadow: 0 2px 0 rgba(43,38,32,.07); }
+.btn-s:hover { border-color: var(--ink-60); background: #fff; }
+.btn-g { color: var(--ink-60); }
+.btn-g:hover { background: rgba(43,38,32,.07); color: var(--ink); }
+.btn-d { color: var(--tomato); border: 1.5px solid rgba(190,74,51,.32); }
+.btn-d:hover { background: var(--tomato-soft); border-color: var(--tomato); }
+.rt .btn-sm { min-height: 36px; padding: 0 14px; font-size: 13px; border-radius: 9px; }
+.rt .btn-ico { min-height: 40px; min-width: 40px; padding: 0; border-radius: 11px; }
+
+/* ---------- fejléc ---------- */
+.rt-hd { max-width: 1160px; margin: 0 auto; padding: 26px 26px 0; }
+.rt-title { font-family: var(--disp); font-weight: 700; font-size: clamp(28px, 4.2vw, 38px); line-height: 1.05; letter-spacing: -.02em; margin: 0; }
+.rt-lede { font-size: 14.5px; color: var(--ink-60); margin: 6px 0 0; max-width: 62ch; }
+
+.rt-tabs { max-width: 1160px; margin: 0 auto; padding: 20px 26px 0; display: flex; gap: 22px; border-bottom: 1.5px solid var(--hair); }
+.rt-tabs button {
+  font-family: var(--disp); font-weight: 600; font-size: 15.5px; color: var(--ink-30);
+  padding: 6px 0 12px; border-bottom: 3px solid transparent; margin-bottom: -1.5px;
+  transition: color .18s, border-color .18s;
+}
+.rt-tabs button:hover { color: var(--ink-60); }
+.rt-tabs button[aria-pressed="true"] { color: var(--ink); border-bottom-color: var(--blue); }
+.rt-tabs .badge { font-family: var(--body); font-size: 11px; font-weight: 700; color: var(--ink-30); background: rgba(43,38,32,.07); border-radius: 99px; padding: 1px 6px; margin-left: 6px; }
+#tabAcc { font-family: var(--body); font-weight: 600; font-size: 13px; color: var(--ink-60); border-bottom: none; padding: 6px 0 12px; }
+#tabAcc:hover { color: var(--ink); }
+.acc-dot-on { background: #3F8F5C !important; }
+.acc-dot-off { background: var(--ink-30) !important; }
+
+/* fiok lap */
+.rt-acc-row { display: flex; align-items: center; gap: 10px; padding: 12px 0; border-bottom: 1.5px dashed var(--hair); }
+.rt-acc-row:last-child { border-bottom: 0; }
+.rt-acc-row .who { flex: 1; min-width: 0; }
+.rt-acc-row .who b { display: block; font-size: 14.5px; font-weight: 700; }
+.rt-acc-row .who span { font-size: 12.5px; color: var(--ink-60); }
+.rt-sync-badge { font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 3px 8px; border-radius: 999px; }
+.rt-sync-on { background: #E3F1E7; color: #2E7047; }
+.rt-sync-off { background: rgba(43,38,32,.07); color: var(--ink-60); }
+
+/* ---------- eszközsor ---------- */
+.rt-tools { max-width: 1160px; margin: 0 auto; padding: 18px 26px 0; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.rt-nav { display: flex; gap: 5px; flex-wrap: wrap; margin-right: auto; }
+.rt-nav button {
+  min-height: 38px; padding: 0 15px; border-radius: 999px; font-size: 13.5px; font-weight: 600;
+  color: var(--ink-60); display: inline-flex; align-items: center; transition: all .16s;
+}
+.rt-nav button:hover { background: rgba(43,38,32,.075); color: var(--ink); }
+.rt-nav button[aria-pressed="true"] { background: var(--ink); color: var(--card); }
+.rt-search {
+  border: 1.5px solid var(--hair); background: var(--card); border-radius: 999px;
+  min-height: 40px; padding: 0 16px; font-size: 13.5px; width: 220px; transition: border-color .16s;
+}
+.rt-search::placeholder { color: var(--ink-30); }
+.rt-search:focus { outline: none; border-color: var(--blue); }
+
+.rt-key { max-width: 1160px; margin: 0 auto; padding: 16px 26px 0; display: flex; align-items: center; gap: 15px; flex-wrap: wrap; font-size: 12.5px; color: var(--ink-60); }
+.rt-key span { display: inline-flex; align-items: center; gap: 6px; }
+.rt-key i { width: 10px; height: 10px; border-radius: 3px; display: block; }
+
+/* ---------- receptkártyák ---------- */
+.rt-main { max-width: 1160px; margin: 0 auto; padding: 14px 26px 40px; }
+.rt-count { margin: 0 0 14px; }
+.rt-grid { display: grid; gap: 16px; grid-auto-rows: 1fr; grid-template-columns: repeat(auto-fill, minmax(316px, 1fr)); }
+
+.rt-card {
+  background: var(--card); border-radius: 13px; padding: 15px 17px 16px;
+  display: flex; flex-direction: column; text-align: left; height: 100%;
+  border: 1.5px solid var(--hair); box-shadow: 0 2px 0 rgba(43,38,32,.05);
+  transition: transform .18s, box-shadow .18s, border-color .18s;
+}
+.rt-card:hover { transform: translateY(-3px); border-color: rgba(46,106,140,.4); box-shadow: 0 8px 0 -2px rgba(43,38,32,.06), 0 12px 24px -14px rgba(43,38,32,.3); }
+.rt .rt-open { text-align: left; display: block; width: 100%; padding: 5px 0; margin: -5px 0; border-radius: 8px; }
+.rt-open:hover .rt-name { color: var(--blue); }
+
+.rt-top { display: flex; align-items: center; gap: 8px; }
+.rt-cat { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-60); background: rgba(43,38,32,.06); padding: 5px 9px; border-radius: 6px; }
+.rt-min { font-size: 12.5px; color: var(--ink-30); margin-right: auto; }
+.rt-act { display: flex; gap: 5px; }
+.rt-act button {
+  width: 38px; height: 38px; border-radius: 11px; display: grid; place-items: center;
+  font-size: 16px; color: var(--ink-60); line-height: 1;
+  border: 1.5px solid transparent; transition: all .16s;
+}
+.rt-act button:hover { background: rgba(43,38,32,.08); border-color: var(--hair); color: var(--ink); }
+.rt-act button.on { background: var(--blue-soft); border-color: rgba(46,106,140,.35); color: var(--blue); }
+.rt-act button.on:hover { background: #D6E4EC; }
+
+.rt-name { font-family: var(--disp); font-weight: 600; font-size: 19px; line-height: 1.2; letter-spacing: -.012em; margin: 11px 0 0; text-wrap: balance; }
+.rt-tear { margin: 13px 0 12px; border-top: 1.5px dashed var(--hair); }
+
+/* mindkét keret egymás alatt, egy kártyán */
+.rt-fr + .rt-fr { margin-top: 11px; padding-top: 11px; border-top: 1px solid rgba(43,38,32,.07); }
+.rt-fr-hd { display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap; }
+.rt-chip { font-size: 10.5px; font-weight: 700; letter-spacing: .04em; color: var(--ink-60); background: rgba(43,38,32,.07); padding: 3px 7px; border-radius: 5px; }
+.rt-fr-k { font-family: var(--disp); font-weight: 700; font-size: 19px; letter-spacing: -.02em; line-height: 1; }
+.rt-fr-u { font-size: 9.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-60); }
+.rt-ms { display: flex; gap: 11px; margin-left: auto; font-size: 13px; font-weight: 600; white-space: nowrap; }
+.rt-ms i { font-style: normal; font-weight: 700; margin-right: 2px; }
+.rt-bar { margin-top: 9px; height: 6px; border-radius: 99px; background: rgba(43,38,32,.07); overflow: hidden; }
+.rt-bar > div { height: 100%; display: flex; border-radius: 99px; overflow: hidden; }
+.rt-bar i { display: block; height: 100%; }
+.rt-nofr { font-size: 12.5px; color: var(--ink-30); margin: 11px 0 0; padding-top: 11px; border-top: 1px solid rgba(43,38,32,.07); }
+
+.rt-empty { grid-column: 1/-1; padding: 56px 20px; text-align: center; }
+.rt-empty p { font-family: var(--disp); font-weight: 600; font-size: 20px; margin: 0 0 5px; }
+.rt-empty small { color: var(--ink-60); }
+
+/* ---------- étrendterv ---------- */
+.rt-plan-v { max-width: 1160px; margin: 0 auto; padding: 20px 26px 40px; }
+.rt-wk { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
+.rt-wk h2 { font-family: var(--disp); font-weight: 700; font-size: 21px; letter-spacing: -.02em; margin: 0; min-width: 210px; }
+.rt-days-grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(258px, 1fr)); }
+.rt-dcard { background: var(--card); border: 1.5px solid var(--hair); border-radius: 13px; padding: 14px 15px 15px; box-shadow: 0 2px 0 rgba(43,38,32,.05); }
+.rt-dcard.ma { border-color: var(--ink); border-width: 2px; }
+.rt-dcard-hd { display: flex; align-items: baseline; gap: 8px; padding-bottom: 11px; border-bottom: 1.5px dashed var(--hair); }
+.rt-dcard-hd b { font-family: var(--disp); font-weight: 700; font-size: 15.5px; }
+.rt-dcard-hd s { text-decoration: none; font-size: 12.5px; color: var(--ink-30); margin-right: auto; }
+.rt-mabadge { font-size: 9.5px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: #fff; background: var(--ink); padding: 3px 7px; border-radius: 5px; }
+
+.rt-slot { padding: 11px 0 0; }
+.rt-slot > p { margin: 0 0 6px; }
+.rt-slot ul { list-style: none; margin: 0 0 6px; padding: 0; }
+.rt-slot li { display: flex; align-items: center; gap: 8px; padding: 6px 0; font-size: 13.5px; }
+.rt-slot li span:first-child { flex: 1; min-width: 0; }
+.rt-slot li .k { font-size: 12px; font-weight: 700; color: var(--ink-60); white-space: nowrap; }
+.rt .rt-rm { width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center; color: var(--ink-30); font-size: 15px; flex: 0 0 30px; transition: all .15s; }
+.rt-rm:hover { background: var(--tomato-soft); color: var(--tomato); }
+.rt .rt-addslot {
+  width: 100%; min-height: 36px; border-radius: 9px; border: 1.5px dashed var(--hair);
+  font-size: 12.5px; font-weight: 700; color: var(--ink-60);
+  display: flex; align-items: center; justify-content: center; gap: 6px; transition: all .16s;
+}
+.rt-addslot:hover { border-color: var(--blue); color: var(--blue); background: var(--blue-soft); border-style: solid; }
+
+.rt-dsum { margin-top: 14px; padding-top: 12px; border-top: 1.5px dashed var(--hair); }
+.rt-dsum-row { display: flex; align-items: baseline; gap: 8px; font-size: 13px; }
+.rt-dsum-row + .rt-dsum-row { margin-top: 9px; }
+.rt-dsum-row b { font-family: var(--disp); font-weight: 700; font-size: 16px; letter-spacing: -.02em; }
+.rt-dsum-row s { text-decoration: none; color: var(--ink-30); font-size: 12px; margin-right: auto; }
+.rt-dsum-row em { font-style: normal; font-size: 11.5px; font-weight: 700; color: var(--ink-60); }
+.rt-dsum .rt-bar { margin-top: 5px; }
+.rt-over { color: var(--tomato) !important; }
+
+/* ---------- naptár ---------- */
+.rt-cal { max-width: 1160px; margin: 0 auto; padding: 20px 26px 40px; }
+.rt-cal-hd { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
+.rt-cal-hd h2 { font-family: var(--disp); font-weight: 700; font-size: 21px; letter-spacing: -.02em; margin: 0; min-width: 190px; }
+.rt-cal-sum { display: flex; gap: 22px; flex-wrap: wrap; margin: 12px 0 20px; }
+.rt-cal-sum div b { font-family: var(--disp); font-weight: 700; font-size: 20px; line-height: 1; letter-spacing: -.02em; display: block; }
+.rt-cal-sum div u { text-decoration: none; display: block; margin-top: 5px; }
+.rt-dow { display: grid; grid-template-columns: repeat(7, 1fr); gap: 7px; margin-bottom: 7px; }
+.rt-dow span { text-align: center; font-size: 9.5px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--ink-30); }
+.rt-daysc { display: grid; grid-template-columns: repeat(7, 1fr); gap: 7px; }
+.rt-day { aspect-ratio: 1/1; border-radius: 11px; border: 1.5px solid var(--hair); background: var(--card); padding: 7px 7px 6px; display: flex; flex-direction: column; text-align: left; transition: border-color .16s, transform .16s; }
+.rt-day.blank { border: 0; background: none; }
+.rt-day.has:hover { transform: translateY(-2px); border-color: var(--blue); }
+.rt-day.empty { background: rgba(43,38,32,.025); cursor: default; }
+.rt-day.ma { border-color: var(--ink); border-width: 2px; }
+.rt-day-n { font-size: 11.5px; font-weight: 700; color: var(--ink-60); line-height: 1; }
+.rt-day-vals { margin-top: auto; display: flex; flex-direction: column; gap: 3px; }
+.rt-day-v { display: flex; align-items: baseline; gap: 4px; font-size: 9.5px; font-weight: 700; letter-spacing: .03em; }
+.rt-day-v b { font-family: var(--disp); font-size: 13px; letter-spacing: -.02em; line-height: 1; }
+.rt-day-v.in { color: var(--blue); } .rt-day-v.ov { color: var(--tomato); }
+.rt-cal-empty { margin-top: 18px; padding: 38px 22px; text-align: center; border: 1.5px dashed var(--hair); border-radius: 13px; }
+.rt-cal-empty p { font-family: var(--disp); font-weight: 600; font-size: 19px; margin: 0 0 6px; }
+.rt-cal-empty small { color: var(--ink-60); }
+
+/* ---------- alsó sáv ---------- */
+.rt-bottom { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; background: var(--card); border-top: 1.5px solid var(--hair); box-shadow: 0 -6px 20px -14px rgba(43,38,32,.4); }
+.rt-bottom-in { max-width: 1160px; margin: 0 auto; padding: 12px 26px 13px; display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
+.rt-mai { font-size: 10.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-30); }
+.rt-bfr { min-width: 168px; }
+.rt-bfr-r { display: flex; align-items: baseline; gap: 7px; }
+.rt-bfr-r b { font-family: var(--disp); font-weight: 700; font-size: 20px; letter-spacing: -.02em; }
+.rt-bfr-r s { text-decoration: none; font-size: 12px; color: var(--ink-30); margin-right: auto; }
+.rt-bfr-r em { font-style: normal; font-size: 11px; font-weight: 700; color: var(--ink-60); }
+
+/* ---------- lap ---------- */
+.rt-scrim { position: fixed; inset: 0; z-index: 40; background: rgba(43,38,32,.42); display: flex; align-items: center; justify-content: center; padding: 22px; opacity: 0; pointer-events: none; transition: opacity .2s; }
+.rt-scrim.open { opacity: 1; pointer-events: auto; }
+.rt-sheet { background: var(--card); width: 100%; max-width: 660px; max-height: 88vh; overflow-y: auto; border-radius: 16px; position: relative; border: 1.5px solid var(--hair); box-shadow: 0 26px 60px -22px rgba(43,38,32,.5); transform: translateY(8px); transition: transform .22s cubic-bezier(.2,.8,.2,1); }
+.rt-scrim.open .rt-sheet { transform: none; }
+.rt .rt-close { position: absolute; top: 14px; right: 16px; width: 40px; height: 40px; border-radius: 11px; color: var(--ink-60); display: grid; place-items: center; font-size: 16px; background: rgba(43,38,32,.06); z-index: 3; transition: all .16s; }
+.rt-close:hover { background: rgba(43,38,32,.14); color: var(--ink); }
+.rt-sh { padding: 24px 28px 30px; }
+.rt-sh h2 { font-family: var(--disp); font-weight: 700; font-size: 26px; line-height: 1.15; letter-spacing: -.02em; margin: 9px 0 0; padding-right: 44px; text-wrap: balance; }
+
+.rt-shfr { background: var(--paper); border-radius: 12px; padding: 15px 16px; margin-top: 14px; }
+.rt-shfr-hd { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+.rt-shfr-hd .rt-chip { font-size: 11.5px; padding: 4px 9px; }
+.rt-nums { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.rt-nums b { font-family: var(--disp); font-weight: 700; font-size: 19px; display: block; line-height: 1; letter-spacing: -.02em; }
+.rt-nums b s { text-decoration: none; font-size: 11px; font-weight: 500; color: var(--ink-30); margin-left: 1px; }
+.rt-nums u { text-decoration: none; display: flex; align-items: center; gap: 4px; margin-top: 6px; font-size: 9.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-60); white-space: nowrap; }
+.rt-nums u i { width: 7px; height: 7px; border-radius: 2px; flex: 0 0 7px; }
+
+.rt-two { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 8px; }
+.rt-h3 { margin: 22px 0 9px; }
+.rt-h4 { margin: 0 0 8px; font-size: 11.5px; font-weight: 700; color: var(--blue); letter-spacing: .04em; }
+.rt-ing { list-style: none; margin: 0; padding: 0; }
+.rt-ing li { padding: 8px 0 8px 20px; border-bottom: 1.5px dashed var(--hair); font-size: 14px; position: relative; }
+.rt-ing li::before { content: ''; position: absolute; left: 3px; top: 16px; width: 6px; height: 6px; border-radius: 2px; background: var(--blue); }
+.rt-steps { margin: 0; padding: 0; list-style: none; counter-reset: s; }
+.rt-steps li { counter-increment: s; display: flex; gap: 12px; padding: 8px 0; font-size: 14px; line-height: 1.55; }
+.rt-steps li::before { content: counter(s); flex: 0 0 22px; height: 22px; border-radius: 7px; background: var(--blue); color: #fff; font-size: 11.5px; font-weight: 700; display: grid; place-items: center; margin-top: 2px; }
+.rt-note { margin: 20px 0 0; padding: 13px 15px; background: var(--paper); border-left: 4px solid var(--butter); border-radius: 0 9px 9px 0; font-size: 13.5px; color: #5A5145; }
+.rt-sh-act { display: flex; gap: 9px; align-items: center; margin-top: 24px; flex-wrap: wrap; }
+
+/* recept-választó */
+.rt-pick { list-style: none; margin: 12px 0 0; padding: 0; }
+.rt-pick li { border-bottom: 1.5px dashed var(--hair); }
+.rt-pick button { width: 100%; display: flex; align-items: center; gap: 12px; padding: 12px 8px; text-align: left; border-radius: 9px; transition: background .14s; }
+.rt-pick button:hover { background: var(--blue-soft); }
+.rt-pick .nm { flex: 1; font-size: 14.5px; font-weight: 600; min-width: 0; }
+.rt-pick .kk { font-size: 12px; font-weight: 700; color: var(--ink-60); white-space: nowrap; }
+
+/* űrlap */
+.rt-field { margin-bottom: 14px; }
+.rt-field label { display: block; margin-bottom: 6px; }
+.rt-field input, .rt-field textarea, .rt-field select { width: 100%; border: 1.5px solid var(--hair); background: var(--paper); border-radius: 10px; padding: 10px 13px; font-size: 14.5px; min-height: 42px; }
+.rt-field textarea { min-height: 84px; resize: vertical; line-height: 1.55; }
+.rt-field input:focus, .rt-field textarea:focus, .rt-field select:focus { outline: none; border-color: var(--blue); }
+.rt-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.rt-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.rt-hint { font-size: 12.5px; color: var(--ink-60); margin: 0; }
+.rt-err { color: var(--tomato); font-size: 13.5px; font-weight: 700; margin: 0 0 12px; }
+
+@media (max-width: 640px) {
+  .rt-hd { padding: 20px 16px 0; }
+  .rt-tabs, .rt-tools, .rt-key, .rt-cal, .rt-plan-v { padding-left: 16px; padding-right: 16px; }
+  .rt-main { padding: 12px 16px 30px; }
+  .rt-bottom-in { padding: 11px 16px 12px; gap: 14px; }
+  .rt-grid, .rt-days-grid { grid-template-columns: 1fr; }
+  .rt-search { width: 100%; }
+  .rt-sh { padding: 22px 18px 26px; }
+  .rt-two { grid-template-columns: 1fr; gap: 4px; }
+  .rt-4 { grid-template-columns: 1fr 1fr; }
+  .rt-scrim { padding: 0; align-items: flex-end; }
+  .rt-sheet { max-height: 93vh; border-radius: 16px 16px 0 0; }
+  .rt-daysc, .rt-dow { gap: 4px; }
+  .rt-day { border-radius: 8px; padding: 4px 4px 3px; }
+  .rt-day-v b { font-size: 10.5px; } .rt-day-v { font-size: 0; gap: 0; }
+  .rt-cal-hd h2, .rt-wk h2 { font-size: 18px; min-width: 0; }
+  .rt-bfr { min-width: 140px; }
+}
+@media (prefers-reduced-motion: reduce) { .rt *, .rt *::before { transition: none !important; } }
+</style>
+
+<div class="rt">
+  <header class="rt-hd">
+    <h1 class="rt-title">Recepttár</h1>
+    <p class="rt-lede">Huszonkét recept, minden kártyán mindkét keret makrói és elkészítése. Lidl-es alapanyagokra számolva.</p>
+  </header>
+
+  <div class="rt-tabs" role="group" aria-label="Nézet">
+    <button id="tabR" aria-pressed="true">Receptek</button>
+    <button id="tabP" aria-pressed="false">Étrendterv</button>
+    <button id="tabC" aria-pressed="false">Naptár<span class="badge" id="calBadge">0</span></button>
+    <button id="tabAcc" style="margin-left:auto" aria-pressed="false">
+      <span id="accDot" style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--ink-30);margin-right:7px;vertical-align:middle"></span
+      ><span id="accLabel">Fiók</span>
+    </button>
+  </div>
+
+  <div id="viewR">
+    <div class="rt-tools">
+      <div class="rt-nav" id="nav"></div>
+      <input class="rt-search" id="q" type="search" placeholder="Keresés recept vagy hozzávaló" aria-label="Keresés">
+      <button class="btn btn-p" id="new">+ Új recept</button>
+    </div>
+    <div class="rt-key">
+      <span><i class="kp"></i>fehérje</span>
+      <span><i class="kc"></i>szénhidrát</span>
+      <span><i class="kf"></i>zsír</span>
+      <span style="color:var(--ink-30)">— a csík hossza a kalória</span>
+    </div>
+    <main class="rt-main">
+      <p class="rt-count rt-label" id="count"></p>
+      <div class="rt-grid" id="grid"></div>
+    </main>
+  </div>
+
+  <section class="rt-plan-v" id="viewP" hidden>
+    <div class="rt-wk">
+      <button class="btn btn-s btn-ico" id="wprev" aria-label="Előző hét">‹</button>
+      <h2 id="wkTitle"></h2>
+      <button class="btn btn-s btn-ico" id="wnext" aria-label="Következő hét">›</button>
+      <button class="btn btn-s btn-sm" id="wtoday">Mai hét</button>
+    </div>
+    <div class="rt-days-grid" id="week"></div>
+  </section>
+
+  <section class="rt-cal" id="viewC" hidden>
+    <div class="rt-cal-hd">
+      <button class="btn btn-s btn-ico" id="cprev" aria-label="Előző hónap">‹</button>
+      <h2 id="calTitle"></h2>
+      <button class="btn btn-s btn-ico" id="cnext" aria-label="Következő hónap">›</button>
+      <button class="btn btn-s btn-sm" id="ctoday">Mai nap</button>
+    </div>
+    <div class="rt-cal-sum" id="calSum"></div>
+    <div class="rt-dow"><span>H</span><span>K</span><span>Sze</span><span>Cs</span><span>P</span><span>Szo</span><span>V</span></div>
+    <div class="rt-daysc" id="days"></div>
+    <div id="calEmpty"></div>
+  </section>
+
+  <footer class="rt-bottom">
+    <div class="rt-bottom-in">
+      <div><p class="rt-mai" style="margin:0 0 4px">A mai nap</p>
+        <button class="btn btn-s btn-sm" id="goToday">Étrend megnyitása</button></div>
+      <div class="rt-bfr" id="bfr1"></div>
+      <div class="rt-bfr" id="bfr2"></div>
+    </div>
+  </footer>
+</div>
+
+<div class="rt-scrim rt" id="scrim">
+  <div class="rt-sheet" role="dialog" aria-modal="true" aria-labelledby="shname" id="sheet"></div>
+</div>
+
+<script>
+const DATA = [
+ {
+  "id": "r0",
+  "nev": "Görög joghurtos-szilvás zabpehely fahéjjal",
+  "kat": "Reggeli",
+  "perc": 5,
+  "megj": "Kiváló, gyors reggeli opció. A szilva szezonon kívül helyettesíthető bogyós gyümölcsökkel (áfonya, málna). Alacsonyabb szénhidrát- és kalóriatartalmú verzió.",
+  "a1": {
+   "makro": {
+    "kcal": 444,
+    "p": 19.5,
+    "c": 53.1,
+    "f": 14.8
+   },
+   "hozz": [
+    "200 g görög joghurt",
+    "50 g zabpehely",
+    "4 szem friss szilva (felezve)",
+    "1 csipet fahéj"
+   ],
+   "lep": [
+    "Egy tálba mard ki a 200 g görög joghurtot és keverd hozzá az 50 g zabpelyhet.",
+    "Mosa meg és felezd meg a 4 szem friss szilvát, majd rendezd a joghurtos zabpehely tetejére.",
+    "Szórd meg egy csipet fahéjjal, és azonnal fogyasztható."
+   ]
+  },
+  "a2": {
+   "makro": {
+    "kcal": 351,
+    "p": 15.1,
+    "c": 43.3,
+    "f": 11.3
+   },
+   "hozz": [
+    "150 g görög joghurt",
+    "40 g zabpehely",
+    "3–4 szem friss szilva (felezve)",
+    "1 csipet fahéj"
+   ],
+   "lep": [
+    "Egy tálban keverd össze a 150 g görög joghurtot a 40 g zabpehellyel.",
+    "Mosa meg és felezd meg a 3–4 szem szilvát, majd tedd a joghurt tetejére.",
+    "Szórd meg egy csipet fahéjjal."
+   ]
+  }
+ },
+ {
+  "id": "r1",
+  "nev": "Meleg szilvás zabkása",
+  "kat": "Reggeli",
+  "perc": 10,
+  "megj": "Laktató, melengető reggeli.",
+  "a1": {
+   "makro": {
+    "kcal": 435,
+    "p": 17.9,
+    "c": 57.1,
+    "f": 12.8
+   },
+   "hozz": [
+    "60 g zabpehely",
+    "kb. 1,5–2 dl víz vagy tej",
+    "150 g görög joghurt",
+    "4 szem friss szilva (aprítva)",
+    "Csipet fahéj (ízlés szerint)"
+   ],
+   "lep": [
+    "A 60 g zabpelyhet egy kis lábosban öntsd fel annyi vízzel vagy tejjel, amennyi éppen ellepi.",
+    "Alacsony lángon, folyamatos kevergetés mellett főzd puhára és krémesre (kb. 3–5 perc).",
+    "Húzd le a tűzről, keverd bele a 150 g görög joghurtot és az aprított szilvaszemeket.",
+    "Szórd meg fahéjjal a tetejét és tálald melegen."
+   ]
+  },
+  "a2": {
+   "makro": {
+    "kcal": 324,
+    "p": 12.9,
+    "c": 44.4,
+    "f": 8.9
+   },
+   "hozz": [
+    "45 g zabpehely",
+    "kb. 1,5 dl víz vagy tej",
+    "100 g görög joghurt",
+    "3–4 szem friss szilva (aprítva)"
+   ],
+   "lep": [
+    "A 45 g zabpelyhet öntsd fel vízzel vagy tejjel egy lábosban.",
+    "Kis lángon főzd krémesre (kb. 3–5 perc).",
+    "Vedd le a tűzről, keverd hozzá a 100 g görög joghurtot és az aprított szilvaszemeket."
+   ]
+  }
+ },
+ {
+  "id": "r2",
+  "nev": "Sütőben sült szilvás zabkása",
+  "kat": "Reggeli",
+  "perc": 25,
+  "megj": "Különleges textúrájú, süteményes jellegű reggeli.",
+  "a1": {
+   "makro": {
+    "kcal": 389,
+    "p": 15.0,
+    "c": 55.2,
+    "f": 10.0
+   },
+   "hozz": [
+    "60 g zabpehely",
+    "4 szem friss szilva (összenyomkodva/villával összetörve)",
+    "1 csipet fahéj",
+    "Kevés víz a lazításhoz",
+    "100 g hideg görög joghurt (tálaláshoz)"
+   ],
+   "lep": [
+    "Melegítsd elő a sütőt 180 °C-ra.",
+    "Egy kis hőálló tálban keverd össze a 60 g zabpelyhet, az összenyomkodott szilvát, a fahéjat és egy pici vizet, hogy nedves masszát kapj.",
+    "Süsd a sütőben kb. 15–20 percig, amíg a teteje enyhén megpirul.",
+    "Vedd ki a sütőből, és kanalazd a tetejére a 100 g hideg görög joghurtot."
+   ]
+  },
+  "a2": {
+   "makro": {
+    "kcal": 315,
+    "p": 12.7,
+    "c": 42.3,
+    "f": 8.9
+   },
+   "hozz": [
+    "45 g zabpehely",
+    "3 szem friss szilva (összenyomkodva)",
+    "1 csipet fahéj",
+    "Pici víz",
+    "100 g hideg görög joghurt (tálaláshoz)"
+   ],
+   "lep": [
+    "Melegítsd elő a sütőt 180 °C-ra.",
+    "Keverd össze a 45 g zabpelyhet, az összenyomkodott szilvát, a fahéjat és a pici vizet egy kis sütőtálban.",
+    "Süsd 15–20 percig, amíg megszilárdul.",
+    "Tálaláskor tegyél a tetejére 100 g hideg görög joghurtot."
+   ]
+  }
+ },
+ {
+  "id": "r3",
+  "nev": "Sonkás-paradicsomos rántotta",
+  "kat": "Reggeli",
+  "perc": 10,
+  "megj": "Fehérjedús, kiadós reggeli. Teljesen szénhidrátszegény reggeli verzió.",
+  "a1": {
+   "makro": {
+    "kcal": 425,
+    "p": 34.5,
+    "c": 21.4,
+    "f": 21.7
+   },
+   "hozz": [
+    "3 db tojás",
+    "60 g jó minőségű sonka (kockázva vagy csíkozva)",
+    "1–2 db friss paradicsom (szeletelve)",
+    "1 szelet teljes kiőrlésű kenyér",
+    "Pici olaj a serpenyő kenéséhez"
+   ],
+   "lep": [
+    "Egy serpenyőt enyhén kiolajozunk és átpirítjuk benne a 60 g kockázott sonkát.",
+    "A 3 tojást egy tálban felverjük egy csipet sóval, majd a sonkára öntjük.",
+    "Lassú tűzön, folyamatosan kevergetve krémes rántottát sütünk.",
+    "Friss paradicsomszeletekkel és 1 szelet teljes kiőrlésű kenyérrel tálaljuk."
+   ]
+  },
+  "a2": {
+   "makro": {
+    "kcal": 248,
+    "p": 22.7,
+    "c": 5.8,
+    "f": 15.0
+   },
+   "hozz": [
+    "2 db tojás",
+    "50 g sonka",
+    "1 db friss paradicsom",
+    "Pici olaj a serpenyő kenéséhez"
+   ],
+   "lep": [
+    "Pirítsd meg az 50 g kockázott sonkát a serpenyőben.",
+    "Öntsd rá a 2 felvert tojást, és süss krémes rántottát.",
+    "1 friss paradicsommal tálald. *(Kenyér nélkül!)*"
+   ]
+  }
+ },
+ {
+  "id": "r4",
+  "nev": "Tükörtojás sonkával és paradicsommal",
+  "kat": "Reggeli",
+  "perc": 10,
+  "megj": "",
+  "a1": {
+   "makro": {
+    "kcal": 436,
+    "p": 35.1,
+    "c": 23.5,
+    "f": 21.8
+   },
+   "hozz": [
+    "3 db tojás",
+    "3 szelet sonka",
+    "2 db friss paradicsom",
+    "1 szelet teljes kiőrlésű kenyér"
+   ],
+   "lep": [
+    "Egy serpenyőben átsütjük a 3 szelet sonkát.",
+    "A sonkák mellé vagy tetejére ráütjük a 3 tojást, és ízlés szerinti keménységűre sütjük a tükörtojásokat.",
+    "A szeletelt friss paradicsommal és 1 szelet teljes kiőrlésű kenyérrel fogyasztjuk."
+   ]
+  },
+  "a2": {
+   "makro": {
+    "kcal": 215,
+    "p": 21.2,
+    "c": 6.7,
+    "f": 11.7
+   },
+   "hozz": [
+    "2 db tojás",
+    "2 szelet sonka",
+    "1 nagy paradicsom"
+   ],
+   "lep": [
+    "Süsd át a 2 szelet sonkát a serpenyőben.",
+    "Üsd rá a 2 tojást és süsd készre a tükörtojásokat.",
+    "Tálald 1 nagy szeletelt paradicsommal. *(Kenyér nélkül!)*"
+   ]
+  }
+ },
+ {
+  "id": "r5",
+  "nev": "Reggeli sonkatál",
+  "kat": "Reggeli",
+  "perc": 15,
+  "megj": "",
+  "a1": {
+   "makro": {
+    "kcal": 348,
+    "p": 29.0,
+    "c": 24.9,
+    "f": 13.9
+   },
+   "hozz": [
+    "2 db főtt tojás",
+    "60 g sonka",
+    "Friss paradicsom, uborka, paprika (tetszőleges mennyiségben)",
+    "1 szelet teljes kiőrlésű kenyér"
+   ],
+   "lep": [
+    "Főzd meg a 2 tojást keményre (kb. 8–10 perc forrástól számítva), majd hámozd meg.",
+    "Rendezd tálra a 60 g sonkát, a félbevágott főtt tojásokat és a felszeletelt friss zöldségeket.",
+    "1 szelet teljes kiőrlésű kenyérrel fogyaszd."
+   ]
+  },
+  "a2": {
+   "makro": {
+    "kcal": 230,
+    "p": 23.2,
+    "c": 7.3,
+    "f": 12.1
+   },
+   "hozz": [
+    "2 db főtt tojás",
+    "50 g sonka",
+    "Friss paradicsom és uborka"
+   ],
+   "lep": [
+    "Főzz meg 2 tojást keményre.",
+    "Tálald az 50 g sonkával, valamint frissen szeletelt paradicsommal és uborkával. *(Kenyér nélkül!)*"
+   ]
+  }
+ },
+ {
+  "id": "r6",
+  "nev": "Sült csirkeszárny csöves kukoricával és paradicsomsalátával",
+  "kat": "Ebéd / Vacsora",
+  "perc": 50,
+  "megj": "",
+  "a1": {
+   "makro": {
+    "kcal": 522,
+    "p": 39.7,
+    "c": 37.2,
+    "f": 24.6
+   },
+   "hozz": [
+    "kb. 250 g csirkeszárny (kb. 4 db)",
+    "Só, bors, fűszerpaprika, csirke fűszerkeverék",
+    "1 cső főtt kukorica",
+    "Friss paradicsomsaláta (2-3 paradicsom, kevés só, pici ecet/citromlé)"
+   ],
+   "lep": [
+    "A csirkeszárnyakat tisztítsd meg, töröld szárazra, majd fűszerezd be sóval, borssal, fűszerpaprikával.",
+    "Sütőben 200 °C-on kb. 35–40 perc alatt süsd aranybarnára és ropogósra.",
+    "A csöves kukoricát sós vízben főzd puhára.",
+    "Szeleteld fel a paradicsomot a salátához, és a sült szárnyakkal, valamint a kukoricával tálald."
+   ]
+  },
+  "a2": {
+   "makro": {
+    "kcal": 446,
+    "p": 32.8,
+    "c": 35.5,
+    "f": 20.1
+   },
+   "hozz": [
+    "kb. 200 g csirkeszárny (kb. 3–4 db)",
+    "Só, bors, fűszerpaprika",
+    "1 cső főtt kukorica",
+    "Friss paradicsomsaláta"
+   ],
+   "lep": [
+    "Fűszerezd be a csirkeszárnyakat sóval, borssal, fűszerpaprikával.",
+    "Süsd 200 °C-os sütőben ropogósra (kb. 35 perc).",
+    "Tálald 1 cső főtt kukoricával és friss paradicsomsalátával."
+   ]
+  }
+ },
+ {
+  "id": "r7",
+  "nev": "Darált húsos rakott cukkini & borsó",
+  "kat": "Ebéd / Vacsora",
+  "perc": 45,
+  "megj": "Köret és rizs nélkül készítendő, nagyon alacsony szénhidráttartalmú, laktató ebéd.",
+  "a1": {
+   "makro": {
+    "kcal": 446,
+    "p": 53.8,
+    "c": 18.9,
+    "f": 15.3
+   },
+   "hozz": [
+    "200 g sovány darált hús (marha vagy pulyka)",
+    "80 g zöldborsó",
+    "1-2 db cukkini (szeletelve)",
+    "2-3 ek. görög joghurt",
+    "Só, bors, fokhagyma, zöldfűszerek"
+   ],
+   "lep": [
+    "A 200 g darált húst egy serpenyőben sóval, borssal, fokhagymával pirítsd át teljesen.",
+    "Egy kis tepsiben vagy jenaiban rétegezd a felszeletelt cukkinit, a pirított darált húst és a 80 g zöldborsót.",
+    "A tetejét kend meg 2-3 evőkanál görög joghurttal.",
+    "190 °C-os sütőben süsd kb. 25–30 percig, amíg a cukkini megpuhul és a joghurt átpirul."
+   ]
+  },
+  "a2": {
+   "makro": {
+    "kcal": 332,
+    "p": 40.2,
+    "c": 13.8,
+    "f": 11.6
+   },
+   "hozz": [
+    "150 g sovány darált hús",
+    "50 g zöldborsó",
+    "1-2 db cukkini (szeletelve)",
+    "2 ek görög joghurt",
+    "Só, bors, fűszerek"
+   ],
+   "lep": [
+    "Pirítsd át a 150 g darált húst fűszerekkel.",
+    "Rétegezd a cukkinit, a húst és az 50 g zöldborsót egy kis tepsiben.",
+    "Kend meg a tetejét 2 evőkanál görög joghurttal, és süsd 190 °C-on 25–30 percig."
+   ]
+  }
+ },
+ {
+  "id": "r8",
+  "nev": "Pirított csirkemell csíkok zöldborsóval és kukoricával",
+  "kat": "Ebéd / Vacsora",
+  "perc": 20,
+  "megj": "",
+  "a1": {
+   "makro": {
+    "kcal": 314,
+    "p": 47.5,
+    "c": 19.8,
+    "f": 4.0
+   },
+   "hozz": [
+    "180 g csirkemell filé (csíkokra vágva)",
+    "100 g párolt zöldborsó és csemegekukorica vegyesen (vagy 1 főtt csöves kukorica + borsó)",
+    "Só, bors, zöldfűszerek",
+    "Friss paradicsomsaláta"
+   ],
+   "lep": [
+    "A csirkemell csíkokat fűszerezd sóval, borssal, zöldfűszerekkel, majd egy tapadásmentes serpenyőben pirítsd készre.",
+    "Keverd hozzá a párolt zöldborsót és kukoricát (vagy tálald mellé a főtt kukoricát és borsót).",
+    "Frissen szeletelt paradicsomsalátával tálald."
+   ]
+  },
+  "a2": {
+   "makro": {
+    "kcal": 265,
+    "p": 39.8,
+    "c": 17.2,
+    "f": 3.3
+   },
+   "hozz": [
+    "150 g csirkemell filé (csíkokra vágva)",
+    "80 g párolt zöldborsó és csemegekukorica vegyesen (vagy 1 főtt csöves kukorica + borsó)",
+    "Friss paradicsomsaláta"
+   ],
+   "lep": [
+    "Pirítsd meg a fűszerezett csirkemell csíkokat serpenyőben.",
+    "Keverd hozzá a párolt zöldborsót és kukoricát.",
+    "Tálald friss paradicsomsalátával."
+   ]
+  }
+ },
+ {
+  "id": "r9",
+  "nev": "Darált húsos-kukoricás ragu cukkini- vagy karfiolágyon",
+  "kat": "Ebéd / Vacsora",
+  "perc": 25,
+  "megj": "",
+  "a1": {
+   "makro": {
+    "kcal": 416,
+    "p": 49.9,
+    "c": 22.0,
+    "f": 12.6
+   },
+   "hozz": [
+    "200 g sovány darált hús",
+    "80 g fagyasztott kukorica és borsó vegyesen",
+    "100 g pasztírozott paradicsom / paradicsomszósz",
+    "Só, bors, bazsalikom, oregano",
+    "Cukkini (spirálozva/szeletelve) vagy párolt karfiol köretként"
+   ],
+   "lep": [
+    "A darált húst pirítsd fehéredésig egy serpenyőben.",
+    "Öntsd hozzá a paradicsomszószt, ízesítsd sóval, borssal, bazsalikommal és oregánóval.",
+    "Add hozzá a 80 g kukoricát és borsót, majd kis lángon főzd össze 10–12 perc alatt.",
+    "Tálald párolt cukkiniszeleteken/cukkinitésztán vagy párolt karfiolágyon."
+   ]
+  },
+  "a2": {
+   "makro": {
+    "kcal": 322,
+    "p": 38.1,
+    "c": 18.1,
+    "f": 9.6
+   },
+   "hozz": [
+    "150 g sovány darált hús",
+    "50 g fagyasztott kukorica és borsó",
+    "Paradicsomszósz",
+    "Párolt cukkini vagy karfiol köretként"
+   ],
+   "lep": [
+    "Pirítsd meg a 150 g darált húst, öntsd rá a paradicsomszószt.",
+    "Add hozzá az 50 g kukoricát és borsót, főzd össze.",
+    "Tálald párolt cukkini- vagy karfiolágyon."
+   ]
+  }
+ },
+ {
+  "id": "r10",
+  "nev": "Darált hússal és borsóval töltött kaliforniai paprika (vagy cukkini)",
+  "kat": "Ebéd / Vacsora",
+  "perc": 45,
+  "megj": "",
+  "a1": {
+   "makro": {
+    "kcal": 409,
+    "p": 48.4,
+    "c": 23.0,
+    "f": 12.2
+   },
+   "hozz": [
+    "1,5–2 nagy db kaliforniai paprika",
+    "200 g sovány darált hús",
+    "Zöldborsó (a raguba keverve)",
+    "Hagymás-fűszeres alappor vagy só, bors, pirospaprika, fokhagyma"
+   ],
+   "lep": [
+    "A darált húst dinszteld meg a fűszerekkel és a zöldborsóval egy serpenyőben.",
+    "A kaliforniai paprikákat vágd félbe vagy fejezd le, és magozd ki.",
+    "Töltsd meg a paprikákat a fűszeres darált húsos-borsós keverékkel.",
+    "Helyezd sütőtálba, és 180 °C-on süsd kb. 30–35 percig, amíg a paprika megpuhul."
+   ]
+  },
+  "a2": {
+   "makro": {
+    "kcal": 295,
+    "p": 36.0,
+    "c": 14.7,
+    "f": 9.0
+   },
+   "hozz": [
+    "1 nagy kaliforniai paprika (vagy cukkini)",
+    "150 g sovány darált hús",
+    "Zöldborsó",
+    "Fűszerek"
+   ],
+   "lep": [
+    "Dinszteld meg a 150 g darált húst a borsóval és fűszerekkel.",
+    "Töltsd meg vele a félbevágott paprikát vagy cukkinit.",
+    "Süsd 180 °C-on kb. 30 percig."
+   ]
+  }
+ },
+ {
+  "id": "r11",
+  "nev": "Sütőben sült darált húsgolyók borsóval és kukoricával",
+  "kat": "Ebéd / Vacsora",
+  "perc": 35,
+  "megj": "",
+  "a1": {
+   "makro": {
+    "kcal": 408,
+    "p": 49.0,
+    "c": 20.4,
+    "f": 12.4
+   },
+   "hozz": [
+    "200 g sovány darált hús",
+    "Só, bors, fokhagyma, kömény, fűszerpaprika",
+    "Párolt zöldborsó és fagyasztott csemegekukorica köretnek"
+   ],
+   "lep": [
+    "A 200 g darált húst fűszerezd sóval, borssal, zúzott fokhagymával és fűszerpaprikával.",
+    "Formázz belőle kis golyókat, majd sütőpapírral bélelt tepsiben 190 °C-on süsd készre kb. 20–25 perc alatt.",
+    "Köretként kínálj mellé párolt zöldborsót és fagyasztott csemegekukoricát."
+   ]
+  },
+  "a2": {
+   "makro": {
+    "kcal": 306,
+    "p": 36.7,
+    "c": 15.3,
+    "f": 9.3
+   },
+   "hozz": [
+    "150 g sovány darált hús",
+    "Só, bors, fokhagyma, fűszerpaprika",
+    "Párolt zöldborsó és fagyasztott kukorica köretnek"
+   ],
+   "lep": [
+    "Fűszerezd a 150 g darált húst, formázz golyókat.",
+    "Süsd sütőben 190 °C-on 20–25 percig.",
+    "Tálald párolt borsóval és kukoricával."
+   ]
+  }
+ },
+ {
+  "id": "r12",
+  "nev": "Sonkás-tojásos saláta",
+  "kat": "Ebéd / Vacsora",
+  "perc": 20,
+  "megj": "",
+  "a1": {
+   "makro": {
+    "kcal": 430,
+    "p": 36.5,
+    "c": 29.1,
+    "f": 17.5
+   },
+   "hozz": [
+    "2 db főtt tojás",
+    "80 g jó minőségű sonka (kockázva)",
+    "Nagy adag friss paradicsom, zöldsaláta, uborka, paprika",
+    "Görög joghurtos öntet (optional: 2-3 ek görög joghurt, só, bors, zöldfűszerek)",
+    "1 szelet teljes kiőrlésű kenyér"
+   ],
+   "lep": [
+    "Főzd meg a 2 tojást keményre, hámozd meg és szeleteld fel.",
+    "Vágd kockákra a 80 g sonkát.",
+    "Egy nagy tálban keverd össze a friss zöldsalátát, paradicsomot, uborkát és paprikát.",
+    "Halmozd rá a sonkát és a tojást, locsold meg görög joghurtos öntettel, és 1 szelet teljes kiőrlésű kenyérrel kísérve fogyaszd."
+   ]
+  },
+  "a2": {
+   "makro": {
+    "kcal": 272,
+    "p": 26.0,
+    "c": 9.2,
+    "f": 14.4
+   },
+   "hozz": [
+    "2 db főtt tojás (vagy 1 főtt tojás + 50–60 g sonka)",
+    "50 g sonka",
+    "Nagy adag friss paradicsom, zöldsaláta",
+    "Görög joghurtos öntet"
+   ],
+   "lep": [
+    "Szeleteld fel a főtt tojásokat és vágd kockákra a sonkát.",
+    "Keverd össze a friss zöldsalátával és paradicsommal.",
+    "Locsold meg görög joghurtos öntettel. *(Kenyér nélkül!)*"
+   ]
+  }
+ },
+ {
+  "id": "r13",
+  "nev": "Szardíniás (vagy tonhalas / csirkemelles) saláta",
+  "kat": "Ebéd / Vacsora",
+  "perc": 10,
+  "megj": "",
+  "a1": {
+   "makro": {
+    "kcal": 395,
+    "p": 30.8,
+    "c": 30.9,
+    "f": 14.5
+   },
+   "hozz": [
+    "1 doboz szardínia (vagy tonhal konzerv)",
+    "Friss paradicsom, zöldsaláta, uborka",
+    "Optional: 80 g párolt kukorica és borsó",
+    "1 szelet teljes kiőrlésű kenyér"
+   ],
+   "lep": [
+    "Csepegtesd le a szardíniát (vagy tonhalat).",
+    "Vágd fel a friss paradicsomot és készíts elő egy nagy adag zöldsalátát.",
+    "Halmozd a halat a zöldségekre (ha meleg köretet szeretnél, a 80g párolt kukoricát-borsót is add hozzá).",
+    "1 szelet teljes kiőrlésű kenyérrel fogyaszd."
+   ]
+  },
+  "a2": {
+   "makro": {
+    "kcal": 279,
+    "p": 23.7,
+    "c": 6.2,
+    "f": 17.6
+   },
+   "hozz": [
+    "1 doboz szardínia (vagy tonhal konzerv / 150 g csirkemell)",
+    "Friss paradicsom, zöldsaláta",
+    "1 tk olívaolaj"
+   ],
+   "lep": [
+    "Csepegtesd le a halat.",
+    "Halmozd a friss zöldsalátára és paradicsomra.",
+    "Locsold meg 1 teáskanál olívaolajjal. *(Kenyér nélkül!)*"
+   ]
+  }
+ },
+ {
+  "id": "r14",
+  "nev": "Grillezett csirkemell fokhagymás-joghurtos öntettel",
+  "kat": "Ebéd / Vacsora",
+  "perc": 20,
+  "megj": "",
+  "a1": {
+   "makro": {
+    "kcal": 276,
+    "p": 46.4,
+    "c": 8.1,
+    "f": 5.9
+   },
+   "hozz": [
+    "180 g csirkemell filé",
+    "2-3 ek görög joghurt",
+    "1 gerezd zúzott fokhagyma, só, bors",
+    "Friss paradicsom és zöldsaláta",
+    "1 szelet teljes kiőrlésű kenyér"
+   ],
+   "lep": [
+    "A 180 g csirkemellet fűszerezd sóval, borssal, és grillserpenyőben süsd készre mindkét oldalát.",
+    "Készítsd el az öntetet: a görög joghurtot keverd össze a zúzott fokhagymával és egy csipet sóval.",
+    "Tálald a csirkemellet friss paradicsommal és salátával, meglocsolva a fokhagymás öntettel, 1 szelet kenyér kíséretében."
+   ]
+  },
+  "a2": {
+   "makro": {
+    "kcal": 235,
+    "p": 38.9,
+    "c": 7.7,
+    "f": 4.9
+   },
+   "hozz": [
+    "150 g csirkemell filé",
+    "Görög joghurtos-fokhagymás öntet (2 ek görög joghurt, fokhagyma)",
+    "Friss paradicsom és saláta"
+   ],
+   "lep": [
+    "Süsd meg a 150 g csirkemellet grillserpenyőben.",
+    "Keverd össze a görög joghurtot zúzott fokhagymával.",
+    "Tálald a csirkét friss salátával és paradicsommal, az öntettel meglocsolva. *(Kenyér nélkül!)*"
+   ]
+  }
+ },
+ {
+  "id": "s15",
+  "nev": "Zabfalatkeksz + főtt tojás",
+  "kat": "Kisétkezés",
+  "perc": 15,
+  "megj": "",
+  "a1": {
+   "makro": {
+    "kcal": 258,
+    "p": 14.8,
+    "c": 17.6,
+    "f": 14.4
+   },
+   "hozz": [
+    "2 db zabfalatkeksz + 2 db keményre főtt tojás"
+   ],
+   "lep": []
+  },
+  "a2": {
+   "makro": {
+    "kcal": 186,
+    "p": 8.5,
+    "c": 17.2,
+    "f": 9.4
+   },
+   "hozz": [
+    "2 db zabfalatkeksz + 1 db főtt tojás"
+   ],
+   "lep": []
+  }
+ },
+ {
+  "id": "s16",
+  "nev": "Zabfalatkeksz + gyümölcs",
+  "kat": "Kisétkezés",
+  "perc": 5,
+  "megj": "Csak az 1800 kcal-os keretben szerepel.",
+  "a1": {
+   "makro": {
+    "kcal": 208,
+    "p": 2.7,
+    "c": 38.4,
+    "f": 4.8
+   },
+   "hozz": [
+    "2 db zabfalatkeksz + 1 db alma (180 g)"
+   ],
+   "lep": []
+  },
+  "a2": null
+ },
+ {
+  "id": "s17",
+  "nev": "Görög joghurt szilvával",
+  "kat": "Kisétkezés",
+  "perc": 5,
+  "megj": "",
+  "a1": {
+   "makro": {
+    "kcal": 202,
+    "p": 9.7,
+    "c": 19.7,
+    "f": 8.5
+   },
+   "hozz": [
+    "150 g görög joghurt + 3-4 szem friss szilva (140 g)"
+   ],
+   "lep": []
+  },
+  "a2": {
+   "makro": {
+    "kcal": 193,
+    "p": 9.5,
+    "c": 17.7,
+    "f": 8.5
+   },
+   "hozz": [
+    "150 g görög joghurt + 3 szem szilva (120 g), ízlés szerint fahéjjal"
+   ],
+   "lep": []
+  }
+ },
+ {
+  "id": "s18",
+  "nev": "Tojás zöldséggel",
+  "kat": "Kisétkezés",
+  "perc": 15,
+  "megj": "Csak az 1800 kcal-os keretben szerepel.",
+  "a1": {
+   "makro": {
+    "kcal": 162,
+    "p": 13.5,
+    "c": 3.8,
+    "f": 10.2
+   },
+   "hozz": [
+    "2 db főtt tojás + 150 g kígyóuborka vagy kaliforniai paprika"
+   ],
+   "lep": []
+  },
+  "a2": null
+ },
+ {
+  "id": "s19",
+  "nev": "Sima görög joghurt",
+  "kat": "Kisétkezés",
+  "perc": 5,
+  "megj": "",
+  "a1": {
+   "makro": {
+    "kcal": 138,
+    "p": 8.7,
+    "c": 5.7,
+    "f": 8.2
+   },
+   "hozz": [
+    "150 g görög joghurt magában vagy fahéjjal"
+   ],
+   "lep": []
+  },
+  "a2": {
+   "makro": {
+    "kcal": 115,
+    "p": 7.2,
+    "c": 4.8,
+    "f": 6.9
+   },
+   "hozz": [
+    "100–150 g görög joghurt (125 g-mal számolva)"
+   ],
+   "lep": []
+  }
+ },
+ {
+  "id": "s20",
+  "nev": "Futás előtti uzsonna",
+  "kat": "Kisétkezés",
+  "perc": 15,
+  "megj": "Csak az 1450 kcal-os keretben szerepel.",
+  "a1": null,
+  "a2": {
+   "makro": {
+    "kcal": 105,
+    "p": 7.0,
+    "c": 6.8,
+    "f": 5.2
+   },
+   "hozz": [
+    "1 db főtt tojás + kígyóuborka vagy 1 szál sárgarépa (80 g)"
+   ],
+   "lep": []
+  }
+ },
+ {
+  "id": "s21",
+  "nev": "Zabfalatkeksz tízóraira",
+  "kat": "Kisétkezés",
+  "perc": 5,
+  "megj": "Csak az 1450 kcal-os keretben szerepel.",
+  "a1": null,
+  "a2": {
+   "makro": {
+    "kcal": 169,
+    "p": 3.0,
+    "c": 28.8,
+    "f": 4.6
+   },
+   "hozz": [
+    "2 db zabfalatkeksz + 3 szem szilva (120 g)"
+   ],
+   "lep": []
+  }
+ }
+];
+
+const KEYS = { fav: 'recepttar:favs', own: 'recepttar:own', etrend: 'recepttar:etrend', oldplan: 'recepttar:plan' };
+const mem = {};
+
+/* =====================================================================
+   TAROLASI RETEGEK, elsobbsegi sorrendben:
+   1) window.storage  -- letezik Claude.ai artifacteken belul
+   2) Firebase Realtime Database -- ha be van allitva, tobb eszkoz kozott is szinkronizal
+   3) localStorage -- mindig mukodik, de csak ezen a bongeszon/eszkozon
+
+   A Firebase hasznalatahoz toltsd ki a FIREBASE_CONFIG objektumot a sajat,
+   ingyenes Firebase projekted adataival. Amig ures/placeholder marad,
+   az app automatikusan localStorage-ot hasznal -- Firebase nelkul is mukodik.
+   ===================================================================== */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAfnvh86QsfKZrw_If_3usKBm-EaIaFgmY",
+  authDomain: "recepttar-b6b52.firebaseapp.com",
+  databaseURL: "https://recepttar-b6b52-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "recepttar-b6b52",
+};
+
+const hasClaudeStorage = () => typeof window.storage !== 'undefined' && window.storage
+  && typeof window.storage.get === 'function';
+const firebaseConfigured = () => FIREBASE_CONFIG.apiKey && !FIREBASE_CONFIG.apiKey.startsWith('IDE_');
+
+let fbAuth = null, fbDb = null, fbUser = null;
+if (firebaseConfigured() && typeof firebase !== 'undefined') {
+  try {
+    firebase.initializeApp(FIREBASE_CONFIG);
+    fbAuth = firebase.auth();
+    fbDb = firebase.database();
+  } catch (e) { console.warn('Firebase init sikertelen:', e); }
+}
+
+async function load(k, fb) {
+  if (hasClaudeStorage()) {
+    try { const r = await window.storage.get(k); return r ? JSON.parse(r.value) : fb; }
+    catch (e) { /* meg nincs elmentve -- essunk at a kovetkezo retegre */ }
+  }
+  if (fbDb && fbUser) {
+    try {
+      const snap = await fbDb.ref(`users/${fbUser.uid}/${k}`).once('value');
+      const v = snap.val();
+      if (v !== null && v !== undefined) return v;
+    } catch (e) { console.warn('Firebase olvasás sikertelen:', e); }
+  }
+  try { const v = localStorage.getItem(k); return v !== null ? JSON.parse(v) : fb; }
+  catch (e) { return (k in mem) ? mem[k] : fb; }
+}
+async function save(k, v) {
+  mem[k] = v;
+  if (hasClaudeStorage()) {
+    try { await window.storage.set(k, JSON.stringify(v)); return; } catch (e) {}
+  }
+  try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {}
+  if (fbDb && fbUser) {
+    try { await fbDb.ref(`users/${fbUser.uid}/${k}`).set(v); } catch (e) { console.warn('Firebase mentés sikertelen:', e); }
+  }
+}
+
+/* belepes utan: ha a felhoben mar van adat, az a mervado; ha ures, feltoltjuk vele az eddigi helyi allapotot */
+async function syncAfterSignIn(user) {
+  fbUser = user;
+  for (const k of [KEYS.fav, KEYS.own, KEYS.etrend]) {
+    const fallback = k === KEYS.etrend ? {} : [];
+    try {
+      const snap = await fbDb.ref(`users/${user.uid}/${k}`).once('value');
+      const remote = snap.val();
+      if (remote !== null && remote !== undefined) {
+        localStorage.setItem(k, JSON.stringify(remote));
+      } else {
+        const local = await load(k, fallback);
+        await fbDb.ref(`users/${user.uid}/${k}`).set(local);
+      }
+    } catch (e) { console.warn('Szinkronizálás sikertelen:', e); }
+  }
+  favs = await load(KEYS.fav, []);
+  own = await load(KEYS.own, []);
+  own.forEach(r => { if (!r.slots) r.slots = slotsOf(r); });
+  etrend = await load(KEYS.etrend, {}) || {};
+  drawNav(); drawGrid(); drawWeek(); drawCal(); drawBottom();
+  drawAccount();
+}
+
+/* ---------- alapok ---------- */
+const FRAMES = [{ k: 'a1', cel: 1800 }, { k: 'a2', cel: 1450 }];
+const SLOTS = [
+  { k: 'reggeli', n: 'Reggeli' }, { k: 'ebed', n: 'Ebéd' },
+  { k: 'vacsora', n: 'Vacsora' }, { k: 'kis', n: 'Kisétkezés' }
+];
+const SLOTNEV = Object.fromEntries(SLOTS.map(s => [s.k, s.n]));
+const HO = ['január','február','március','április','május','június','július','augusztus','szeptember','október','november','december'];
+const NAPROVID = ['Hétfő','Kedd','Szerda','Csütörtök','Péntek','Szombat','Vasárnap'];
+
+/* az eredeti "Ebéd / Vacsora" kategoriabol ket onallo etkezes lesz */
+function slotsOf(r) {
+  if (r.slots) return r.slots;
+  if (r.kat === 'Reggeli') return ['reggeli'];
+  if (r.kat === 'Kisétkezés') return ['kis'];
+  return ['ebed', 'vacsora'];
+}
+DATA.forEach(r => { r.slots = slotsOf(r); });
+
+let filter = 'Mind', query = '', view = 'R';
+let favs = [], own = [], etrend = {};
+
+const el = id => document.getElementById(id);
+const num = n => Number(n).toFixed(1).replace('.', ',').replace(/,0$/, '');
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const all = () => DATA.concat(own);
+const get = id => all().find(r => r.id === id);
+const iso = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const ma = () => iso(new Date());
+const hetIdx = d => (d.getDay() + 6) % 7;
+function hetfoje(d) { const x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); x.setDate(x.getDate() - hetIdx(x)); return x; }
+const plusz = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+let hetKezd = hetfoje(new Date());   // a segedfuggvenyek utan, kulonben hetIdx meg nem letezik
+let calHo = new Date();
+const napja = key => etrend[key] || { reggeli: [], ebed: [], vacsora: [], kis: [] };
+const maxKcal = () => Math.max(...all().flatMap(r => FRAMES.map(f => r[f.k] ? r[f.k].makro.kcal : 0)), 1);
+
+function napOsszeg(key, fk) {
+  const n = napja(key);
+  const ids = SLOTS.flatMap(s => n[s.k] || []);
+  const items = ids.map(get).filter(r => r && r[fk]);
+  const t = items.reduce((a, r) => { const m = r[fk].makro;
+    return { kcal: a.kcal + m.kcal, p: a.p + m.p, c: a.c + m.c, f: a.f + m.f }; },
+    { kcal: 0, p: 0, c: 0, f: 0 });
+  t.n = items.length;
+  return t;
+}
+const vanNap = key => SLOTS.some(s => (napja(key)[s.k] || []).length);
+
+async function setSlot(key, slot, ids) {
+  const n = { ...napja(key) };
+  n[slot] = ids;
+  if (SLOTS.every(s => !(n[s.k] || []).length)) delete etrend[key]; else etrend[key] = n;
+  await save(KEYS.etrend, etrend);
+  drawWeek(); drawCal(); drawBottom(); drawGrid();
+}
+
+/* ---------- csík ---------- */
+function barHtml(m, max) {
+  const ep = m.p * 4, ec = m.c * 4, ef = m.f * 9;
+  return `<div class="rt-bar"><div style="width:${(m.kcal / max * 100).toFixed(1)}%">
+    <i class="kp" style="flex:${ep}"></i><i class="kc" style="flex:${ec}"></i><i class="kf" style="flex:${ef}"></i>
+  </div></div>`;
+}
+function macroSpan(m) {
+  return `<span class="rt-ms"><span><i class="mP">F</i>${num(m.p)}</span><span><i class="mC">Sz</i>${num(m.c)}</span><span><i class="mF">Zs</i>${num(m.f)}</span></span>`;
+}
+
+/* ---------- receptek nézet ---------- */
+function visible() {
+  const q = query.trim().toLowerCase();
+  return all().filter(r => {
+    const sl = slotsOf(r);
+    if (filter === 'Kedvencek') { if (!favs.includes(r.id)) return false; }
+    else if (filter !== 'Mind') { if (!sl.includes(filter)) return false; }
+    if (!q) return true;
+    return [r.nev, ...sl.map(s => SLOTNEV[s]), r.a1 ? r.a1.hozz.join(' ') : '', r.a2 ? r.a2.hozz.join(' ') : '']
+      .join(' ').toLowerCase().includes(q);
+  });
+}
+function drawNav() {
+  const opts = [{ k: 'Mind', n: 'Mind' }, ...SLOTS, { k: 'Kedvencek', n: 'Kedvencek' }];
+  el('nav').innerHTML = opts.map(o =>
+    `<button data-c="${o.k}" aria-pressed="${o.k === filter}">${esc(o.n)}${o.k === 'Kedvencek' && favs.length ? ' ' + favs.length : ''}</button>`
+  ).join('');
+}
+function katNev(r) { return slotsOf(r).map(s => SLOTNEV[s]).join(' · '); }
+
+function drawGrid() {
+  const rows = visible(), max = maxKcal();
+  el('count').textContent = `${rows.length} recept`;
+  if (!rows.length) {
+    el('grid').innerHTML = `<div class="rt-empty"><p>Erre nincs recept</p><small>Próbálj más keresőszót, vagy válts étkezést.</small></div>`;
+    return;
+  }
+  el('grid').innerHTML = rows.map(r => {
+    const fav = favs.includes(r.id);
+    const frames = FRAMES.map(f => {
+      const v = r[f.k];
+      if (!v) return `<p class="rt-nofr">Nincs ${f.cel} kcal-os változata.</p>`;
+      const m = v.makro;
+      return `<div class="rt-fr">
+        <div class="rt-fr-hd"><span class="rt-chip">${f.cel}</span>
+          <span class="rt-fr-k">${m.kcal}</span><span class="rt-fr-u">kcal</span>${macroSpan(m)}</div>
+        ${barHtml(m, max)}
+      </div>`;
+    }).join('');
+    return `<article class="rt-card">
+      <div class="rt-top">
+        <span class="rt-cat">${esc(katNev(r))}${r.own ? ' · saját' : ''}</span>
+        <span class="rt-min">${r.perc} perc</span>
+        <div class="rt-act">
+          <button class="${fav ? 'on' : ''}" data-fav="${r.id}" aria-pressed="${fav}" aria-label="Kedvenc" title="Kedvenc">${fav ? '★' : '☆'}</button>
+          <button data-quick="${r.id}" aria-label="Mai étrendhez" title="Mai étrendhez">+</button>
+        </div>
+      </div>
+      <button class="rt-open" data-open="${r.id}">
+        <h3 class="rt-name">${esc(r.nev)}</h3>
+      </button>
+      <div class="rt-tear"></div>
+      ${frames}
+    </article>`;
+  }).join('');
+}
+
+/* ---------- étrendterv ---------- */
+function drawWeek() {
+  const veg = plusz(hetKezd, 6);
+  const cim = hetKezd.getMonth() === veg.getMonth()
+    ? `${hetKezd.getFullYear()}. ${HO[hetKezd.getMonth()]} ${hetKezd.getDate()}—${veg.getDate()}.`
+    : `${HO[hetKezd.getMonth()]} ${hetKezd.getDate()}. — ${HO[veg.getMonth()]} ${veg.getDate()}.`;
+  el('wkTitle').textContent = cim;
+
+  el('week').innerHTML = [0,1,2,3,4,5,6].map(i => {
+    const d = plusz(hetKezd, i), key = iso(d), isMa = key === ma();
+    const n = napja(key);
+    const slots = SLOTS.map(s => {
+      const ids = n[s.k] || [];
+      return `<div class="rt-slot">
+        <p class="rt-label">${s.n}</p>
+        ${ids.length ? `<ul>${ids.map((id, ix) => {
+          const r = get(id); if (!r) return '';
+          const k1 = r.a1 ? r.a1.makro.kcal : null, k2 = r.a2 ? r.a2.makro.kcal : null;
+          return `<li><span>${esc(r.nev)}</span><span class="k">${k1 ?? '—'} / ${k2 ?? '—'}</span>
+            <button class="rt-rm" data-rm="${key}|${s.k}|${ix}" aria-label="Kivétel">×</button></li>`;
+        }).join('')}</ul>` : ''}
+        <button class="rt-addslot" data-add="${key}|${s.k}">+ ${s.n.toLowerCase()} hozzáadása</button>
+      </div>`;
+    }).join('');
+
+    const sum = FRAMES.map(f => {
+      const t = napOsszeg(key, f.k);
+      const tul = t.kcal > f.cel;
+      return `<div class="rt-dsum-row">
+          <span class="rt-chip">${f.cel}</span>
+          <b class="${tul ? 'rt-over' : ''}">${t.kcal}</b><s>kcal</s>
+          <em class="${tul ? 'rt-over' : ''}">${tul ? '+' + (t.kcal - f.cel) : (f.cel - t.kcal) + ' szabad'}</em>
+        </div>
+        <div class="rt-bar"><div style="width:${Math.min(t.kcal / f.cel, 1) * 100}%">
+          <i class="kp" style="flex:${t.p*4||1}"></i><i class="kc" style="flex:${t.c*4}"></i><i class="kf" style="flex:${t.f*9}"></i>
+        </div></div>`;
+    }).join('');
+
+    return `<div class="rt-dcard ${isMa ? 'ma' : ''}">
+      <div class="rt-dcard-hd"><b>${NAPROVID[i]}</b><s>${HO[d.getMonth()].slice(0,3)}. ${d.getDate()}.</s>
+        ${isMa ? '<span class="rt-mabadge">ma</span>' : ''}</div>
+      ${slots}
+      <div class="rt-dsum">${sum}</div>
+    </div>`;
+  }).join('');
+}
+
+/* recept-választó egy naphoz és étkezéshez */
+let pickCtx = null, pickQ = '';
+function openPick(key, slot) {
+  pickCtx = { key, slot }; pickQ = '';
+  renderPick();
+  el('scrim').classList.add('open');
+  const i = el('pq'); if (i) i.focus();
+}
+function renderPick() {
+  const { key, slot } = pickCtx;
+  const [y, mo, d] = key.split('-').map(Number);
+  const q = pickQ.trim().toLowerCase();
+  const lista = all().filter(r => slotsOf(r).includes(slot))
+    .filter(r => !q || r.nev.toLowerCase().includes(q) ||
+      (r.a1 && r.a1.hozz.join(' ').toLowerCase().includes(q)));
+  el('sheet').innerHTML = `
+    <button class="rt-close" id="x" aria-label="Bezárás">✕</button>
+    <div class="rt-sh">
+      <p class="rt-label">${HO[mo-1]} ${d}. · ${SLOTNEV[slot]}</p>
+      <h2 id="shname">Mit teszünk ide?</h2>
+      <div class="rt-field" style="margin-top:16px">
+        <input id="pq" type="search" placeholder="Keresés a ${lista.length} lehetőség között" value="${esc(pickQ)}" aria-label="Keresés">
+      </div>
+      ${lista.length ? `<ul class="rt-pick">${lista.map(r => {
+        const k1 = r.a1 ? r.a1.makro.kcal : null, k2 = r.a2 ? r.a2.makro.kcal : null;
+        return `<li><button data-put="${r.id}">
+          <span class="nm">${esc(r.nev)}</span>
+          <span class="kk">${k1 ?? '—'} / ${k2 ?? '—'} kcal</span></button></li>`;
+      }).join('')}</ul>` : `<p class="rt-hint" style="margin-top:14px">Nincs találat.</p>`}
+    </div>`;
+  const inp = el('pq');
+  inp.oninput = e => { pickQ = e.target.value; const p = inp.selectionStart; renderPick(); const n2 = el('pq'); n2.focus(); n2.setSelectionRange(p, p); };
+}
+
+/* ---------- naptár ---------- */
+function drawCal() {
+  const osszes = Object.keys(etrend).filter(vanNap);
+  el('calBadge').textContent = osszes.length;
+
+  const y = calHo.getFullYear(), mo = calHo.getMonth();
+  el('calTitle').textContent = `${y}. ${HO[mo]}`;
+  const db = new Date(y, mo + 1, 0).getDate(), elotte = hetIdx(new Date(y, mo, 1)), maS = ma();
+
+  let cells = '';
+  for (let i = 0; i < elotte; i++) cells += `<div class="rt-day blank"></div>`;
+  const honap = [];
+  for (let d = 1; d <= db; d++) {
+    const key = iso(new Date(y, mo, d)), isMa = key === maS;
+    if (!vanNap(key)) { cells += `<div class="rt-day empty ${isMa ? 'ma' : ''}"><span class="rt-day-n">${d}</span></div>`; continue; }
+    const t1 = napOsszeg(key, 'a1'), t2 = napOsszeg(key, 'a2');
+    honap.push({ t1, t2 });
+    cells += `<button class="rt-day has ${isMa ? 'ma' : ''}" data-day="${key}" aria-label="${d}. — ${t1.kcal} és ${t2.kcal} kcal">
+      <span class="rt-day-n">${d}</span>
+      <span class="rt-day-vals">
+        <span class="rt-day-v ${t1.kcal > 1800 ? 'ov' : 'in'}"><b>${t1.kcal}</b>1800</span>
+        <span class="rt-day-v ${t2.kcal > 1450 ? 'ov' : 'in'}"><b>${t2.kcal}</b>1450</span>
+      </span></button>`;
+  }
+  el('days').innerHTML = cells;
+
+  if (honap.length) {
+    const a1 = Math.round(honap.reduce((a, x) => a + x.t1.kcal, 0) / honap.length);
+    const a2 = Math.round(honap.reduce((a, x) => a + x.t2.kcal, 0) / honap.length);
+    const b1 = honap.filter(x => x.t1.kcal <= 1800).length;
+    el('calSum').innerHTML = `
+      <div><b>${honap.length}</b><u class="rt-label">nap ebben a hónapban</u></div>
+      <div><b>${a1}</b><u class="rt-label">átlag az 1800-as keretben</u></div>
+      <div><b>${a2}</b><u class="rt-label">átlag az 1450-as keretben</u></div>
+      <div><b>${b1} / ${honap.length}</b><u class="rt-label">1800 alatt maradt</u></div>`;
+  } else el('calSum').innerHTML = '';
+
+  el('calEmpty').innerHTML = osszes.length ? '' : `<div class="rt-cal-empty">
+    <p>Még nincs betervezett nap</p>
+    <small>Az Étrendterv fülön oszd be a heted — a napok itt jelennek meg előzményként.</small></div>`;
+}
+
+function openDay(key) {
+  const [y, mo, d] = key.split('-').map(Number);
+  const dt = new Date(y, mo - 1, d);
+  const n = napja(key);
+  const blokk = FRAMES.map(f => {
+    const t = napOsszeg(key, f.k), tul = t.kcal > f.cel;
+    return `<div class="rt-shfr">
+      <div class="rt-shfr-hd"><span class="rt-chip">${f.cel} kcal-os keret</span>
+        <span style="font-size:12.5px;color:${tul ? 'var(--tomato)' : 'var(--ink-60)'}">${tul ? (t.kcal - f.cel) + ' kcal-lal fölötte' : (f.cel - t.kcal) + ' kcal szabad'}</span></div>
+      <div class="rt-nums">
+        <div><b>${t.kcal}</b><u>kcal</u></div>
+        <div><b>${num(t.p)}<s>g</s></b><u><i class="kp"></i>fehérje</u></div>
+        <div><b>${num(t.c)}<s>g</s></b><u><i class="kc"></i>szénh.</u></div>
+        <div><b>${num(t.f)}<s>g</s></b><u><i class="kf"></i>zsír</u></div>
+      </div></div>`;
+  }).join('');
+  const lista = SLOTS.filter(s => (n[s.k] || []).length).map(s => `
+    <p class="rt-h3 rt-label">${s.n}</p>
+    <ul class="rt-ing">${n[s.k].map(id => { const r = get(id); if (!r) return '';
+      return `<li>${esc(r.nev)} <span style="color:var(--ink-30);font-size:12.5px">— ${r.a1 ? r.a1.makro.kcal : '—'} / ${r.a2 ? r.a2.makro.kcal : '—'} kcal</span></li>`;
+    }).join('')}</ul>`).join('');
+
+  el('sheet').innerHTML = `
+    <button class="rt-close" id="x" aria-label="Bezárás">✕</button>
+    <div class="rt-sh">
+      <p class="rt-label">${NAPROVID[hetIdx(dt)]}${key === ma() ? ' · ma' : ''}</p>
+      <h2 id="shname">${y}. ${HO[mo-1]} ${d}.</h2>
+      ${blokk}${lista}
+      <div class="rt-sh-act">
+        <button class="btn btn-p" data-week="${key}">Megnyitás az étrendben</button>
+        <button class="btn btn-d" data-delday="${key}">Nap kiürítése</button>
+      </div>
+    </div>`;
+  el('scrim').classList.add('open');
+  el('x').focus();
+}
+
+/* ---------- alsó sáv ---------- */
+function drawBottom() {
+  FRAMES.forEach((f, i) => {
+    const t = napOsszeg(ma(), f.k), tul = t.kcal > f.cel;
+    el('bfr' + (i + 1)).innerHTML = `
+      <div class="rt-bfr-r"><span class="rt-chip">${f.cel}</span>
+        <b class="${tul ? 'rt-over' : ''}">${t.kcal}</b><s>kcal</s>
+        <em class="${tul ? 'rt-over' : ''}">${tul ? '+' + (t.kcal - f.cel) : (f.cel - t.kcal) + ' szabad'}</em></div>
+      <div class="rt-bar"><div style="width:${Math.min(t.kcal / f.cel, 1) * 100}%">
+        <i class="kp" style="flex:${t.p*4||1}"></i><i class="kc" style="flex:${t.c*4}"></i><i class="kf" style="flex:${t.f*9}"></i>
+      </div></div>`;
+  });
+}
+
+/* ---------- recept lapja: mindkét keret ---------- */
+function openSheet(id) {
+  const r = get(id); if (!r) return;
+  const max = maxKcal();
+  const frBlokk = FRAMES.map(f => {
+    const v = r[f.k];
+    if (!v) return `<div class="rt-shfr"><div class="rt-shfr-hd"><span class="rt-chip">${f.cel} kcal-os keret</span></div>
+      <p class="rt-hint">Ehhez a kerethez nincs változat.</p></div>`;
+    const m = v.makro;
+    return `<div class="rt-shfr">
+      <div class="rt-shfr-hd"><span class="rt-chip">${f.cel} kcal-os keret</span></div>
+      <div class="rt-nums">
+        <div><b>${m.kcal}</b><u>kcal</u></div>
+        <div><b>${num(m.p)}<s>g</s></b><u><i class="kp"></i>fehérje</u></div>
+        <div><b>${num(m.c)}<s>g</s></b><u><i class="kc"></i>szénh.</u></div>
+        <div><b>${num(m.f)}<s>g</s></b><u><i class="kf"></i>zsír</u></div>
+      </div>
+      ${barHtml(m, max)}
+    </div>`;
+  }).join('');
+
+  const ing = `<p class="rt-h3 rt-label">Hozzávalók</p><div class="rt-two">
+    ${FRAMES.map(f => r[f.k] ? `<div><p class="rt-h4">${f.cel} kcal-os keret</p>
+      <ul class="rt-ing">${r[f.k].hozz.map(h => `<li>${esc(h)}</li>`).join('')}</ul></div>` : '').join('')}
+  </div>`;
+
+  const lep = FRAMES.filter(f => r[f.k] && r[f.k].lep.length).map(f =>
+    `<p class="rt-h3 rt-label">Elkészítés — ${f.cel} kcal-os keret</p>
+     <ol class="rt-steps">${r[f.k].lep.map(s => `<li>${esc(s)}</li>`).join('')}</ol>`).join('');
+
+  el('sheet').innerHTML = `
+    <button class="rt-close" id="x" aria-label="Bezárás">✕</button>
+    <div class="rt-sh">
+      <p class="rt-label">${esc(katNev(r))} · ${r.perc} perc</p>
+      <h2 id="shname">${esc(r.nev)}</h2>
+      ${frBlokk}${ing}${lep}
+      ${r.megj ? `<p class="rt-note">${esc(r.megj)}</p>` : ''}
+      <div class="rt-sh-act">
+        <button class="btn btn-p" data-quick="${r.id}">+ Mai étrendhez</button>
+        <button class="btn btn-s" data-fav="${r.id}">${favs.includes(r.id) ? '★ Kedvenc' : '☆ Kedvencnek'}</button>
+        ${r.own ? `<button class="btn btn-s" data-edit="${r.id}">Szerkesztés</button><button class="btn btn-d" data-del="${r.id}">Törlés</button>` : ''}
+      </div>
+    </div>`;
+  el('scrim').classList.add('open');
+  el('x').focus();
+}
+const closeSheet = () => el('scrim').classList.remove('open');
+
+/* ---------- szerkesztő ---------- */
+function openEditor(id) {
+  const r = id ? get(id) : null;
+  const f = (v, k) => (r && r[v] ? r[v].makro[k] : '');
+  const sl = r ? slotsOf(r).join(',') : 'ebed,vacsora';
+  const SLOPT = [['reggeli','Reggeli'],['ebed','Ebéd'],['vacsora','Vacsora'],['ebed,vacsora','Ebéd és vacsora'],['kis','Kisétkezés']];
+  el('sheet').innerHTML = `
+    <button class="rt-close" id="x" aria-label="Bezárás">✕</button>
+    <div class="rt-sh">
+      <p class="rt-label">${r ? 'Szerkesztés' : 'Új tétel'}</p>
+      <h2 id="shname">${r ? esc(r.nev) : 'Új recept'}</h2>
+      <div style="height:20px"></div>
+      <p class="rt-err" id="err" hidden></p>
+      <div class="rt-field"><label class="rt-label" for="f-nev">Recept neve</label>
+        <input id="f-nev" value="${r ? esc(r.nev) : ''}" placeholder="Tepsis csirke brokkolival"></div>
+      <div class="rt-2">
+        <div class="rt-field"><label class="rt-label" for="f-slot">Mikor eszed</label><select id="f-slot">
+          ${SLOPT.map(([k, n]) => `<option value="${k}" ${sl === k ? 'selected' : ''}>${n}</option>`).join('')}
+        </select></div>
+        <div class="rt-field"><label class="rt-label" for="f-perc">Összidő (perc)</label>
+          <input id="f-perc" type="number" min="0" value="${r ? r.perc : 20}"></div>
+      </div>
+      <div class="rt-field"><label class="rt-label" for="f-hozz">Hozzávalók — egy sorba egy</label>
+        <textarea id="f-hozz" placeholder="200 g csirkemell&#10;250 g brokkoli">${r && r.a1 ? esc(r.a1.hozz.join('\n')) : ''}</textarea></div>
+      <div class="rt-field"><label class="rt-label" for="f-lep">Elkészítés — egy sorba egy lépés</label>
+        <textarea id="f-lep" placeholder="Fűszerezd be a csirkét.&#10;Süsd 200 fokon 25 percig.">${r && r.a1 ? esc(r.a1.lep.join('\n')) : ''}</textarea></div>
+      <p class="rt-h3 rt-label">Makrók — 1800 kcal-os keret</p>
+      <div class="rt-4">
+        <div class="rt-field"><label class="rt-label" for="k1">kcal</label><input id="k1" type="number" min="0" value="${f('a1','kcal')}"></div>
+        <div class="rt-field"><label class="rt-label" for="p1">fehérje</label><input id="p1" type="number" min="0" step="0.1" value="${f('a1','p')}"></div>
+        <div class="rt-field"><label class="rt-label" for="c1">szénh.</label><input id="c1" type="number" min="0" step="0.1" value="${f('a1','c')}"></div>
+        <div class="rt-field"><label class="rt-label" for="z1">zsír</label><input id="z1" type="number" min="0" step="0.1" value="${f('a1','f')}"></div>
+      </div>
+      <p class="rt-h3 rt-label">Makrók — 1450 kcal-os keret</p>
+      <div class="rt-4">
+        <div class="rt-field"><label class="rt-label" for="k2">kcal</label><input id="k2" type="number" min="0" value="${f('a2','kcal')}"></div>
+        <div class="rt-field"><label class="rt-label" for="p2">fehérje</label><input id="p2" type="number" min="0" step="0.1" value="${f('a2','p')}"></div>
+        <div class="rt-field"><label class="rt-label" for="c2">szénh.</label><input id="c2" type="number" min="0" step="0.1" value="${f('a2','c')}"></div>
+        <div class="rt-field"><label class="rt-label" for="z2">zsír</label><input id="z2" type="number" min="0" step="0.1" value="${f('a2','f')}"></div>
+      </div>
+      <p class="rt-hint">A második keret elhagyható — ha üresen hagyod a kcal-t, a kártyán csak az 1800-as sor jelenik meg.</p>
+      <div class="rt-sh-act">
+        <button class="btn btn-p" id="dosave">${r ? 'Változások mentése' : 'Recept mentése'}</button>
+        <button class="btn btn-g" id="cancel">Mégsem</button>
+      </div>
+    </div>`;
+  el('scrim').classList.add('open');
+  el('f-nev').focus();
+  el('cancel').onclick = closeSheet;
+  el('dosave').onclick = async () => {
+    const nev = el('f-nev').value.trim();
+    if (!nev) return fail('Adj nevet a receptnek.');
+    if (!el('k1').value.trim()) return fail('Az 1800-as keret kalóriaértéke kell — enélkül nem tudom a csíkot kirajzolni.');
+    const hozz = el('f-hozz').value.split('\n').map(s => s.trim()).filter(Boolean);
+    const lep = el('f-lep').value.split('\n').map(s => s.trim()).filter(Boolean);
+    const mk = (k,p,c,z) => ({ kcal:+el(k).value||0, p:+el(p).value||0, c:+el(c).value||0, f:+el(z).value||0 });
+    const slots = el('f-slot').value.split(',');
+    const rec = { id: r ? r.id : 'o' + Date.now(), own: true, nev, slots,
+      kat: slots.map(s => SLOTNEV[s]).join(' / '), perc: +el('f-perc').value || 0, megj: '',
+      a1: { makro: mk('k1','p1','c1','z1'), hozz, lep },
+      a2: el('k2').value.trim() ? { makro: mk('k2','p2','c2','z2'), hozz, lep } : null };
+    own = r ? own.map(x => x.id === r.id ? rec : x) : own.concat([rec]);
+    await save(KEYS.own, own);
+    closeSheet(); drawGrid(); drawWeek(); drawBottom();
+  };
+  function fail(msg) { const e = el('err'); e.textContent = msg; e.hidden = false; }
+}
+
+/* ---------- fiók / bejelentkezés ---------- */
+function drawAccount() {
+  const dot = el('accDot'), label = el('accLabel');
+  if (fbUser) { dot.className = 'acc-dot-on'; label.textContent = 'Szinkronban'; }
+  else { dot.className = 'acc-dot-off'; label.textContent = 'Fiók'; }
+}
+
+function openAccount() {
+  if (!firebaseConfigured()) {
+    el('sheet').innerHTML = `
+      <button class="rt-close" id="x" aria-label="Bezárás">✕</button>
+      <div class="rt-sh">
+        <p class="rt-label">Több eszköz, ugyanaz az állapot</p>
+        <h2 id="shname">Szinkronizálás beállítása</h2>
+        <p style="margin-top:16px;font-size:14.5px;line-height:1.6">
+          Jelenleg az adataid csak ebben a böngészőben, ezen az eszközön mentődnek.
+          Ahhoz, hogy mobilon és Macen is ugyanazt lásd, be kell állítanod egy ingyenes
+          Firebase-projektet, és be kell másolnod a hozzáférési adatait a fájl elejére,
+          a <code>FIREBASE_CONFIG</code> objektumba. Kérdezz rá, és lépésről lépésre végigviszlek rajta.
+        </p>
+        <div class="rt-sh-act"><button class="btn btn-s" id="x2">Értem</button></div>
+      </div>`;
+    el('scrim').classList.add('open');
+    el('x2').onclick = closeSheet;
+    return;
+  }
+  if (fbUser) {
+    el('sheet').innerHTML = `
+      <button class="rt-close" id="x" aria-label="Bezárás">✕</button>
+      <div class="rt-sh">
+        <p class="rt-label">Fiók</p>
+        <h2 id="shname">Szinkronban vagy</h2>
+        <div class="rt-acc-row" style="margin-top:18px">
+          <div class="who"><b>${esc(fbUser.email || 'Bejelentkezve')}</b><span>Az adataid minden eszközön ugyanazok lesznek.</span></div>
+          <span class="rt-sync-badge rt-sync-on">Élő</span>
+        </div>
+        <div class="rt-sh-act"><button class="btn btn-d" id="signout">Kijelentkezés</button></div>
+      </div>`;
+    el('scrim').classList.add('open');
+    el('signout').onclick = async () => { await fbAuth.signOut(); fbUser = null; drawAccount(); closeSheet(); };
+    return;
+  }
+  renderAuthForm('signin');
+}
+
+function renderAuthForm(mode, msg) {
+  const isSignin = mode === 'signin';
+  el('sheet').innerHTML = `
+    <button class="rt-close" id="x" aria-label="Bezárás">✕</button>
+    <div class="rt-sh">
+      <p class="rt-label">Szinkronizálás</p>
+      <h2 id="shname">${isSignin ? 'Belépés' : 'Új fiók létrehozása'}</h2>
+      <p class="rt-err" id="authErr" ${msg ? '' : 'hidden'}>${msg ? esc(msg) : ''}</p>
+      <div class="rt-field" style="margin-top:16px"><label class="rt-label" for="authEmail">E-mail cím</label>
+        <input id="authEmail" type="email" placeholder="te@example.com" autocomplete="username"></div>
+      <div class="rt-field"><label class="rt-label" for="authPw">Jelszó</label>
+        <input id="authPw" type="password" placeholder="legalább 6 karakter" autocomplete="${isSignin ? 'current-password' : 'new-password'}"></div>
+      <div class="rt-sh-act">
+        <button class="btn btn-p" id="authGo">${isSignin ? 'Belépés' : 'Fiók létrehozása'}</button>
+        <button class="btn btn-g" id="authSwitch">${isSignin ? 'Nincs még fiókod? Regisztrálj' : 'Már van fiókod? Lépj be'}</button>
+      </div>
+    </div>`;
+  el('scrim').classList.add('open');
+  el('authEmail').focus();
+  el('authSwitch').onclick = () => renderAuthForm(isSignin ? 'signup' : 'signin');
+  el('authGo').onclick = async () => {
+    const email = el('authEmail').value.trim(), pw = el('authPw').value;
+    if (!email || !pw) return renderAuthForm(mode, 'Add meg az e-mail címed és a jelszavad.');
+    try {
+      const cred = isSignin
+        ? await fbAuth.signInWithEmailAndPassword(email, pw)
+        : await fbAuth.createUserWithEmailAndPassword(email, pw);
+      await syncAfterSignIn(cred.user);
+      closeSheet();
+    } catch (e) {
+      const hu = {
+        'auth/invalid-email': 'Érvénytelen e-mail cím.',
+        'auth/user-not-found': 'Nincs ilyen fiók — hozz létre egyet.',
+        'auth/wrong-password': 'Hibás jelszó.',
+        'auth/email-already-in-use': 'Ez az e-mail cím már foglalt — lépj be helyette.',
+        'auth/weak-password': 'A jelszó legalább 6 karakter legyen.',
+      }[e.code] || 'Hiba történt, próbáld újra.';
+      renderAuthForm(mode, hu);
+    }
+  };
+}
+
+/* ---------- nézetváltás ---------- */
+function setView(v) {
+  view = v;
+  [['R','tabR','viewR'],['P','tabP','viewP'],['C','tabC','viewC']].forEach(([k, t, w]) => {
+    el(t).setAttribute('aria-pressed', v === k);
+    el(w).hidden = v !== k;
+  });
+  if (v === 'P') drawWeek();
+  if (v === 'C') drawCal();
+}
+el('tabR').onclick = () => setView('R');
+el('tabP').onclick = () => setView('P');
+el('tabC').onclick = () => setView('C');
+el('q').oninput = e => { query = e.target.value; drawGrid(); };
+el('new').onclick = () => openEditor(null);
+el('nav').onclick = e => { const b = e.target.closest('[data-c]'); if (!b) return; filter = b.dataset.c; drawNav(); drawGrid(); };
+el('wprev').onclick = () => { hetKezd = plusz(hetKezd, -7); drawWeek(); };
+el('wnext').onclick = () => { hetKezd = plusz(hetKezd, 7); drawWeek(); };
+el('wtoday').onclick = () => { hetKezd = hetfoje(new Date()); drawWeek(); };
+el('cprev').onclick = () => { calHo = new Date(calHo.getFullYear(), calHo.getMonth() - 1, 1); drawCal(); };
+el('cnext').onclick = () => { calHo = new Date(calHo.getFullYear(), calHo.getMonth() + 1, 1); drawCal(); };
+el('ctoday').onclick = () => { calHo = new Date(); drawCal(); };
+el('goToday').onclick = () => { hetKezd = hetfoje(new Date()); setView('P'); };
+el('tabAcc').onclick = openAccount;
+
+document.addEventListener('click', async e => {
+  const fav = e.target.closest('[data-fav]');
+  if (fav) {
+    const id = fav.dataset.fav;
+    favs = favs.includes(id) ? favs.filter(x => x !== id) : favs.concat([id]);
+    await save(KEYS.fav, favs); drawNav(); drawGrid();
+    if (el('scrim').classList.contains('open') && el('sheet').querySelector('[data-fav]')) openSheet(id);
+    return;
+  }
+  const qk = e.target.closest('[data-quick]');
+  if (qk) {
+    const r = get(qk.dataset.quick); if (!r) return;
+    const slot = slotsOf(r)[0], key = ma();
+    await setSlot(key, slot, (napja(key)[slot] || []).concat([r.id]));
+    if (el('scrim').classList.contains('open')) closeSheet();
+    return;
+  }
+  const add = e.target.closest('[data-add]');
+  if (add) { const [key, slot] = add.dataset.add.split('|'); return openPick(key, slot); }
+  const put = e.target.closest('[data-put]');
+  if (put) {
+    const { key, slot } = pickCtx;
+    await setSlot(key, slot, (napja(key)[slot] || []).concat([put.dataset.put]));
+    closeSheet(); return;
+  }
+  const rm = e.target.closest('[data-rm]');
+  if (rm) {
+    const [key, slot, ix] = rm.dataset.rm.split('|');
+    const arr = (napja(key)[slot] || []).slice(); arr.splice(+ix, 1);
+    await setSlot(key, slot, arr); return;
+  }
+  const day = e.target.closest('[data-day]'); if (day) return openDay(day.dataset.day);
+  const wk = e.target.closest('[data-week]');
+  if (wk) { const [y, mo, d] = wk.dataset.week.split('-').map(Number);
+    hetKezd = hetfoje(new Date(y, mo - 1, d)); closeSheet(); setView('P'); return; }
+  const dd = e.target.closest('[data-delday]');
+  if (dd) { delete etrend[dd.dataset.delday]; await save(KEYS.etrend, etrend);
+    closeSheet(); drawWeek(); drawCal(); drawBottom(); drawGrid(); return; }
+  const ed = e.target.closest('[data-edit]'); if (ed) return openEditor(ed.dataset.edit);
+  const del = e.target.closest('[data-del]');
+  if (del) {
+    const id = del.dataset.del;
+    own = own.filter(x => x.id !== id); favs = favs.filter(x => x !== id);
+    Object.keys(etrend).forEach(k => SLOTS.forEach(s => {
+      if (etrend[k][s.k]) etrend[k][s.k] = etrend[k][s.k].filter(x => x !== id);
+    }));
+    Object.keys(etrend).forEach(k => { if (!vanNap(k)) delete etrend[k]; });
+    await save(KEYS.own, own); await save(KEYS.fav, favs); await save(KEYS.etrend, etrend);
+    closeSheet(); drawNav(); drawGrid(); drawWeek(); drawCal(); drawBottom(); return;
+  }
+  if (e.target.id === 'x' || e.target.id === 'scrim') return closeSheet();
+  const card = e.target.closest('[data-open]'); if (card) openSheet(card.dataset.open);
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSheet(); });
+
+(async () => {
+  favs = await load(KEYS.fav, []);
+  own = await load(KEYS.own, []);
+  own.forEach(r => { if (!r.slots) r.slots = slotsOf(r); });
+  etrend = await load(KEYS.etrend, {}) || {};
+
+  // korabbi, egyetlen "napi terv" listat athozzuk a mai nap etkezeseibe
+  const regi = await load(KEYS.oldplan, null);
+  if (regi && !Object.keys(etrend).length) {
+    const ids = Array.isArray(regi) ? regi : [...(regi.a1 || []), ...(regi.a2 || [])];
+    const n = { reggeli: [], ebed: [], vacsora: [], kis: [] };
+    [...new Set(ids)].forEach(id => { const r = get(id); if (r) n[slotsOf(r)[0]].push(id); });
+    if (SLOTS.some(s => n[s.k].length)) { etrend[ma()] = n; await save(KEYS.etrend, etrend); }
+  }
+
+  drawNav(); drawGrid(); drawWeek(); drawCal(); drawBottom(); drawAccount();
+
+  if (fbAuth) {
+    fbAuth.onAuthStateChanged(async (user) => {
+      if (user && (!fbUser || fbUser.uid !== user.uid)) { await syncAfterSignIn(user); }
+      else if (!user) { fbUser = null; drawAccount(); }
+    });
+  }
+})();
+</script>
+
+</body>
+</html>
