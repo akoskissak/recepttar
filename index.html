@@ -141,7 +141,19 @@
 }
 .rt-act button:hover { background: rgba(43,38,32,.08); border-color: var(--hair); color: var(--ink); }
 .rt-act button.on { background: var(--blue-soft); border-color: rgba(46,106,140,.35); color: var(--blue); }
-.rt-act button.on:hover { background: #D6E4EC; }
+/* ha mar a mai etrendben van, a hover a kivetelt kinalja */
+.rt-act button.on .ic-x { display: none; }
+.rt-act button.on:hover, .rt-act button.on:focus-visible {
+  background: var(--tomato-soft); border-color: rgba(190,74,51,.45); color: var(--tomato);
+}
+.rt-act button.on:hover .ic-v, .rt-act button.on:focus-visible .ic-v { display: none; }
+.rt-act button.on:hover .ic-x, .rt-act button.on:focus-visible .ic-x { display: block; }
+/* erintokijelzon nincs hover: ott allandoan a ✕ lathato, hogy a koppintas ne legyen megleptes */
+@media (hover: none) {
+  .rt-act button.on { background: var(--tomato-soft); border-color: rgba(190,74,51,.45); color: var(--tomato); }
+  .rt-act button.on .ic-v { display: none; }
+  .rt-act button.on .ic-x { display: block; }
+}
 
 .rt-name { font-family: var(--disp); font-weight: 600; font-size: 19px; line-height: 1.2; letter-spacing: -.012em; margin: 11px 0 0; text-wrap: balance; }
 .rt-tear { margin: 13px 0 12px; border-top: 1.5px dashed var(--hair); }
@@ -177,7 +189,7 @@
 .rt-slot li { display: flex; align-items: center; gap: 8px; padding: 6px 0; font-size: 13.5px; }
 .rt-slot li span:first-child { flex: 1; min-width: 0; }
 .rt-slot li .k { font-size: 12px; font-weight: 700; color: var(--ink-60); white-space: nowrap; }
-.rt .rt-rm { width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center; color: var(--ink-30); font-size: 15px; flex: 0 0 30px; transition: all .15s; }
+.rt .rt-rm { width: 36px; height: 36px; border-radius: 9px; display: grid; place-items: center; color: var(--ink-30); font-size: 16px; flex: 0 0 36px; transition: all .15s; }
 .rt-rm:hover { background: var(--tomato-soft); color: var(--tomato); }
 .rt .rt-addslot {
   width: 100%; min-height: 36px; border-radius: 9px; border: 1.5px dashed var(--hair);
@@ -246,7 +258,7 @@
 .rt-toast span { min-width: 0; }
 .rt .rt-toast button {
   color: #F2C46B; font-weight: 700; font-size: 13px; white-space: nowrap;
-  min-height: 34px; padding: 0 10px; border-radius: 8px; flex-shrink: 0;
+  min-height: 36px; padding: 0 12px; border-radius: 8px; flex-shrink: 0;
 }
 .rt .rt-toast button:hover { background: rgba(255,255,255,.12); }
 @keyframes toastIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
@@ -1369,12 +1381,13 @@ async function syncAfterSignIn(user) {
 /* ---------- alapok ---------- */
 const FRAMES = [{ k: 'a1', cel: 1800 }, { k: 'a2', cel: 1450 }];
 const SLOTS = [
-  { k: 'reggeli', n: 'Reggeli', hoz: 'reggelihez' },
-  { k: 'ebed',    n: 'Ebéd',    hoz: 'ebédhez' },
-  { k: 'vacsora', n: 'Vacsora', hoz: 'vacsorához' },
-  { k: 'kis',     n: 'Kisétkezés', hoz: 'kisétkezéshez' }
+  { k: 'reggeli', n: 'Reggeli',     hoz: 'reggelihez',     max: 1 },
+  { k: 'ebed',    n: 'Ebéd',        hoz: 'ebédhez',        max: 1 },
+  { k: 'vacsora', n: 'Vacsora',     hoz: 'vacsorához',     max: 1 },
+  { k: 'kis',     n: 'Kisétkezés',  hoz: 'kisétkezéshez',  max: Infinity }
 ];
 const SLOTHOZ = Object.fromEntries(SLOTS.map(s => [s.k, s.hoz]));
+const SLOTMAX = Object.fromEntries(SLOTS.map(s => [s.k, s.max]));
 const SLOTNEV = Object.fromEntries(SLOTS.map(s => [s.k, s.n]));
 const HO = ['január','február','március','április','május','június','július','augusztus','szeptember','október','november','december'];
 const NAPROVID = ['Hétfő','Kedd','Szerda','Csütörtök','Péntek','Szombat','Vasárnap'];
@@ -1453,22 +1466,58 @@ function toast(msg, withUndo) {
   };
 }
 
-/* hany peldanyban van ma ez a recept az etrendben */
+/* hany peldanyban es melyik etkezesekben van ma ez a recept */
 function maiDb(id) {
   const n = napja(ma());
   return SLOTS.reduce((a, s) => a + (n[s.k] || []).filter(x => x === id).length, 0);
 }
+function maiHol(id) {
+  const n = napja(ma());
+  return SLOTS.filter(s => (n[s.k] || []).includes(id)).map(s => s.k);
+}
 
 async function addTo(key, slot, id) {
-  snapshot();
-  await setSlot(key, slot, (napja(key)[slot] || []).concat([id]));
+  const cur = napja(key)[slot] || [];
+  const max = SLOTMAX[slot];
   const r = get(id);
-  if (key === ma()) {
-    toast(`${r.nev} — hozzáadva a mai ${SLOTHOZ[slot]}`, true);
+  let arr, lecserelt = null;
+
+  if (cur.length >= max) {
+    // egy napra csak egy reggeli / ebed / vacsora jut, ezert csere lesz belole
+    lecserelt = get(cur[cur.length - 1]);
+    arr = cur.slice(0, Math.max(0, max - 1)).concat([id]);
   } else {
-    const [y, mo, d] = key.split('-').map(Number);
-    toast(`${r.nev} — hozzáadva: ${HO[mo-1].slice(0,3)}. ${d}., ${SLOTNEV[slot].toLowerCase()}`, true);
+    arr = cur.concat([id]);
   }
+
+  snapshot();
+  await setSlot(key, slot, arr);
+
+  const hol = key === ma()
+    ? `a mai ${SLOTHOZ[slot]}`
+    : `${HO[+key.split('-')[1] - 1].slice(0,3)}. ${+key.split('-')[2]}., ${SLOTNEV[slot].toLowerCase()}`;
+
+  if (lecserelt && lecserelt.id !== id) {
+    toast(`${lecserelt.nev} helyett most ${r.nev} lett ${key === ma() ? SLOTNEV[slot].toLowerCase() : hol}`, true);
+  } else if (lecserelt && lecserelt.id === id) {
+    toast(`${r.nev} már ${key === ma() ? 'a mai ' + SLOTNEV[slot].toLowerCase() : hol}`, false);
+  } else {
+    toast(`${r.nev} — hozzáadva ${hol}`, true);
+  }
+}
+
+/* a kartyarol torles: kiveszi a mai etrend minden etkezesebol */
+async function removeToday(id) {
+  const r = get(id), holVolt = maiHol(id);
+  if (!holVolt.length) return;
+  const key = ma(), n = { ...napja(key) };
+  holVolt.forEach(s => { n[s] = (n[s] || []).filter(x => x !== id); });
+  snapshot();
+  if (SLOTS.every(s => !(n[s.k] || []).length)) delete etrend[key]; else etrend[key] = n;
+  await save(KEYS.etrend, etrend);
+  redrawAll();
+  const nevek = holVolt.map(s => SLOTNEV[s].toLowerCase()).join(', ');
+  toast(`${r.nev} kivéve a mai étrendből (${nevek})`, true);
 }
 
 /* ---------- csík ---------- */
@@ -1501,6 +1550,13 @@ function drawNav() {
   ).join('');
 }
 function katNev(r) { return slotsOf(r).map(s => SLOTNEV[s]).join(' · '); }
+function holCimke(id) {
+  const hol = maiHol(id), db = maiDb(id);
+  const nev = hol.map(s => SLOTNEV[s].toLowerCase()).join(', ');
+  return db > 1 && hol.length === 1
+    ? `A mai ${nev}ben ${db}×`
+    : `A mai étrendben: ${nev}`;
+}
 
 function drawGrid() {
   const rows = visible(), max = maxKcal();
@@ -1545,9 +1601,12 @@ function drawGrid() {
           <button class="${fav ? 'on' : ''}" data-fav="${r.id}" aria-pressed="${fav}"
             aria-label="${fav ? 'Kedvenc — kattints a levételhez' : 'Jelöld kedvencnek'}"
             title="${fav ? 'Kedvenc — kattints a levételhez' : 'Jelöld kedvencnek'}">${fav ? '★' : '☆'}</button>
-          <button class="${db ? 'on' : ''}" data-quick="${r.id}"
-            aria-label="${db ? `Már a mai étrendben (${db}) — hozzáadás még egyszer` : 'Hozzáadás a mai étrendhez'}"
-            title="${db ? `Már a mai étrendben${db > 1 ? ` (${db}×)` : ''} — kattints, ha még egyszer kell` : 'Hozzáadás a mai étrendhez'}">${db ? '✓' : '+'}</button>
+          ${db ? `<button class="on" data-remove="${r.id}"
+            aria-label="${esc(holCimke(r.id))} — kattints a kivételhez"
+            title="${esc(holCimke(r.id))} — kattints a kivételhez"
+            ><span class="ic-v">✓</span><span class="ic-x">✕</span></button>`
+          : `<button data-quick="${r.id}"
+            aria-label="Hozzáadás a mai étrendhez" title="Hozzáadás a mai étrendhez">+</button>`}
         </div>
       </div>
       <button class="rt-open" data-open="${r.id}">
@@ -1580,7 +1639,13 @@ function drawWeek() {
           return `<li><span>${esc(r.nev)}</span><span class="k">${k1 ?? '—'} / ${k2 ?? '—'}</span>
             <button class="rt-rm" data-rm="${key}|${s.k}|${ix}" aria-label="Kivétel">×</button></li>`;
         }).join('')}</ul>` : ''}
-        <button class="rt-addslot" data-add="${key}|${s.k}">+ ${s.n.toLowerCase()} hozzáadása</button>
+        ${(() => {
+          const teli = ids.length >= SLOTMAX[s.k];
+          if (teli) return `<button class="rt-addslot" data-add="${key}|${s.k}"
+            aria-label="${s.n} lecserélése">Csere</button>`;
+          return `<button class="rt-addslot" data-add="${key}|${s.k}">+ ${
+            s.k === 'kis' && ids.length ? 'még egy kisétkezés' : s.n.toLowerCase()}</button>`;
+        })()}
       </div>`;
     }).join('');
 
@@ -1618,6 +1683,9 @@ function renderPick() {
   const { key, slot } = pickCtx;
   const [y, mo, d] = key.split('-').map(Number);
   const q = pickQ.trim().toLowerCase();
+  const meglevo = (napja(key)[slot] || []);
+  const csere = meglevo.length >= SLOTMAX[slot];
+  const cserelt = csere ? get(meglevo[meglevo.length - 1]) : null;
   const lista = all().filter(r => slotsOf(r).includes(slot))
     .filter(r => !q || r.nev.toLowerCase().includes(q) ||
       (r.a1 && r.a1.hozz.join(' ').toLowerCase().includes(q)));
@@ -1625,7 +1693,8 @@ function renderPick() {
     <button class="rt-close" id="x" aria-label="Bezárás">✕</button>
     <div class="rt-sh">
       <p class="rt-label">${HO[mo-1]} ${d}. · ${SLOTNEV[slot]}</p>
-      <h2 id="shname">Mit teszünk ide?</h2>
+      <h2 id="shname">${csere ? 'Mire cseréljük?' : 'Mit teszünk ide?'}</h2>
+      ${csere && cserelt ? `<p style="margin:12px 0 0;font-size:13.5px;color:var(--ink-60)">Most ${esc(cserelt.nev)} van itt. Egy napra egy ${SLOTNEV[slot].toLowerCase()} jut, ezért a választásod lecseréli.</p>` : ''}
       <div class="rt-field" style="margin-top:16px">
         <input id="pq" type="search" placeholder="Keresés a ${lista.length} lehetőség között" value="${esc(pickQ)}" aria-label="Keresés">
       </div>
@@ -2047,6 +2116,8 @@ document.addEventListener('click', async e => {
     await addTo(ma(), sl[0], r.id);
     return;
   }
+  const rmToday = e.target.closest('[data-remove]');
+  if (rmToday) { await removeToday(rmToday.dataset.remove); return; }
   const sp = e.target.closest('[data-slotpick]');
   if (sp) {
     const [id, slot] = sp.dataset.slotpick.split('|');
