@@ -1,15 +1,12 @@
 <!DOCTYPE html>
-<html lang="hu">
-<head>
-<meta charset="UTF-8">
+<html lang="hu"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Recepttár — receptek makrókkal</title>
 <meta name="description" content="Recepttár: 22 recept két kalóriakerethez, étrendtervvel és naptárral.">
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-database-compat.js"></script>
-</head>
-<body>
+</head><body>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;600;700&family=Karla:wght@400;500;600;700&display=swap');
 
@@ -68,7 +65,13 @@
 .rt-title { font-family: var(--disp); font-weight: 700; font-size: clamp(28px, 4.2vw, 38px); line-height: 1.05; letter-spacing: -.02em; margin: 0; }
 .rt-lede { font-size: 14.5px; color: var(--ink-60); margin: 6px 0 0; max-width: 62ch; }
 
-.rt-tabs { max-width: 1160px; margin: 0 auto; padding: 20px 26px 0; display: flex; gap: 22px; border-bottom: 1.5px solid var(--hair); }
+.rt-tabs {
+  max-width: 1160px; margin: 0 auto; padding: 20px 26px 0; display: flex; gap: 22px;
+  border-bottom: 1.5px solid var(--hair);
+  overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch;
+}
+.rt-tabs::-webkit-scrollbar { display: none; }
+.rt-tabs button { flex-shrink: 0; }
 .rt-tabs button {
   font-family: var(--disp); font-weight: 600; font-size: 15.5px; color: var(--ink-30);
   padding: 6px 0 12px; border-bottom: 3px solid transparent; margin-bottom: -1.5px;
@@ -103,7 +106,7 @@
 .rt-nav button[aria-pressed="true"] { background: var(--ink); color: var(--card); }
 .rt-search {
   border: 1.5px solid var(--hair); background: var(--card); border-radius: 999px;
-  min-height: 40px; padding: 0 16px; font-size: 13.5px; width: 220px; transition: border-color .16s;
+  min-height: 40px; padding: 0 42px 0 16px; font-size: 13.5px; width: 220px; transition: border-color .16s;
 }
 .rt-search::placeholder { color: var(--ink-30); }
 .rt-search:focus { outline: none; border-color: var(--blue); }
@@ -155,10 +158,6 @@
 .rt-bar > div { height: 100%; display: flex; border-radius: 99px; overflow: hidden; }
 .rt-bar i { display: block; height: 100%; }
 .rt-nofr { font-size: 12.5px; color: var(--ink-30); margin: 11px 0 0; padding-top: 11px; border-top: 1px solid rgba(43,38,32,.07); }
-
-.rt-empty { grid-column: 1/-1; padding: 56px 20px; text-align: center; }
-.rt-empty p { font-family: var(--disp); font-weight: 600; font-size: 20px; margin: 0 0 5px; }
-.rt-empty small { color: var(--ink-60); }
 
 /* ---------- étrendterv ---------- */
 .rt-plan-v { max-width: 1160px; margin: 0 auto; padding: 20px 26px 40px; }
@@ -230,6 +229,48 @@
 .rt-bfr-r s { text-decoration: none; font-size: 12px; color: var(--ink-30); margin-right: auto; }
 .rt-bfr-r em { font-style: normal; font-size: 11px; font-weight: 700; color: var(--ink-60); }
 
+/* ---------- visszajelzés ---------- */
+.rt-toasts {
+  position: fixed; left: 50%; transform: translateX(-50%);
+  bottom: 124px; z-index: 60; display: flex; flex-direction: column; gap: 8px;
+  align-items: center; pointer-events: none; width: max-content;
+  max-width: min(520px, calc(100vw - 24px));
+}
+.rt-toast {
+  background: var(--ink); color: #FFFDF7; border-radius: 12px;
+  padding: 11px 12px 11px 16px; display: flex; align-items: center; gap: 12px;
+  font-size: 13.5px; font-weight: 600; line-height: 1.35; pointer-events: auto;
+  box-shadow: 0 10px 28px -10px rgba(43,38,32,.55);
+  animation: toastIn .2s cubic-bezier(.2,.8,.2,1);
+}
+.rt-toast span { min-width: 0; }
+.rt .rt-toast button {
+  color: #F2C46B; font-weight: 700; font-size: 13px; white-space: nowrap;
+  min-height: 34px; padding: 0 10px; border-radius: 8px; flex-shrink: 0;
+}
+.rt .rt-toast button:hover { background: rgba(255,255,255,.12); }
+@keyframes toastIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+/* ---------- üres állapotok: cselekvésre hívnak ---------- */
+.rt-empty { grid-column: 1/-1; padding: 52px 20px; text-align: center; }
+.rt-empty p { font-family: var(--disp); font-weight: 600; font-size: 20px; margin: 0 0 6px; }
+.rt-empty small { color: var(--ink-60); display: block; max-width: 42ch; margin: 0 auto 16px; }
+
+/* kereső törlése */
+.rt-searchwrap { position: relative; display: flex; align-items: center; }
+.rt .rt-clearq {
+  position: absolute; right: 2px; width: 36px; height: 36px; border-radius: 50%;
+  display: grid; place-items: center; font-size: 14px; color: var(--ink-60);
+}
+.rt .rt-clearq:hover { background: rgba(43,38,32,.09); color: var(--ink); }
+
+/* megerősítés törlés előtt */
+.rt-confirm {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  background: var(--tomato-soft); border-radius: 11px; padding: 12px 14px; margin-top: 24px;
+}
+.rt-confirm p { margin: 0; font-size: 13.5px; font-weight: 600; flex: 1; min-width: 160px; }
+
 /* ---------- lap ---------- */
 .rt-scrim { position: fixed; inset: 0; z-index: 40; background: rgba(43,38,32,.42); display: flex; align-items: center; justify-content: center; padding: 22px; opacity: 0; pointer-events: none; transition: opacity .2s; }
 .rt-scrim.open { opacity: 1; pointer-events: auto; }
@@ -297,6 +338,8 @@
   .rt-day-v b { font-size: 10.5px; } .rt-day-v { font-size: 0; gap: 0; }
   .rt-cal-hd h2, .rt-wk h2 { font-size: 18px; min-width: 0; }
   .rt-bfr { min-width: 140px; }
+  .rt-toasts { bottom: 112px; }
+  .rt-tabs { gap: 16px; }
 }
 @media (prefers-reduced-motion: reduce) { .rt *, .rt *::before { transition: none !important; } }
 </style>
@@ -320,7 +363,10 @@
   <div id="viewR">
     <div class="rt-tools">
       <div class="rt-nav" id="nav"></div>
-      <input class="rt-search" id="q" type="search" placeholder="Keresés recept vagy hozzávaló" aria-label="Keresés">
+      <span class="rt-searchwrap">
+        <input class="rt-search" id="q" type="search" placeholder="Keresés recept vagy hozzávaló" aria-label="Keresés recept vagy hozzávaló szerint">
+        <button class="rt-clearq" id="clearq" aria-label="Keresés törlése" hidden>✕</button>
+      </span>
       <button class="btn btn-p" id="new">+ Új recept</button>
     </div>
     <div class="rt-key">
@@ -366,6 +412,8 @@
       <div class="rt-bfr" id="bfr2"></div>
     </div>
   </footer>
+
+  <div class="rt-toasts" id="toasts" role="status" aria-live="polite" aria-atomic="true"></div>
 </div>
 
 <div class="rt-scrim rt" id="scrim">
@@ -1321,9 +1369,12 @@ async function syncAfterSignIn(user) {
 /* ---------- alapok ---------- */
 const FRAMES = [{ k: 'a1', cel: 1800 }, { k: 'a2', cel: 1450 }];
 const SLOTS = [
-  { k: 'reggeli', n: 'Reggeli' }, { k: 'ebed', n: 'Ebéd' },
-  { k: 'vacsora', n: 'Vacsora' }, { k: 'kis', n: 'Kisétkezés' }
+  { k: 'reggeli', n: 'Reggeli', hoz: 'reggelihez' },
+  { k: 'ebed',    n: 'Ebéd',    hoz: 'ebédhez' },
+  { k: 'vacsora', n: 'Vacsora', hoz: 'vacsorához' },
+  { k: 'kis',     n: 'Kisétkezés', hoz: 'kisétkezéshez' }
 ];
+const SLOTHOZ = Object.fromEntries(SLOTS.map(s => [s.k, s.hoz]));
 const SLOTNEV = Object.fromEntries(SLOTS.map(s => [s.k, s.n]));
 const HO = ['január','február','március','április','május','június','július','augusztus','szeptember','október','november','december'];
 const NAPROVID = ['Hétfő','Kedd','Szerda','Csütörtök','Péntek','Szombat','Vasárnap'];
@@ -1375,6 +1426,51 @@ async function setSlot(key, slot, ids) {
   drawWeek(); drawCal(); drawBottom(); drawGrid();
 }
 
+/* ---------- visszajelzés és visszavonás ---------- */
+let toastT = null, undoSnap = null;
+
+function redrawAll() { drawGrid(); drawWeek(); drawCal(); drawBottom(); }
+
+/* minden etrend-modositas elott lementjuk az elozo allapotot, hogy visszavonhato legyen */
+function snapshot() { undoSnap = JSON.parse(JSON.stringify(etrend)); }
+
+function toast(msg, withUndo) {
+  const w = el('toasts');
+  // az also sav magassaga valtozik (mobilon tobb sorba tord), ezert mindig fole meregetunk
+  const bar = document.querySelector('.rt-bottom');
+  w.style.bottom = ((bar ? bar.getBoundingClientRect().height : 100) + 14) + 'px';
+  w.innerHTML = `<div class="rt-toast"><span>${esc(msg)}</span>${
+    withUndo ? `<button id="undoBtn">Visszavonás</button>` : ''}</div>`;
+  clearTimeout(toastT);
+  toastT = setTimeout(() => { w.innerHTML = ''; }, withUndo ? 7000 : 3200);
+  if (withUndo) el('undoBtn').onclick = async () => {
+    if (undoSnap) {
+      etrend = undoSnap; undoSnap = null;
+      await save(KEYS.etrend, etrend); redrawAll();
+    }
+    clearTimeout(toastT); w.innerHTML = '';
+    toast('Visszaállítva');
+  };
+}
+
+/* hany peldanyban van ma ez a recept az etrendben */
+function maiDb(id) {
+  const n = napja(ma());
+  return SLOTS.reduce((a, s) => a + (n[s.k] || []).filter(x => x === id).length, 0);
+}
+
+async function addTo(key, slot, id) {
+  snapshot();
+  await setSlot(key, slot, (napja(key)[slot] || []).concat([id]));
+  const r = get(id);
+  if (key === ma()) {
+    toast(`${r.nev} — hozzáadva a mai ${SLOTHOZ[slot]}`, true);
+  } else {
+    const [y, mo, d] = key.split('-').map(Number);
+    toast(`${r.nev} — hozzáadva: ${HO[mo-1].slice(0,3)}. ${d}., ${SLOTNEV[slot].toLowerCase()}`, true);
+  }
+}
+
 /* ---------- csík ---------- */
 function barHtml(m, max) {
   const ep = m.p * 4, ec = m.c * 4, ef = m.f * 9;
@@ -1410,11 +1506,27 @@ function drawGrid() {
   const rows = visible(), max = maxKcal();
   el('count').textContent = `${rows.length} recept`;
   if (!rows.length) {
-    el('grid').innerHTML = `<div class="rt-empty"><p>Erre nincs recept</p><small>Próbálj más keresőszót, vagy válts étkezést.</small></div>`;
+    let cim, mit, gomb;
+    if (filter === 'Kedvencek' && !favs.length) {
+      cim = 'Még nincs kedvenced';
+      mit = 'A kártyákon a csillagra kattintva jelölheted azokat, amiket gyakran főzöl — itt gyűlnek össze.';
+      gomb = `<button class="btn btn-p" data-reset="Mind">Mutasd az összes receptet</button>`;
+    } else if (query) {
+      cim = `Semmi sem passzol erre: „${esc(query)}”`;
+      mit = 'A név és a hozzávalók között keresek. Próbáld rövidebb szóval, például „csirke” vagy „joghurt”.';
+      gomb = `<button class="btn btn-p" id="emptyClear">Keresés törlése</button>`;
+    } else {
+      cim = `Nincs recept ehhez: ${esc(filter)}`;
+      mit = 'Válts étkezést, vagy vedd fel a sajátodat — a makrókat te adod meg, a többit én számolom.';
+      gomb = `<button class="btn btn-p" id="emptyNew">+ Új recept</button>`;
+    }
+    el('grid').innerHTML = `<div class="rt-empty"><p>${cim}</p><small>${mit}</small>${gomb}</div>`;
+    if (el('emptyClear')) el('emptyClear').onclick = () => { setQuery(''); el('q').focus(); };
+    if (el('emptyNew')) el('emptyNew').onclick = () => openEditor(null);
     return;
   }
   el('grid').innerHTML = rows.map(r => {
-    const fav = favs.includes(r.id);
+    const fav = favs.includes(r.id), db = maiDb(r.id);
     const frames = FRAMES.map(f => {
       const v = r[f.k];
       if (!v) return `<p class="rt-nofr">Nincs ${f.cel} kcal-os változata.</p>`;
@@ -1430,8 +1542,12 @@ function drawGrid() {
         <span class="rt-cat">${esc(katNev(r))}${r.own ? ' · saját' : ''}</span>
         <span class="rt-min">${r.perc} perc</span>
         <div class="rt-act">
-          <button class="${fav ? 'on' : ''}" data-fav="${r.id}" aria-pressed="${fav}" aria-label="Kedvenc" title="Kedvenc">${fav ? '★' : '☆'}</button>
-          <button data-quick="${r.id}" aria-label="Mai étrendhez" title="Mai étrendhez">+</button>
+          <button class="${fav ? 'on' : ''}" data-fav="${r.id}" aria-pressed="${fav}"
+            aria-label="${fav ? 'Kedvenc — kattints a levételhez' : 'Jelöld kedvencnek'}"
+            title="${fav ? 'Kedvenc — kattints a levételhez' : 'Jelöld kedvencnek'}">${fav ? '★' : '☆'}</button>
+          <button class="${db ? 'on' : ''}" data-quick="${r.id}"
+            aria-label="${db ? `Már a mai étrendben (${db}) — hozzáadás még egyszer` : 'Hozzáadás a mai étrendhez'}"
+            title="${db ? `Már a mai étrendben${db > 1 ? ` (${db}×)` : ''} — kattints, ha még egyszer kell` : 'Hozzáadás a mai étrendhez'}">${db ? '✓' : '+'}</button>
         </div>
       </div>
       <button class="rt-open" data-open="${r.id}">
@@ -1495,7 +1611,7 @@ let pickCtx = null, pickQ = '';
 function openPick(key, slot) {
   pickCtx = { key, slot }; pickQ = '';
   renderPick();
-  el('scrim').classList.add('open');
+  openScrim();
   const i = el('pq'); if (i) i.focus();
 }
 function renderPick() {
@@ -1563,7 +1679,9 @@ function drawCal() {
 
   el('calEmpty').innerHTML = osszes.length ? '' : `<div class="rt-cal-empty">
     <p>Még nincs betervezett nap</p>
-    <small>Az Étrendterv fülön oszd be a heted — a napok itt jelennek meg előzményként.</small></div>`;
+    <small style="display:block;max-width:44ch;margin:0 auto 16px">Oszd be a heted az Étrendterv fülön. Amint egy naphoz ételt teszel, itt megjelenik — így később visszanézheted, mennyi jött ki aznap.</small>
+    <button class="btn btn-p" id="calToPlan">Étrend megnyitása</button></div>`;
+  if (el('calToPlan')) el('calToPlan').onclick = () => { hetKezd = hetfoje(new Date()); setView('P'); };
 }
 
 function openDay(key) {
@@ -1599,7 +1717,7 @@ function openDay(key) {
         <button class="btn btn-d" data-delday="${key}">Nap kiürítése</button>
       </div>
     </div>`;
-  el('scrim').classList.add('open');
+  openScrim();
   el('x').focus();
 }
 
@@ -1657,13 +1775,65 @@ function openSheet(id) {
       <div class="rt-sh-act">
         <button class="btn btn-p" data-quick="${r.id}">+ Mai étrendhez</button>
         <button class="btn btn-s" data-fav="${r.id}">${favs.includes(r.id) ? '★ Kedvenc' : '☆ Kedvencnek'}</button>
-        ${r.own ? `<button class="btn btn-s" data-edit="${r.id}">Szerkesztés</button><button class="btn btn-d" data-del="${r.id}">Törlés</button>` : ''}
+        ${r.own ? `<button class="btn btn-s" data-edit="${r.id}">Szerkesztés</button><button class="btn btn-d" id="askDel">Törlés</button>` : ''}
+      </div>
+      ${r.own ? `<div id="delBox"></div>` : ''}
+    </div>`;
+  openScrim();
+  el('x').focus();
+  if (el('askDel')) el('askDel').onclick = () => {
+    el('delBox').innerHTML = `<div class="rt-confirm">
+      <p>Törlöm a receptet? Az étrendből is kikerül.</p>
+      <button class="btn btn-d btn-sm" data-del="${r.id}">Igen, törlöm</button>
+      <button class="btn btn-s btn-sm" id="cancelDel">Mégsem</button>
+    </div>`;
+    el('cancelDel').onclick = () => { el('delBox').innerHTML = ''; el('askDel').focus(); };
+    el('delBox').querySelector('[data-del]').focus();
+  };
+}
+let lastFocus = null;
+function openScrim() {
+  lastFocus = document.activeElement;
+  el('scrim').classList.add('open');
+}
+function closeSheet() {
+  const wasOpen = el('scrim').classList.contains('open');
+  el('scrim').classList.remove('open');
+  if (wasOpen && lastFocus && typeof lastFocus.focus === 'function') {
+    try { lastFocus.focus(); } catch (e) {}
+  }
+  lastFocus = null;
+}
+/* a fokusz maradjon a megnyitott lapon belul */
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Tab' || !el('scrim').classList.contains('open')) return;
+  const f = el('sheet').querySelectorAll('button, input, select, textarea, [href]');
+  const list = [...f].filter(x => !x.disabled && x.offsetParent !== null);
+  if (!list.length) return;
+  const first = list[0], last = list[list.length - 1];
+  if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+});
+
+/* ---------- étkezés választása gyors hozzáadáskor ---------- */
+function openSlotChoice(id) {
+  const r = get(id); if (!r) return;
+  const sl = slotsOf(r);
+  el('sheet').innerHTML = `
+    <button class="rt-close" id="x" aria-label="Bezárás">✕</button>
+    <div class="rt-sh">
+      <p class="rt-label">Mai étrend</p>
+      <h2 id="shname">${esc(r.nev)}</h2>
+      <p style="margin:14px 0 0;font-size:14.5px;color:var(--ink-60)">Melyik étkezéshez tegyem?</p>
+      <div class="rt-sh-act" style="margin-top:18px">
+        ${sl.map(s => `<button class="btn btn-p" data-slotpick="${id}|${s}">${SLOTNEV[s]}</button>`).join('')}
+        <button class="btn btn-g" id="otherDay">Inkább másik napra</button>
       </div>
     </div>`;
-  el('scrim').classList.add('open');
+  openScrim();
   el('x').focus();
+  el('otherDay').onclick = () => { hetKezd = hetfoje(new Date()); closeSheet(); setView('P'); };
 }
-const closeSheet = () => el('scrim').classList.remove('open');
 
 /* ---------- szerkesztő ---------- */
 function openEditor(id) {
@@ -1711,7 +1881,7 @@ function openEditor(id) {
         <button class="btn btn-g" id="cancel">Mégsem</button>
       </div>
     </div>`;
-  el('scrim').classList.add('open');
+  openScrim();
   el('f-nev').focus();
   el('cancel').onclick = closeSheet;
   el('dosave').onclick = async () => {
@@ -1726,9 +1896,11 @@ function openEditor(id) {
       kat: slots.map(s => SLOTNEV[s]).join(' / '), perc: +el('f-perc').value || 0, megj: '',
       a1: { makro: mk('k1','p1','c1','z1'), hozz, lep },
       a2: el('k2').value.trim() ? { makro: mk('k2','p2','c2','z2'), hozz, lep } : null };
+    const uj = !r;
     own = r ? own.map(x => x.id === r.id ? rec : x) : own.concat([rec]);
     await save(KEYS.own, own);
     closeSheet(); drawGrid(); drawWeek(); drawBottom();
+    toast(uj ? `${rec.nev} mentve` : 'Változások mentve');
   };
   function fail(msg) { const e = el('err'); e.textContent = msg; e.hidden = false; }
 }
@@ -1755,7 +1927,7 @@ function openAccount() {
         </p>
         <div class="rt-sh-act"><button class="btn btn-s" id="x2">Értem</button></div>
       </div>`;
-    el('scrim').classList.add('open');
+    openScrim();
     el('x2').onclick = closeSheet;
     return;
   }
@@ -1771,8 +1943,8 @@ function openAccount() {
         </div>
         <div class="rt-sh-act"><button class="btn btn-d" id="signout">Kijelentkezés</button></div>
       </div>`;
-    el('scrim').classList.add('open');
-    el('signout').onclick = async () => { await fbAuth.signOut(); fbUser = null; drawAccount(); closeSheet(); };
+    openScrim();
+    el('signout').onclick = async () => { await fbAuth.signOut(); fbUser = null; drawAccount(); closeSheet(); toast('Kijelentkeztél — az adatok ezen az eszközön maradnak'); };
     return;
   }
   renderAuthForm('signin');
@@ -1795,7 +1967,7 @@ function renderAuthForm(mode, msg) {
         <button class="btn btn-g" id="authSwitch">${isSignin ? 'Nincs még fiókod? Regisztrálj' : 'Már van fiókod? Lépj be'}</button>
       </div>
     </div>`;
-  el('scrim').classList.add('open');
+  openScrim();
   el('authEmail').focus();
   el('authSwitch').onclick = () => renderAuthForm(isSignin ? 'signup' : 'signin');
   el('authGo').onclick = async () => {
@@ -1833,9 +2005,21 @@ function setView(v) {
 el('tabR').onclick = () => setView('R');
 el('tabP').onclick = () => setView('P');
 el('tabC').onclick = () => setView('C');
-el('q').oninput = e => { query = e.target.value; drawGrid(); };
+function setQuery(v) {
+  query = v;
+  el('q').value = v;
+  el('clearq').hidden = !v;
+  drawGrid();
+}
+el('q').oninput = e => setQuery(e.target.value);
+el('q').onkeydown = e => { if (e.key === 'Escape' && query) { e.stopPropagation(); setQuery(''); } };
+el('clearq').onclick = () => { setQuery(''); el('q').focus(); };
 el('new').onclick = () => openEditor(null);
 el('nav').onclick = e => { const b = e.target.closest('[data-c]'); if (!b) return; filter = b.dataset.c; drawNav(); drawGrid(); };
+document.addEventListener('click', e => {
+  const rs = e.target.closest('[data-reset]');
+  if (rs) { filter = rs.dataset.reset; setQuery(''); drawNav(); drawGrid(); }
+});
 el('wprev').onclick = () => { hetKezd = plusz(hetKezd, -7); drawWeek(); };
 el('wnext').onclick = () => { hetKezd = plusz(hetKezd, 7); drawWeek(); };
 el('wtoday').onclick = () => { hetKezd = hetfoje(new Date()); drawWeek(); };
@@ -1857,9 +2041,17 @@ document.addEventListener('click', async e => {
   const qk = e.target.closest('[data-quick]');
   if (qk) {
     const r = get(qk.dataset.quick); if (!r) return;
-    const slot = slotsOf(r)[0], key = ma();
-    await setSlot(key, slot, (napja(key)[slot] || []).concat([r.id]));
+    const sl = slotsOf(r);
+    if (sl.length > 1) { return openSlotChoice(r.id); }   // ebed vagy vacsora? dontsd el te
     if (el('scrim').classList.contains('open')) closeSheet();
+    await addTo(ma(), sl[0], r.id);
+    return;
+  }
+  const sp = e.target.closest('[data-slotpick]');
+  if (sp) {
+    const [id, slot] = sp.dataset.slotpick.split('|');
+    closeSheet();
+    await addTo(ma(), slot, id);
     return;
   }
   const add = e.target.closest('[data-add]');
@@ -1867,22 +2059,34 @@ document.addEventListener('click', async e => {
   const put = e.target.closest('[data-put]');
   if (put) {
     const { key, slot } = pickCtx;
-    await setSlot(key, slot, (napja(key)[slot] || []).concat([put.dataset.put]));
-    closeSheet(); return;
+    closeSheet();
+    await addTo(key, slot, put.dataset.put);
+    return;
   }
   const rm = e.target.closest('[data-rm]');
   if (rm) {
     const [key, slot, ix] = rm.dataset.rm.split('|');
-    const arr = (napja(key)[slot] || []).slice(); arr.splice(+ix, 1);
-    await setSlot(key, slot, arr); return;
+    const arr = (napja(key)[slot] || []).slice();
+    const kivett = get(arr[+ix]);
+    arr.splice(+ix, 1);
+    snapshot();
+    await setSlot(key, slot, arr);
+    toast(`${kivett ? kivett.nev : 'Tétel'} kivéve`, true);
+    return;
   }
   const day = e.target.closest('[data-day]'); if (day) return openDay(day.dataset.day);
   const wk = e.target.closest('[data-week]');
   if (wk) { const [y, mo, d] = wk.dataset.week.split('-').map(Number);
     hetKezd = hetfoje(new Date(y, mo - 1, d)); closeSheet(); setView('P'); return; }
   const dd = e.target.closest('[data-delday]');
-  if (dd) { delete etrend[dd.dataset.delday]; await save(KEYS.etrend, etrend);
-    closeSheet(); drawWeek(); drawCal(); drawBottom(); drawGrid(); return; }
+  if (dd) {
+    snapshot();
+    delete etrend[dd.dataset.delday];
+    await save(KEYS.etrend, etrend);
+    closeSheet(); redrawAll();
+    toast('A nap kiürítve', true);
+    return;
+  }
   const ed = e.target.closest('[data-edit]'); if (ed) return openEditor(ed.dataset.edit);
   const del = e.target.closest('[data-del]');
   if (del) {
@@ -1893,7 +2097,9 @@ document.addEventListener('click', async e => {
     }));
     Object.keys(etrend).forEach(k => { if (!vanNap(k)) delete etrend[k]; });
     await save(KEYS.own, own); await save(KEYS.fav, favs); await save(KEYS.etrend, etrend);
-    closeSheet(); drawNav(); drawGrid(); drawWeek(); drawCal(); drawBottom(); return;
+    closeSheet(); drawNav(); redrawAll();
+    toast('Recept törölve');
+    return;
   }
   if (e.target.id === 'x' || e.target.id === 'scrim') return closeSheet();
   const card = e.target.closest('[data-open]'); if (card) openSheet(card.dataset.open);
@@ -1926,5 +2132,4 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSheet()
 })();
 </script>
 
-</body>
-</html>
+</body></html>
