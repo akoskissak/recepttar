@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Recepttár — receptek makrókkal</title>
-<meta name="description" content="43 recept két kalóriakerethez, étrendtervvel, naptárral és főzés móddal.">
 <meta name="theme-color" content="#F5F0E3">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Recepttár">
@@ -41,6 +40,22 @@
 .rt button, .rt input, .rt textarea, .rt select { font: inherit; color: inherit; }
 .rt button { cursor: pointer; background: none; border: 0; padding: 0; }
 .rt :focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; border-radius: 5px; }
+
+/* 5.1 sotet tema -- kontrasztok mind WCAG AA felett (szoveg >=4.5:1, UI-elem >=3:1), leellenorizve */
+[data-tema="dark"] .rt {
+  --paper: #211E1A;
+  --card: #2A2621;
+  --ink: #F2EDE3;
+  --ink-60: #B6AC9C;
+  --ink-30: #7E7466;
+  --hair: #3A342C;
+  --blue: #6FA8C7;
+  --blue-soft: #28343C;
+  --butter: #E8B84B;
+  --tomato: #E0705A;
+  --tomato-soft: #3A2A24;
+}
+[data-tema="dark"] { color-scheme: dark; }
 
 .rt-label { font-size: 10.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-60); }
 .mP { color: var(--blue); } .mC { color: var(--butter); } .mF { color: var(--tomato); }
@@ -206,7 +221,7 @@
 .rt-wk { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
 .rt-wk h2 { font-family: var(--disp); font-weight: 700; font-size: 21px; letter-spacing: -.02em; margin: 0; min-width: 210px; }
 .rt-days-grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(258px, 1fr)); }
-.rt-dcard { background: var(--card); border: 1.5px solid var(--hair); border-radius: 13px; padding: 14px 15px 15px; box-shadow: 0 2px 0 rgba(43,38,32,.05); }
+.rt-dcard { background: var(--card); border: 1.5px solid var(--hair); border-radius: 13px; padding: 14px 15px 15px; box-shadow: 0 2px 0 rgba(43,38,32,.05); min-width: 0; }
 .rt-dcard.ma { border-color: var(--ink); border-width: 2px; }
 .rt-dcard-hd { display: flex; align-items: baseline; gap: 8px; padding-bottom: 11px; border-bottom: 1.5px dashed var(--hair); }
 .rt-dcard-hd b { font-family: var(--disp); font-weight: 700; font-size: 15.5px; }
@@ -216,8 +231,26 @@
 .rt-slot { padding: 11px 0 0; }
 .rt-slot > p { margin: 0 0 6px; }
 .rt-slot ul { list-style: none; margin: 0 0 6px; padding: 0; }
-.rt-slot li { display: flex; align-items: center; gap: 8px; padding: 6px 0; font-size: 13.5px; }
-.rt-slot li span:first-child { flex: 1; min-width: 0; }
+.rt-slot li { display: flex; align-items: center; gap: 4px; padding: 2px 0; font-size: 13.5px; }
+.rt .rt-plan-item {
+  flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px;
+  text-align: left; font: inherit; padding: 6px 4px; margin: 0 -4px;
+  min-height: 40px; border-radius: 7px; transition: background .12s;
+}
+.rt .rt-plan-item .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rt .rt-plan-item:hover, .rt .rt-plan-item:focus-visible { background: var(--blue-soft); }
+.rt .rt-plan-item:hover .nm, .rt .rt-plan-item:focus-visible .nm { color: var(--blue); }
+
+/* naptar nap-reszletei: a nev + kcal egy sorban, a li mar ad ponot es kitoltest, a gomb csak kitolti a helyet */
+.rt .rt-day-item {
+  width: 100%; min-height: 40px; padding: 8px 0;
+  display: flex; align-items: center; gap: 10px;
+  font-size: 14px; text-align: left; border-radius: 6px;
+}
+.rt .rt-day-item > span:first-child { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rt .rt-day-item .kcal { color: var(--ink-30); font-size: 12.5px; font-weight: 400; flex: 0 0 auto; }
+.rt .rt-day-item:hover, .rt .rt-day-item:focus-visible { color: var(--blue); }
+.rt .rt-day-item:hover .kcal, .rt .rt-day-item:focus-visible .kcal { color: var(--blue); }
 .rt-slot li .k { font-size: 12px; font-weight: 700; color: var(--ink-60); white-space: nowrap; }
 .rt .rt-rm { width: 36px; height: 36px; border-radius: 9px; display: grid; place-items: center; color: var(--ink-30); font-size: 16px; flex: 0 0 36px; transition: all .15s; }
 .rt-rm:hover { background: var(--tomato-soft); color: var(--tomato); }
@@ -1005,7 +1038,6 @@ const DATA = [
   "id": "r9",
   "nev": "Sült csirkeszárny csöves kukoricával és paradicsomsalátával",
   "slots": [
-   "ebed",
    "vacsora"
   ],
   "perc": 50,
@@ -1052,7 +1084,6 @@ const DATA = [
   "id": "r10",
   "nev": "Darált húsos rakott cukkini & borsó",
   "slots": [
-   "ebed",
    "vacsora"
   ],
   "perc": 45,
@@ -1102,8 +1133,7 @@ const DATA = [
   "id": "r11",
   "nev": "Pirított csirkemell csíkok zöldborsóval és kukoricával",
   "slots": [
-   "ebed",
-   "vacsora"
+   "ebed"
   ],
   "perc": 25,
   "megj": "A rizst nyersen mérd — főzés után a súlya kb. háromszorosára nő, de a makró a nyers mennyiségre vonatkozik.",
@@ -1153,7 +1183,6 @@ const DATA = [
   "id": "r12",
   "nev": "Darált húsos-kukoricás ragu cukkiniágyon",
   "slots": [
-   "ebed",
    "vacsora"
   ],
   "perc": 30,
@@ -1206,7 +1235,6 @@ const DATA = [
   "id": "r13",
   "nev": "Töltött kaliforniai paprika darált hússal és borsóval",
   "slots": [
-   "ebed",
    "vacsora"
   ],
   "perc": 45,
@@ -1255,7 +1283,6 @@ const DATA = [
   "id": "r14",
   "nev": "Sütőben sült darált húsgolyók borsóval és kukoricával",
   "slots": [
-   "ebed",
    "vacsora"
   ],
   "perc": 35,
@@ -1304,7 +1331,6 @@ const DATA = [
   "id": "r15",
   "nev": "Sonkás-tojásos saláta",
   "slots": [
-   "ebed",
    "vacsora"
   ],
   "perc": 20,
@@ -1361,7 +1387,6 @@ const DATA = [
   "id": "r16",
   "nev": "Tonhalas-csicseriborsós saláta",
   "slots": [
-   "ebed",
    "vacsora"
   ],
   "perc": 12,
@@ -1417,8 +1442,7 @@ const DATA = [
   "id": "r17",
   "nev": "Grillezett csirkemell fokhagymás-joghurtos öntettel",
   "slots": [
-   "ebed",
-   "vacsora"
+   "ebed"
   ],
   "perc": 25,
   "megj": "A húst sütés után hagyd 2-3 percig pihenni, így nem szárad ki.",
@@ -1472,8 +1496,7 @@ const DATA = [
   "id": "r18",
   "nev": "Citromos-fokhagymás sült lazac brokkolival",
   "slots": [
-   "ebed",
-   "vacsora"
+   "ebed"
   ],
   "perc": 35,
   "megj": "A lazac zsírja nagyrészt omega-3, de kalóriában így is sűrű — ezért van pontosan kimérve.",
@@ -1523,8 +1546,7 @@ const DATA = [
   "id": "r19",
   "nev": "Sütőben sült fehér halfilé cukkinivel és paradicsommal",
   "slots": [
-   "ebed",
-   "vacsora"
+   "ebed"
   ],
   "perc": 35,
   "megj": "A fehér halfilé a legkevesebb kalóriát adó állati fehérje a Lidl kínálatában — fogyókúra alatt nagyon jól jön.",
@@ -1578,8 +1600,7 @@ const DATA = [
   "id": "r20",
   "nev": "Csirkemelles quinoa-bowl paprikával és rukkolával",
   "slots": [
-   "ebed",
-   "vacsora"
+   "ebed"
   ],
   "perc": 30,
   "megj": "A quinoát nyersen mérd. Teljes értékű fehérjét ad, ezért a hús mellé is jó választás.",
@@ -1631,8 +1652,7 @@ const DATA = [
   "id": "r21",
   "nev": "Vörös lencse dahl sárgarépával",
   "slots": [
-   "ebed",
-   "vacsora"
+   "ebed"
   ],
   "perc": 30,
   "megj": "Húsmentes, mégis sok fehérjét és rengeteg rostot ad — ez a rost az, ami órákra elveszi az éhséget.",
@@ -1684,8 +1704,7 @@ const DATA = [
   "id": "r22",
   "nev": "Pulykamell wrap joghurtos öntettel",
   "slots": [
-   "ebed",
-   "vacsora"
+   "ebed"
   ],
   "perc": 20,
   "megj": "Vihető ebéd. A pulykamell a legszárazabb húsok egyike, ezért ne süsd túl.",
@@ -1739,7 +1758,6 @@ const DATA = [
   "id": "r23",
   "nev": "Garnélás cukkinispagetti paradicsomszósszal",
   "slots": [
-   "ebed",
    "vacsora"
   ],
   "perc": 25,
@@ -1794,7 +1812,6 @@ const DATA = [
   "id": "r24",
   "nev": "Töltött padlizsán darált pulykával",
   "slots": [
-   "ebed",
    "vacsora"
   ],
   "perc": 45,
@@ -1848,8 +1865,7 @@ const DATA = [
   "id": "r25",
   "nev": "Csirkés-babos chili barna rizzsel",
   "slots": [
-   "ebed",
-   "vacsora"
+   "ebed"
   ],
   "perc": 35,
   "megj": "A bab rostja és a csirke fehérjéje együtt nagyon eltelítő. Másnap még jobb.",
@@ -2281,8 +2297,7 @@ const DATA = [
   "id": "r29",
   "nev": "Csirkeleves zöldségekkel és levestésztával",
   "slots": [
-   "ebed",
-   "vacsora"
+   "ebed"
   ],
   "perc": 50,
   "megj": "A tésztát azért főzd külön, mert a levesben megdagad és másnapra felszívja az egész alaplevet. A hús csirkemellből a legszárazabb, de a legkevesebb zsírt adja.",
@@ -2339,8 +2354,7 @@ const DATA = [
   "id": "r30",
   "nev": "Feltuningolt készleves csirkével és tojással",
   "slots": [
-   "ebed",
-   "vacsora"
+   "ebed"
   ],
   "perc": 15,
   "megj": "Magában a tasakos leves nagyrészt só és keményítő, alig van benne fehérje — ezért van benne a csirke, a tojás és a zöldség. Így 10 perc alatt kész, mégis rendes étkezés. Sózni már nem kell, a por sós.",
@@ -2388,8 +2402,7 @@ const DATA = [
   "id": "r31",
   "nev": "Karfiolkrémleves grillezett csirkecsíkokkal",
   "slots": [
-   "ebed",
-   "vacsora"
+   "ebed"
   ],
   "perc": 35,
   "megj": "A karfiol krémesíti a levest anélkül, hogy tejszín kellene bele. A csirke a tetején teszi étkezéssé.",
@@ -2444,8 +2457,7 @@ const DATA = [
   "id": "r32",
   "nev": "Zöldségleves húsgombóccal",
   "slots": [
-   "ebed",
-   "vacsora"
+   "ebed"
   ],
   "perc": 40,
   "megj": "A gombócokat ne forrald nagy lángon, mert szétesnek — gyöngyöző víz kell nekik.",
@@ -2501,8 +2513,7 @@ const DATA = [
   "id": "r33",
   "nev": "Minestrone fehérbabbal",
   "slots": [
-   "ebed",
-   "vacsora"
+   "ebed"
   ],
   "perc": 35,
   "megj": "Húsmentes, mégis laktató a bab fehérjéje és rostja miatt. Másnap sűrűbb lesz — hígítsd fel egy kis vízzel.",
@@ -2754,6 +2765,7 @@ const FRAMES_DEFAULT = [
   { k: 'a2', nev: '1450', cel: 1450, prot: 110 },
 ];
 let FRAMES = FRAMES_DEFAULT.map(f => ({ ...f }));
+let temaPref = 'auto';   // 'auto' | 'light' | 'dark'
 function applyBeallitasok(b) {
   if (b && Array.isArray(b.frames) && b.frames.length === 2) {
     FRAMES = b.frames.map((f, i) => ({
@@ -2763,13 +2775,37 @@ function applyBeallitasok(b) {
       prot: Math.max(0, +f.prot || FRAMES_DEFAULT[i].prot),
     }));
   }
+  if (b && ['auto', 'light', 'dark'].includes(b.tema)) temaPref = b.tema;
+  applyTema();
+}
+
+/* 5.1: 'auto' eseten a rendszerbeallitast kovetjuk, kulonben a kivalasztott temat hasznaljuk.
+   A <html>-re tesszuk az attributumot, mert a CSS szabaly [data-tema="dark"] .rt { ... }
+   ancestor-szelektor -- ennek felette kell lennie a .rt konteinereknek. */
+function effectiveTema() {
+  if (temaPref === 'dark' || temaPref === 'light') return temaPref;
+  return (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+}
+function applyTema() {
+  const eff = effectiveTema();
+  document.documentElement.setAttribute('data-tema', eff);
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', eff === 'dark' ? '#211E1A' : '#F5F0E3');
+}
+if (window.matchMedia) {
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    if (temaPref === 'auto') applyTema();
+  });
 }
 const SLOTS = [
-  { k: 'reggeli', n: 'Reggeli',     hoz: 'reggelihez',     max: 1 },
-  { k: 'ebed',    n: 'Ebéd',        hoz: 'ebédhez',        max: 1 },
-  { k: 'vacsora', n: 'Vacsora',     hoz: 'vacsorához',     max: 1 },
-  { k: 'kis',     n: 'Kisétkezés',  hoz: 'kisétkezéshez',  max: Infinity }
+  { k: 'reggeli', n: 'Reggeli',     hoz: 'reggelihez',     ra: 'reggelire',      max: 1 },
+  { k: 'ebed',    n: 'Ebéd',        hoz: 'ebédhez',        ra: 'ebédre',         max: 1 },
+  { k: 'vacsora', n: 'Vacsora',     hoz: 'vacsorához',     ra: 'vacsorára',      max: 1 },
+  { k: 'kis',     n: 'Kisétkezés',  hoz: 'kisétkezéshez',  ra: 'kisétkezésre',   max: Infinity }
 ];
+/* a magyar ragozast nem szamoljuk, hanem kiirjuk -- a "vacsora -> vacsorara" tipusu
+   maganhangzo-nyujtast egy szabaly sem fedi le tisztan */
+const SLOTRA = Object.fromEntries(SLOTS.map(s => [s.k, s.ra]));
 const SLOTHOZ = Object.fromEntries(SLOTS.map(s => [s.k, s.hoz]));
 const SLOTMAX = Object.fromEntries(SLOTS.map(s => [s.k, s.max]));
 /* "1800-as" / "1450-es" -- csak szamnevnel ragozunk, egyedi (nem szam) nevnel valtozatlanul hagyjuk */
@@ -3103,8 +3139,10 @@ function drawWeek() {
         ${ids.length ? `<ul>${ids.map((id, ix) => {
           const r = get(id); if (!r) return '';
           const k1 = r.a1 ? r.a1.makro.kcal : null, k2 = r.a2 ? r.a2.makro.kcal : null;
-          return `<li><span>${esc(r.nev)}</span><span class="k">${k1 ?? '—'} / ${k2 ?? '—'}</span>
-            <button class="rt-rm" data-rm="${key}|${s.k}|${ix}" aria-label="Kivétel">×</button></li>`;
+          return `<li><button class="rt-plan-item" data-open="${id}">
+              <span class="nm">${esc(r.nev)}</span><span class="k">${k1 ?? '—'} / ${k2 ?? '—'}</span>
+            </button>
+            <button class="rt-rm" data-rm="${key}|${s.k}|${ix}" aria-label="${esc(r.nev)} kivétele">×</button></li>`;
         }).join('')}</ul>` : ''}
         ${(() => {
           const teli = ids.length >= SLOTMAX[s.k];
@@ -3212,9 +3250,9 @@ function autoFillTerv(key) {
 }
 
 /* recept-választó egy naphoz és étkezéshez */
-let pickCtx = null, pickQ = '';
+let pickCtx = null, pickQ = '', pickAll = false;
 function openPick(key, slot) {
-  pickCtx = { key, slot }; pickQ = '';
+  pickCtx = { key, slot }; pickQ = ''; pickAll = false;
   renderPick();
   openScrim();
   const i = el('pq'); if (i) i.focus();
@@ -3222,13 +3260,30 @@ function openPick(key, slot) {
 function renderPick() {
   const { key, slot } = pickCtx;
   const [y, mo, d] = key.split('-').map(Number);
-  const q = pickQ.trim().toLowerCase();
+  const terms = fold(pickQ).split(/\s+/).filter(Boolean);
   const meglevo = (napja(key)[slot] || []);
   const csere = meglevo.length >= SLOTMAX[slot];
   const cserelt = csere ? get(meglevo[meglevo.length - 1]) : null;
-  const lista = all().filter(r => slotsOf(r).includes(slot))
-    .filter(r => !q || r.nev.toLowerCase().includes(q) ||
-      (r.a1 && r.a1.hozz.join(' ').toLowerCase().includes(q)));
+
+  const egyezik = r => {
+    if (!terms.length) return true;
+    const hay = fold([r.nev, r.a1 ? r.a1.hozz.join(' ') : '', r.a2 ? r.a2.hozz.join(' ') : ''].join(' '));
+    return terms.every(t => hay.includes(t));
+  };
+  /* alapbol csak az adott etkezeshez tartozo fogasokat ajanljuk (ebed es vacsora
+     szemantikusan szet van valasztva), de a kapcsoloval barmit be lehet tenni barhova */
+  const sajat = all().filter(r => slotsOf(r).includes(slot) && egyezik(r));
+  const tobbi = all().filter(r => !slotsOf(r).includes(slot) && egyezik(r));
+  const lista = pickAll ? sajat.concat(tobbi) : sajat;
+
+  const sor = r => {
+    const k1 = r.a1 ? r.a1.makro.kcal : null, k2 = r.a2 ? r.a2.makro.kcal : null;
+    const maskor = !slotsOf(r).includes(slot);
+    return `<li><button data-put="${r.id}">
+      <span class="nm">${esc(r.nev)}${maskor ? ` <span class="rt-chip" style="font-size:9.5px;vertical-align:middle">${slotsOf(r).map(s => SLOTNEV[s]).join(' · ')}</span>` : ''}</span>
+      <span class="kk">${k1 ?? '—'} / ${k2 ?? '—'} kcal</span></button></li>`;
+  };
+
   el('sheet').innerHTML = `
     <button class="rt-close" id="x" aria-label="Bezárás">✕</button>
     <div class="rt-sh">
@@ -3238,15 +3293,17 @@ function renderPick() {
       <div class="rt-field" style="margin-top:16px">
         <input id="pq" type="search" placeholder="Keresés a ${lista.length} lehetőség között" value="${esc(pickQ)}" aria-label="Keresés">
       </div>
-      ${lista.length ? `<ul class="rt-pick">${lista.map(r => {
-        const k1 = r.a1 ? r.a1.makro.kcal : null, k2 = r.a2 ? r.a2.makro.kcal : null;
-        return `<li><button data-put="${r.id}">
-          <span class="nm">${esc(r.nev)}</span>
-          <span class="kk">${k1 ?? '—'} / ${k2 ?? '—'} kcal</span></button></li>`;
-      }).join('')}</ul>` : `<p class="rt-hint" style="margin-top:14px">Nincs találat.</p>`}
+      ${lista.length ? `<ul class="rt-pick">${lista.map(sor).join('')}</ul>`
+        : `<p class="rt-hint" style="margin-top:14px">Nincs találat.</p>`}
+      <div class="rt-sh-act" style="margin-top:16px">
+        <button class="btn btn-g btn-sm" id="pickAllBtn" aria-pressed="${pickAll}">
+          ${pickAll ? `Csak ${nevElotag(SLOTNEV[slot])} ${SLOTRA[slot]} szánt fogások` : `Mutasd a többi fogást is (${tobbi.length})`}
+        </button>
+      </div>
     </div>`;
   const inp = el('pq');
   inp.oninput = e => { pickQ = e.target.value; const p = inp.selectionStart; renderPick(); const n2 = el('pq'); n2.focus(); n2.setSelectionRange(p, p); };
+  el('pickAllBtn').onclick = () => { pickAll = !pickAll; renderPick(); };
 }
 
 /* ---------- nap másolása másik napra ---------- */
@@ -3337,7 +3394,8 @@ function openDay(key) {
   const lista = SLOTS.filter(s => (n[s.k] || []).length).map(s => `
     <p class="rt-h3 rt-label">${s.n}</p>
     <ul class="rt-ing">${n[s.k].map(id => { const r = get(id); if (!r) return '';
-      return `<li>${esc(r.nev)} <span style="color:var(--ink-30);font-size:12.5px">— ${r.a1 ? r.a1.makro.kcal : '—'} / ${r.a2 ? r.a2.makro.kcal : '—'} kcal</span></li>`;
+      return `<li><button class="rt-day-item" data-open="${id}">
+        <span>${esc(r.nev)}</span><span class="kcal">${r.a1 ? r.a1.makro.kcal : '—'} / ${r.a2 ? r.a2.makro.kcal : '—'} kcal</span></button></li>`;
     }).join('')}</ul>`).join('');
 
   el('sheet').innerHTML = `
@@ -3874,6 +3932,12 @@ function openAccount() {
 /* ---------- beállítások: keretnevek és célok ---------- */
 function settingsBlokk() {
   return `
+    <p class="rt-h3 rt-label">Megjelenés</p>
+    <div class="rt-scale" role="group" aria-label="Téma" style="margin-bottom:22px">
+      <button data-tema-opt="auto" aria-pressed="${temaPref === 'auto'}">Automatikus</button>
+      <button data-tema-opt="light" aria-pressed="${temaPref === 'light'}">Világos</button>
+      <button data-tema-opt="dark" aria-pressed="${temaPref === 'dark'}">Sötét</button>
+    </div>
     <p class="rt-h3 rt-label">Kalóriakeretek</p>
     <p style="margin:0 0 14px;font-size:13.5px;color:var(--ink-60)">
       Két keret van — ennyi fér a receptadatokba —, de a nevük, a kalória- és a fehérjecéljuk szabadon állítható.</p>
@@ -3895,6 +3959,12 @@ function settingsBlokk() {
 }
 function bindSettings() {
   const b = el('doSettings'); if (!b) return;
+  document.querySelectorAll('[data-tema-opt]').forEach(btn => btn.onclick = async () => {
+    temaPref = btn.dataset.temaOpt;
+    document.querySelectorAll('[data-tema-opt]').forEach(x => x.setAttribute('aria-pressed', x === btn));
+    applyTema();
+    await save(KEYS.beallitasok, { frames: FRAMES, tema: temaPref });
+  });
   b.onclick = async () => {
     const vals = [0, 1].map(i => ({
       nev: el(`s-nev${i}`).value.trim() || FRAMES[i].nev,
@@ -3905,8 +3975,8 @@ function bindSettings() {
       el('settingsErr').innerHTML = `<p class="rt-err" style="margin-top:14px">A kcal-célnak pozitívnak kell lennie.</p>`;
       return;
     }
-    applyBeallitasok({ frames: vals });
-    await save(KEYS.beallitasok, { frames: FRAMES });
+    applyBeallitasok({ frames: vals, tema: temaPref });
+    await save(KEYS.beallitasok, { frames: FRAMES, tema: temaPref });
     redrawAll(); drawAccount();
     el('settingsErr').innerHTML = '';
     toast('Beállítások elmentve');
