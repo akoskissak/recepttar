@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Recepttár — receptek makrókkal</title>
-<meta name="description" content="43 recept két kalóriakerethez, étrendtervvel és naptárral.">
+<meta name="description" content="43 recept két kalóriakerethez, étrendtervvel, naptárral és főzés móddal.">
 <meta name="theme-color" content="#F5F0E3">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Recepttár">
@@ -356,6 +356,87 @@
 .rt-nums u i { width: 7px; height: 7px; border-radius: 2px; flex: 0 0 7px; }
 
 .rt-two { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 8px; }
+.rt-ing-hd { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 22px; }
+.rt .rt-scale { display: flex; gap: 3px; background: var(--paper); border-radius: 9px; padding: 3px; }
+.rt .rt-scale button { min-height: 36px; padding: 0 13px; border-radius: 7px; font-size: 12.5px; font-weight: 700; color: var(--ink-60); }
+.rt .rt-scale button:hover { color: var(--ink); }
+.rt .rt-scale button[aria-pressed="true"] { background: var(--card); color: var(--blue); box-shadow: 0 1px 2px rgba(43,38,32,.12); }
+
+/* ---------- nyomtatás ---------- */
+@media print {
+  body * { visibility: hidden; }
+  .rt-scrim, .rt-scrim * { visibility: visible; }
+  .rt-scrim { position: static !important; background: none !important; padding: 0 !important; opacity: 1 !important; }
+  .rt-sheet { box-shadow: none !important; max-height: none !important; overflow: visible !important; max-width: none !important; border: 0 !important; }
+  .rt-close, .rt-noprint, #toasts, .rt-hd, .rt-tabs, .rt-tools, .rt-key, .rt-bottom { display: none !important; }
+  .rt-shfr { break-inside: avoid; }
+  .rt-steps li { break-inside: avoid; }
+  #printWeek, #printWeek * { visibility: visible; }
+}
+.rt-print-only { display: none; }
+@media print { .rt-print-only { display: block; } }
+
+/* ---------- Főzés mód (2.1) ---------- */
+.rt-cook {
+  position: fixed; inset: 0; z-index: 50; background: var(--paper);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.rt-cook[hidden] { display: none; }   /* a .rt-cook display:flex kulonben felulirna a natv [hidden] viselkedest */
+.rt-cook-hd {
+  display: flex; align-items: center; gap: 12px; padding: 16px 20px;
+  border-bottom: 1.5px solid var(--hair); flex: 0 0 auto;
+}
+.rt-cook-hd h2 { font-family: var(--disp); font-weight: 700; font-size: 17px; margin: 0; flex: 1; min-width: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rt-cook-body { flex: 1; overflow-y: auto; padding: 20px 24px 24px; max-width: 640px; margin: 0 auto; width: 100%; }
+
+.rt-cook-tabs { display: flex; gap: 6px; margin-bottom: 20px; }
+.rt .rt-cook-tabs button {
+  flex: 1; min-height: 42px; border-radius: 10px; font-size: 13.5px; font-weight: 700;
+  color: var(--ink-60); background: var(--card); border: 1.5px solid var(--hair);
+}
+.rt .rt-cook-tabs button[aria-pressed="true"] { background: var(--ink); color: var(--card); border-color: var(--ink); }
+
+.rt-cook-ing { list-style: none; margin: 0; padding: 0; }
+.rt-cook-ing li { border-bottom: 1.5px dashed var(--hair); }
+.rt .rt-cook-ing button {
+  width: 100%; display: flex; align-items: center; gap: 14px; padding: 15px 4px;
+  text-align: left; font-size: 16px; min-height: 48px;
+}
+.rt-cook-ing .box {
+  width: 24px; height: 24px; border-radius: 7px; border: 2px solid var(--ink-30); flex: 0 0 24px;
+  display: grid; place-items: center; font-size: 14px; color: transparent; transition: all .15s;
+}
+.rt-cook-ing button.done .box { background: var(--blue); border-color: var(--blue); color: #fff; }
+.rt-cook-ing button.done span.txt { text-decoration: line-through; color: var(--ink-30); }
+
+.rt-cook-step { text-align: center; padding: 10px 0 30px; }
+.rt-cook-count { font-family: var(--disp); font-weight: 700; font-size: 14px; color: var(--ink-60); margin-bottom: 18px; }
+.rt-cook-text { font-family: var(--disp); font-weight: 500; font-size: 26px; line-height: 1.35; letter-spacing: -.01em; min-height: 140px; display: flex; align-items: center; justify-content: center; }
+.rt-cook-nav { display: flex; gap: 10px; margin-top: 20px; }
+.rt .rt-cook-nav button { flex: 1; min-height: 54px; border-radius: 13px; font-size: 15px; font-weight: 700; }
+.rt-cook-dots { display: flex; gap: 6px; justify-content: center; margin-top: 18px; }
+.rt-cook-dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--hair); display: block; }
+.rt-cook-dots i.on { background: var(--blue); }
+
+.rt-timer-btn { margin-top: 22px; }
+.rt-timer-live {
+  margin-top: 22px; padding: 18px; background: var(--card); border: 1.5px solid var(--hair);
+  border-radius: 14px; text-align: center;
+}
+.rt-timer-live b { font-family: var(--disp); font-weight: 700; font-size: 40px; letter-spacing: -.02em; display: block; }
+.rt-timer-live.done b { color: var(--tomato); }
+.rt-wake-badge {
+  display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 700;
+  color: var(--ink-60); padding: 5px 10px; border-radius: 999px; background: var(--card); border: 1.5px solid var(--hair);
+}
+.rt-wake-badge i { width: 7px; height: 7px; border-radius: 50%; background: #3F8F5C; display: block; }
+
+@media (max-width: 640px) {
+  .rt-cook-hd { padding: 13px 16px; }
+  .rt-cook-body { padding: 16px 18px 20px; }
+  .rt-cook-text { font-size: 22px; min-height: 120px; }
+}
 .rt-h3 { margin: 22px 0 9px; }
 .rt-h4 { margin: 0 0 8px; font-size: 11.5px; font-weight: 700; color: var(--blue); letter-spacing: .04em; }
 .rt-ing { list-style: none; margin: 0; padding: 0; }
@@ -494,6 +575,10 @@
 
 <div class="rt-scrim rt" id="scrim">
   <div class="rt-sheet" role="dialog" aria-modal="true" aria-labelledby="shname" id="sheet"></div>
+</div>
+
+<div class="rt rt-cook" id="cookOverlay" hidden role="dialog" aria-modal="true" aria-label="Főzés mód">
+  <div id="cookInner"></div>
 </div>
 
 <script>
@@ -2578,7 +2663,7 @@ const DATA = [
  }
 ];
 
-const KEYS = { fav: 'recepttar:favs', own: 'recepttar:own', etrend: 'recepttar:etrend', oldplan: 'recepttar:plan' };
+const KEYS = { fav: 'recepttar:favs', own: 'recepttar:own', etrend: 'recepttar:etrend', oldplan: 'recepttar:plan', beallitasok: 'recepttar:beallitasok' };
 const mem = {};
 
 /* =====================================================================
@@ -2662,7 +2747,23 @@ async function syncAfterSignIn(user) {
 }
 
 /* ---------- alapok ---------- */
-const FRAMES = [{ k: 'a1', cel: 1800 }, { k: 'a2', cel: 1450 }];
+/* A keretek (nev, kcal-cel, feherje-cel) mostantol szerkesztheto beallitasok --
+   a szam CSAK ket keret lehet, mert a receptadatok a1/a2 kulcsokra epulnek. */
+const FRAMES_DEFAULT = [
+  { k: 'a1', nev: '1800', cel: 1800, prot: 130 },
+  { k: 'a2', nev: '1450', cel: 1450, prot: 110 },
+];
+let FRAMES = FRAMES_DEFAULT.map(f => ({ ...f }));
+function applyBeallitasok(b) {
+  if (b && Array.isArray(b.frames) && b.frames.length === 2) {
+    FRAMES = b.frames.map((f, i) => ({
+      k: FRAMES_DEFAULT[i].k,
+      nev: String(f.nev || f.cel || FRAMES_DEFAULT[i].nev),
+      cel: Math.max(1, +f.cel || FRAMES_DEFAULT[i].cel),
+      prot: Math.max(0, +f.prot || FRAMES_DEFAULT[i].prot),
+    }));
+  }
+}
 const SLOTS = [
   { k: 'reggeli', n: 'Reggeli',     hoz: 'reggelihez',     max: 1 },
   { k: 'ebed',    n: 'Ebéd',        hoz: 'ebédhez',        max: 1 },
@@ -2671,8 +2772,20 @@ const SLOTS = [
 ];
 const SLOTHOZ = Object.fromEntries(SLOTS.map(s => [s.k, s.hoz]));
 const SLOTMAX = Object.fromEntries(SLOTS.map(s => [s.k, s.max]));
-/* "1800-as" / "1450-es" -- mindketto "ezer"-rel kezdodik, ezert a szocska "az" */
-const keretNev = cel => cel + (cel % 100 === 50 ? '-es' : '-as');
+/* "1800-as" / "1450-es" -- csak szamnevnel ragozunk, egyedi (nem szam) nevnel valtozatlanul hagyjuk */
+const keretNev = f => {
+  const nev = typeof f === 'object' ? f.nev : f;
+  if (/^\d+$/.test(String(nev))) return nev + (Number(nev) % 100 === 50 ? '-es' : '-as');
+  return nev;
+};
+/* "a" vagy "az" -- szamnal (pl. 1800, ejtve "ezernyolcszaz") mindig az, mert magyarban
+   az ezres nagysagrendek maganhangzoval kezdodnek kimondva; egyedi szoveges nevnel az irott
+   alak elso betuje dont */
+function nevElotag(f) {
+  const nev = typeof f === 'object' ? f.nev : f;
+  if (/^\d+$/.test(String(nev))) return 'az';
+  return /^[aáeéiíoóöőuúüű]/i.test(String(nev)) ? 'az' : 'a';
+}
 const SLOTNEV = Object.fromEntries(SLOTS.map(s => [s.k, s.n]));
 const HO = ['január','február','március','április','május','június','július','augusztus','szeptember','október','november','december'];
 const NAPROVID = ['Hétfő','Kedd','Szerda','Csütörtök','Péntek','Szombat','Vasárnap'];
@@ -2693,6 +2806,21 @@ let favs = [], own = [], etrend = {};
 const el = id => document.getElementById(id);
 const num = n => Number(n).toFixed(1).replace('.', ',').replace(/,0$/, '');
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+function sameList(a, b) {
+  if (!a || !b) return true;
+  return a.length === b.length && a.every((x, i) => x === b[i]);
+}
+/* 2.2 adagszorzas: a sor elejen allo szamot szorozzuk, a mertekegyseget megtartjuk.
+   Ha a sor nem szammal kezdodik (fuszer, izles szerinti hozzavalo), csak jelezzuk a szorzot,
+   a mennyiseget nem talaljuk ki. */
+function scaleLine(line, factor) {
+  if (factor === 1) return line;
+  const m = line.match(/^(\d+(?:[.,]\d+)?)\s*(g|ml|kg|l)?\s+(.*)$/);
+  if (!m) return `${line} (×${factor})`;
+  const szam = parseFloat(m[1].replace(',', '.')) * factor;
+  const szamStr = Number.isInteger(szam) ? String(szam) : szam.toFixed(1).replace('.', ',');
+  return m[2] ? `${szamStr} ${m[2]} ${m[3]}` : `${szamStr} ${m[3]}`;
+}
 const all = () => DATA.concat(own);
 const get = id => all().find(r => r.id === id);
 const iso = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -2726,12 +2854,18 @@ async function setSlot(key, slot, ids) {
 }
 
 /* ---------- visszajelzés és visszavonás ---------- */
-let toastT = null, undoSnap = null;
+let toastT = null;
+const undoStack = [];   // legfeljebb 20 lepes, minden elem az etrend teljes masolata a valtoztatas ELOTT
+const UNDO_MAX = 20;
 
 function redrawAll() { drawGrid(); drawWeek(); drawCal(); drawBottom(); }
 
-/* minden etrend-modositas elott lementjuk az elozo allapotot, hogy visszavonhato legyen */
-function snapshot() { undoSnap = JSON.parse(JSON.stringify(etrend)); }
+/* minden etrend-modositas elott lementjuk az elozo allapotot, hogy visszavonhato legyen -- egymas utani
+   muveletek kulon lepesben kerulnek a verembe, tehat tobbszori visszavonassal sorban visszagorgethetok */
+function snapshot() {
+  undoStack.push(JSON.parse(JSON.stringify(etrend)));
+  if (undoStack.length > UNDO_MAX) undoStack.shift();
+}
 
 function toast(msg, withUndo) {
   const w = el('toasts');
@@ -2743,12 +2877,13 @@ function toast(msg, withUndo) {
   clearTimeout(toastT);
   toastT = setTimeout(() => { w.innerHTML = ''; }, withUndo ? 7000 : 3200);
   if (withUndo) el('undoBtn').onclick = async () => {
-    if (undoSnap) {
-      etrend = undoSnap; undoSnap = null;
+    const prev = undoStack.pop();
+    if (prev) {
+      etrend = prev;
       await save(KEYS.etrend, etrend); redrawAll();
     }
     clearTimeout(toastT); w.innerHTML = '';
-    toast('Visszaállítva');
+    toast(undoStack.length ? 'Visszaállítva' : 'Visszaállítva — nincs több visszavonható lépés', undoStack.length > 0);
   };
 }
 
@@ -2818,25 +2953,35 @@ function macroSpan(m) {
 }
 
 /* ---------- receptek nézet ---------- */
-/* mennyi kaloria maradt ma az egyes keretekben */
+/* mennyi kaloria (es feherje) maradt ma az egyes keretekben */
 function maradek() {
-  return FRAMES.map(f => ({ cel: f.cel, k: f.k, marad: f.cel - napOsszeg(ma(), f.k).kcal }));
+  return FRAMES.map(f => {
+    const t = napOsszeg(ma(), f.k);
+    return { cel: f.cel, nev: f.nev, k: f.k, marad: f.cel - t.kcal, protMarad: f.prot - t.p, protCel: f.prot };
+  });
 }
 /* belefer-e a recept a mai maradekba mindegyik keretben, ahol van valtozata */
 function beleferMa(r) {
   return maradek().every(m => !r[m.k] || r[m.k].makro.kcal <= m.marad);
 }
 
+/* ekezet nelkuli kereses: az NFD-dekompozicio NEM bontja fel az o-t es u-t
+   (ellenoriztem: normalize('NFD') utan is o/u marad), ezert explicit tablazat kell */
+const FOLD_MAP = { á:'a', é:'e', í:'i', ó:'o', ö:'o', ő:'o', ú:'u', ü:'u', ű:'u' };
+function fold(s) {
+  return String(s).toLowerCase().replace(/[áéíóöőúüű]/g, c => FOLD_MAP[c] || c);
+}
+
 function visible() {
-  const q = query.trim().toLowerCase();
+  const terms = fold(query).split(/\s+/).filter(Boolean);
   let rows = all().filter(r => {
     const sl = slotsOf(r);
     if (filter === 'Kedvencek') { if (!favs.includes(r.id)) return false; }
     else if (filter !== 'Mind') { if (!sl.includes(filter)) return false; }
     if (csakBelefer && !beleferMa(r)) return false;
-    if (!q) return true;
-    return [r.nev, ...sl.map(s => SLOTNEV[s]), r.a1 ? r.a1.hozz.join(' ') : '', r.a2 ? r.a2.hozz.join(' ') : '']
-      .join(' ').toLowerCase().includes(q);
+    if (!terms.length) return true;
+    const hay = fold([r.nev, ...sl.map(s => SLOTNEV[s]), r.a1 ? r.a1.hozz.join(' ') : '', r.a2 ? r.a2.hozz.join(' ') : ''].join(' '));
+    return terms.every(t => hay.includes(t));   // minden szonak egyeznie kell (ES kapcsolat)
   });
 
   const k = r => r.a1 ? r.a1.makro.kcal : (r.a2 ? r.a2.makro.kcal : 0);
@@ -2853,7 +2998,7 @@ function drawBudget() {
   el('budget').innerHTML = `<div class="rt-budget">
     <span class="rt-label" style="letter-spacing:.09em">Ma még belefér</span>
     ${maradek().map(m => `<span><b class="${m.marad < 0 ? 'tele' : ''}">${m.marad}</b> kcal
-      <span style="color:var(--ink-60)">az ${keretNev(m.cel)} keretben</span></span>`).join('')}
+      <span style="color:var(--ink-60)">${nevElotag(m)} ${keretNev(m)} keretben</span></span>`).join('')}
   </div>`;
 }
 function drawNav() {
@@ -2974,14 +3119,19 @@ function drawWeek() {
     const sum = FRAMES.map(f => {
       const t = napOsszeg(key, f.k);
       const tul = t.kcal > f.cel;
+      const pTul = t.p >= f.prot;
       return `<div class="rt-dsum-row">
-          <span class="rt-chip">${f.cel}</span>
+          <span class="rt-chip">${f.nev}</span>
           <b class="${tul ? 'rt-over' : ''}">${t.kcal}</b><s>kcal</s>
           <em class="${tul ? 'rt-over' : ''}">${tul ? '+' + (t.kcal - f.cel) : (f.cel - t.kcal) + ' szabad'}</em>
         </div>
         <div class="rt-bar"><div style="width:${Math.min(t.kcal / f.cel, 1) * 100}%">
           <i class="kp" style="flex:${t.p*4||1}"></i><i class="kc" style="flex:${t.c*4}"></i><i class="kf" style="flex:${t.f*9}"></i>
-        </div></div>`;
+        </div></div>
+        <div class="rt-dsum-row" style="margin-top:6px">
+          <span class="rt-chip" style="background:var(--blue-soft);color:var(--blue)">fehérje</span>
+          <b class="${pTul ? '' : ''}" style="color:var(--blue)">${num(t.p)}</b><s>/ ${f.prot} g</s>
+        </div>`;
     }).join('');
 
     return `<div class="rt-dcard ${isMa ? 'ma' : ''}">
@@ -3007,28 +3157,32 @@ function drawWeekSum() {
   const t = FRAMES.map(f => {
     const ossz = napok.map(k => napOsszeg(k, f.k));
     return {
-      cel: f.cel,
+      cel: f.cel, nev: f.nev,
       atlag: Math.round(ossz.reduce((a, x) => a + x.kcal, 0) / napok.length),
+      atlagP: (ossz.reduce((a, x) => a + x.p, 0) / napok.length),
+      protCel: f.prot,
       belul: ossz.filter(x => x.kcal <= f.cel).length,
     };
   });
-  const atlagP = (napok.reduce((a, k) => a + napOsszeg(k, 'a1').p, 0) / napok.length).toFixed(1).replace('.', ',');
   el('wksum').innerHTML = `
     <div><b>${napok.length} / 7</b><u class="rt-label">betervezett nap</u></div>
-    ${t.map(x => `<div><b>${x.atlag}</b><u class="rt-label">átlag az ${keretNev(x.cel)} keretben</u></div>`).join('')}
-    <div><b>${atlagP} g</b><u class="rt-label">átlagos fehérje</u></div>
-    ${t.map(x => `<div><b>${x.belul} / ${napok.length}</b><u class="rt-label">az ${keretNev(x.cel)} keret alatt</u></div>`).join('')}`;
+    ${t.map(x => `<div><b>${x.atlag}</b><u class="rt-label">átlag ${nevElotag(x)} ${keretNev(x)} keretben</u></div>`).join('')}
+    ${t.map(x => `<div><b>${num(x.atlagP)} / ${x.protCel} g</b><u class="rt-label">átlagos fehérje ${nevElotag(x)} ${keretNev(x)} keretben</u></div>`).join('')}
+    ${t.map(x => `<div><b>${x.belul} / ${napok.length}</b><u class="rt-label">${nevElotag(x)} ${keretNev(x)} keret alatt</u></div>`).join('')}`;
 }
 
 /* ---------- automatikus napkitöltés ----------
-   Az 1800-as keret a vezető: veletlen kombinaciokat probal, es azt tartja meg,
-   ami a kereten belul a legkozelebb van hozza, kozben sok feherjet ad. */
+   Az elso keret (FRAMES[0]) a vezeto: veletlen kombinaciokat probal, es azt tartja meg,
+   ami a kereten belul a legkozelebb van hozza, kozben a feherje-celt majdnem kemeny
+   korlatkent kezeli (nagy buntetes, ha alatta marad). */
 function autoFillTerv(key) {
   const meglevo = napja(key);
-  const cel = 1800;
+  const cel = FRAMES[0].cel, protCel = FRAMES[0].prot;
   const jelolt = s => all().filter(r => slotsOf(r).includes(s) && r.a1);
   const fixKcal = SLOTS.reduce((a, s) => a + (meglevo[s.k] || [])
     .reduce((x, id) => { const r = get(id); return x + (r && r.a1 ? r.a1.makro.kcal : 0); }, 0), 0);
+  const fixProt = SLOTS.reduce((a, s) => a + (meglevo[s.k] || [])
+    .reduce((x, id) => { const r = get(id); return x + (r && r.a1 ? r.a1.makro.p : 0); }, 0), 0);
   const ures = ['reggeli','ebed','vacsora'].filter(s => !(meglevo[s] || []).length);
   const kisJelolt = jelolt('kis');
   if (!ures.length && !kisJelolt.length) return null;
@@ -3036,7 +3190,7 @@ function autoFillTerv(key) {
   let best = null;
   for (let t = 0; t < 400; t++) {
     const valasztas = {};
-    let sum = fixKcal, prot = 0;
+    let sum = fixKcal, prot = fixProt;
     for (const s of ures) {
       const c = jelolt(s); if (!c.length) continue;
       const r = c[Math.floor(Math.random() * c.length)];
@@ -3049,8 +3203,10 @@ function autoFillTerv(key) {
       snackek.push(r.id); sum += r.a1.makro.kcal; prot += r.a1.makro.p;
     }
     if (snackek.length) valasztas.kis = (meglevo.kis || []).concat(snackek);
-    const pont = (sum <= cel ? sum : cel - (sum - cel) * 3) + prot * 2;
-    if (!best || pont > best.pont) best = { pont, valasztas, sum };
+    const kcalPont = sum <= cel ? sum : cel - (sum - cel) * 3;
+    const protPont = prot >= protCel ? protCel * 3 : prot * 3 - (protCel - prot) * 2;
+    const pont = kcalPont + protPont;
+    if (!best || pont > best.pont) best = { pont, valasztas, sum, prot };
   }
   return best;
 }
@@ -3136,8 +3292,8 @@ function drawCal() {
     cells += `<button class="rt-day has ${isMa ? 'ma' : ''}" data-day="${key}" aria-label="${d}. — ${t1.kcal} és ${t2.kcal} kcal">
       <span class="rt-day-n">${d}</span>
       <span class="rt-day-vals">
-        <span class="rt-day-v ${t1.kcal > 1800 ? 'ov' : 'in'}"><b>${t1.kcal}</b>1800</span>
-        <span class="rt-day-v ${t2.kcal > 1450 ? 'ov' : 'in'}"><b>${t2.kcal}</b>1450</span>
+        <span class="rt-day-v ${t1.kcal > FRAMES[0].cel ? 'ov' : 'in'}"><b>${t1.kcal}</b>${FRAMES[0].nev}</span>
+        <span class="rt-day-v ${t2.kcal > FRAMES[1].cel ? 'ov' : 'in'}"><b>${t2.kcal}</b>${FRAMES[1].nev}</span>
       </span></button>`;
   }
   el('days').innerHTML = cells;
@@ -3145,12 +3301,14 @@ function drawCal() {
   if (honap.length) {
     const a1 = Math.round(honap.reduce((a, x) => a + x.t1.kcal, 0) / honap.length);
     const a2 = Math.round(honap.reduce((a, x) => a + x.t2.kcal, 0) / honap.length);
-    const b1 = honap.filter(x => x.t1.kcal <= 1800).length;
+    const p1 = honap.reduce((a, x) => a + x.t1.p, 0) / honap.length;
+    const b1 = honap.filter(x => x.t1.kcal <= FRAMES[0].cel).length;
     el('calSum').innerHTML = `
       <div><b>${honap.length}</b><u class="rt-label">nap ebben a hónapban</u></div>
-      <div><b>${a1}</b><u class="rt-label">átlag az 1800-as keretben</u></div>
-      <div><b>${a2}</b><u class="rt-label">átlag az 1450-as keretben</u></div>
-      <div><b>${b1} / ${honap.length}</b><u class="rt-label">1800 alatt maradt</u></div>`;
+      <div><b>${a1}</b><u class="rt-label">átlag ${nevElotag(FRAMES[0])} ${keretNev(FRAMES[0])} keretben</u></div>
+      <div><b>${a2}</b><u class="rt-label">átlag ${nevElotag(FRAMES[1])} ${keretNev(FRAMES[1])} keretben</u></div>
+      <div><b>${num(p1)} / ${FRAMES[0].prot} g</b><u class="rt-label">átlagos fehérje ${nevElotag(FRAMES[0])} ${keretNev(FRAMES[0])} keretben</u></div>
+      <div><b>${b1} / ${honap.length}</b><u class="rt-label">${nevElotag(FRAMES[0])} ${keretNev(FRAMES[0])} keret alatt</u></div>`;
   } else el('calSum').innerHTML = '';
 
   el('calEmpty').innerHTML = osszes.length ? '' : `<div class="rt-cal-empty">
@@ -3202,9 +3360,10 @@ function drawBottom() {
   FRAMES.forEach((f, i) => {
     const t = napOsszeg(ma(), f.k), tul = t.kcal > f.cel;
     el('bfr' + (i + 1)).innerHTML = `
-      <div class="rt-bfr-r"><span class="rt-chip">${f.cel}</span>
+      <div class="rt-bfr-r"><span class="rt-chip">${f.nev}</span>
         <b class="${tul ? 'rt-over' : ''}">${t.kcal}</b><s>kcal</s>
-        <em class="${tul ? 'rt-over' : ''}">${tul ? '+' + (t.kcal - f.cel) : (f.cel - t.kcal) + ' szabad'}</em></div>
+        <em class="${tul ? 'rt-over' : ''}">${tul ? '+' + (t.kcal - f.cel) : (f.cel - t.kcal) + ' szabad'}</em>
+        <em style="margin-left:6px;color:var(--blue)">F ${num(t.p)}/${f.prot}</em></div>
       <div class="rt-bar"><div style="width:${Math.min(t.kcal / f.cel, 1) * 100}%">
         <i class="kp" style="flex:${t.p*4||1}"></i><i class="kc" style="flex:${t.c*4}"></i><i class="kf" style="flex:${t.f*9}"></i>
       </div></div>`;
@@ -3212,8 +3371,189 @@ function drawBottom() {
 }
 
 /* ---------- recept lapja: mindkét keret ---------- */
+let sheetScale = 1;   // 2.2: az eppen nyitott lap adagszorzoja, minden uj megnyitaskor 1-re all
+function ingHtml(r, scale) {
+  return `<div class="rt-two">
+    ${FRAMES.map(f => r[f.k] ? `<div><p class="rt-h4">${f.cel} kcal-os keret</p>
+      <ul class="rt-ing">${r[f.k].hozz.map(h => `<li>${esc(scaleLine(h, scale))}</li>`).join('')}</ul></div>` : '').join('')}
+  </div>`;
+}
+
+/* ---------- Főzés mód (2.1) ---------- */
+let cookState = null;
+let cookWakeLock = null;
+
+/* legfeljebb 2 szamot keres a lepes szovegeben ("35-40 percig" vagy "8 percig"),
+   tartomanynal az atlagot hasznalja -- csak akkor ajanlunk idozitot, ha tenyleg talalunk idot */
+const IDO_RE = /(\d+)(?:\s*[-–]\s*(\d+))?\s*(perc|másodperc)\w*/i;
+function parseTimer(text) {
+  const m = String(text).match(IDO_RE);
+  if (!m) return null;
+  const a = +m[1], b = m[2] ? +m[2] : a;
+  const ertek = Math.round((a + b) / 2);
+  const masodperc = /másodperc/i.test(m[3]) ? ertek : ertek * 60;
+  return { masodperc, cimke: m[2] ? `${a}–${b} ${m[3]}` : `${a} ${m[3]}` };
+}
+
+async function requestWakeLock() {
+  if (!('wakeLock' in navigator)) return;
+  try { cookWakeLock = await navigator.wakeLock.request('screen'); } catch (e) { cookWakeLock = null; }
+}
+async function releaseWakeLock() {
+  if (cookWakeLock) { try { await cookWakeLock.release(); } catch (e) {} cookWakeLock = null; }
+}
+document.addEventListener('visibilitychange', async () => {
+  if (document.visibilityState === 'visible' && cookState && !cookWakeLock) {
+    await requestWakeLock();
+    if (cookState) drawCook();   // a jelveny allapota valtozhatott, frissitsuk
+  }
+});
+
+/* harom rovid sipolas WebAudio-val -- nincs hozza hangfajl, csak egy oszcillator */
+function beep() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = 'sine'; o.frequency.value = 880;
+    o.connect(g); g.connect(ctx.destination);
+    o.start();
+    for (let i = 0; i < 3; i++) {
+      const t = ctx.currentTime + i * 0.35;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.3, t + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.22);
+    }
+    o.stop(ctx.currentTime + 1.15);
+  } catch (e) { /* audio nem elerheto -- nema idozito is jobb, mint hiba */ }
+}
+
+async function openCooking(id) {
+  const r = get(id); if (!r) return;
+  const lepesek = (r.lep && r.lep.length) ? r.lep : ((r.a1 && r.a1.lep) || (r.a2 && r.a2.lep) || []);
+  if (!lepesek.length) return;
+  cookState = { r, tab: 'ing', frame: 0, scale: 1, step: 0, checked: new Set(), timer: null };
+  el('cookOverlay').hidden = false;
+  await requestWakeLock();   // itt varunk meg, hogy a jelvenyen a tenyleges allapot latszodjon, ne csak az API letezese
+  drawCook();
+}
+function closeCooking() {
+  if (cookState) stopTimer();
+  el('cookOverlay').hidden = true;
+  cookState = null;
+  releaseWakeLock();
+}
+
+function drawCook() {
+  const { r } = cookState;
+  const wake = cookWakeLock !== null;   // csak a tenyleges sikeres lockot jelezzuk, nem az API mere letezeset
+  el('cookInner').innerHTML = `
+    <div class="rt-cook-hd">
+      <button class="btn btn-g btn-ico" id="cookClose" aria-label="Bezárás">✕</button>
+      <h2>${esc(r.nev)}</h2>
+      ${wake ? `<span class="rt-wake-badge"><i></i>Ébren tartva</span>` : ''}
+    </div>
+    <div class="rt-cook-body">
+      <div class="rt-cook-tabs" role="group" aria-label="Nézet">
+        <button data-ctab="ing" aria-pressed="${cookState.tab !== 'lep'}">Hozzávalók</button>
+        <button data-ctab="lep" aria-pressed="${cookState.tab === 'lep'}">Lépések</button>
+      </div>
+      <div id="cookContent"></div>
+    </div>`;
+  el('cookClose').onclick = closeCooking;
+  el('cookInner').querySelectorAll('[data-ctab]').forEach(b => b.onclick = () => { cookState.tab = b.dataset.ctab; drawCook(); });
+  if (cookState.tab === 'lep') drawCookSteps(); else drawCookIng();
+}
+
+function drawCookIng() {
+  const { r, frame, scale, checked } = cookState;
+  const fr = FRAMES[frame];
+  const hozz = (r[fr.k] && r[fr.k].hozz) || [];
+  el('cookContent').innerHTML = `
+    <div class="rt-scale" role="group" aria-label="Keret" style="margin-bottom:10px">
+      ${FRAMES.map((f, i) => `<button data-cframe="${i}" aria-pressed="${i === frame}">${esc(f.nev)}</button>`).join('')}
+    </div>
+    <div class="rt-scale" role="group" aria-label="Adagszorzó" style="margin-bottom:18px">
+      ${[1,2,3].map(n => `<button data-cscale="${n}" aria-pressed="${n === scale}">×${n}</button>`).join('')}
+    </div>
+    ${scale !== 1 ? `<p class="rt-hint" style="margin-bottom:14px">A szorzó csak a hozzávalókat skálázza, a makrók egy adagra vonatkoznak.</p>` : ''}
+    <ul class="rt-cook-ing">
+      ${hozz.map((h, i) => `<li><button data-cing="${i}" class="${checked.has(i) ? 'done' : ''}">
+        <span class="box">✓</span><span class="txt">${esc(scaleLine(h, scale))}</span></button></li>`).join('')}
+    </ul>`;
+  el('cookContent').querySelectorAll('[data-cframe]').forEach(b => b.onclick = () => { cookState.frame = +b.dataset.cframe; drawCookIng(); });
+  el('cookContent').querySelectorAll('[data-cscale]').forEach(b => b.onclick = () => { cookState.scale = +b.dataset.cscale; drawCookIng(); });
+  el('cookContent').querySelectorAll('[data-cing]').forEach(b => b.onclick = () => {
+    const i = +b.dataset.cing;
+    checked.has(i) ? checked.delete(i) : checked.add(i);
+    drawCookIng();
+  });
+}
+
+function drawCookSteps() {
+  const { r, step } = cookState;
+  const lepesek = (r.lep && r.lep.length) ? r.lep : ((r.a1 && r.a1.lep) || (r.a2 && r.a2.lep) || []);
+  const text = lepesek[step];
+  const info = parseTimer(text);
+  const utolso = step === lepesek.length - 1;
+  el('cookContent').innerHTML = `
+    <div class="rt-cook-step">
+      <div class="rt-cook-count">${step + 1} / ${lepesek.length}</div>
+      <div class="rt-cook-text">${esc(text)}</div>
+      ${info ? `<div id="timerArea"></div>` : ''}
+      <div class="rt-cook-dots">${lepesek.map((_, i) => `<i class="${i === step ? 'on' : ''}"></i>`).join('')}</div>
+    </div>
+    <div class="rt-cook-nav">
+      <button class="btn btn-s" id="cookPrev" ${step === 0 ? 'disabled' : ''}>Előző</button>
+      <button class="btn btn-p" id="cookNext">${utolso ? 'Kész!' : 'Következő'}</button>
+    </div>`;
+  el('cookPrev').onclick = () => { stopTimer(); cookState.step--; drawCookSteps(); };
+  el('cookNext').onclick = () => {
+    if (utolso) { closeCooking(); toast('Jó étvágyat!'); return; }
+    stopTimer(); cookState.step++; drawCookSteps();
+  };
+  if (info) drawTimerButton(info);
+
+  // 2.1 erintos lapozas: kuszob felett vizszintes huzasra lep elore/hatra
+  let x0 = null;
+  const stepBox = document.querySelector('.rt-cook-step');
+  stepBox.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; }, { passive: true });
+  stepBox.addEventListener('touchend', e => {
+    if (x0 === null) return;
+    const dx = e.changedTouches[0].clientX - x0; x0 = null;
+    if (Math.abs(dx) < 60) return;
+    if (dx < 0) el('cookNext').click(); else if (step > 0) el('cookPrev').click();
+  }, { passive: true });
+}
+
+function drawTimerButton(info) {
+  const area = el('timerArea'); if (!area) return;
+  area.innerHTML = `<button class="btn btn-s rt-timer-btn" id="startTimer">Indíts: ${info.cimke}</button>`;
+  el('startTimer').onclick = () => startTimer(info.masodperc, info);
+}
+function stopTimer() {
+  if (cookState && cookState.timer) { clearInterval(cookState.timer); cookState.timer = null; }
+}
+function startTimer(mp, info) {
+  stopTimer();
+  const area = el('timerArea'); if (!area) return;
+  let left = mp;
+  const render = (kesz) => {
+    const m = Math.floor(Math.max(left, 0) / 60), s = Math.max(left, 0) % 60;
+    area.innerHTML = `<div class="rt-timer-live ${kesz ? 'done' : ''}"><b>${m}:${String(s).padStart(2, '0')}</b>
+      <button class="btn btn-g btn-sm" id="stopTimer">${kesz ? 'Rendben' : 'Leállítás'}</button></div>`;
+    el('stopTimer').onclick = () => { stopTimer(); drawTimerButton(info); };
+  };
+  render(false);
+  cookState.timer = setInterval(() => {
+    left--;
+    if (left <= 0) { clearInterval(cookState.timer); cookState.timer = null; beep(); render(true); return; }
+    render(false);
+  }, 1000);
+}
+
 function openSheet(id) {
   const r = get(id); if (!r) return;
+  sheetScale = 1;
   const max = maxKcal();
   const frBlokk = FRAMES.map(f => {
     const v = r[f.k];
@@ -3232,10 +3572,14 @@ function openSheet(id) {
     </div>`;
   }).join('');
 
-  const ing = `<p class="rt-h3 rt-label">Hozzávalók — keretenként</p><div class="rt-two">
-    ${FRAMES.map(f => r[f.k] ? `<div><p class="rt-h4">${f.cel} kcal-os keret</p>
-      <ul class="rt-ing">${r[f.k].hozz.map(h => `<li>${esc(h)}</li>`).join('')}</ul></div>` : '').join('')}
-  </div>`;
+  const ingHead = `<div class="rt-ing-hd">
+    <p class="rt-h3 rt-label" style="margin:0">Hozzávalók — keretenként</p>
+    <div class="rt-scale" role="group" aria-label="Adagszorzó">
+      ${[1,2,3].map(n => `<button data-scale="${n}" aria-pressed="${n === 1}">×${n}</button>`).join('')}
+    </div>
+  </div>
+  <p class="rt-hint" style="margin:6px 0 12px" id="scaleHint" hidden>A makrók fent mindig egy adagra vonatkoznak — a szorzó csak a hozzávalókat skálázza.</p>
+  <div id="ingBlock">${ingHtml(r, 1)}</div>`;
 
   /* Az elkeszites mindket keretnel ugyanaz -- csak a mennyisegek masok -,
      ezert egyszer irjuk ki. A regi, keretenkent tarolt lepesekre is visszaesunk. */
@@ -3249,19 +3593,28 @@ function openSheet(id) {
 
   el('sheet').innerHTML = `
     <button class="rt-close" id="x" aria-label="Bezárás">✕</button>
-    <div class="rt-sh">
+    <div class="rt-sh" id="printArea">
       <p class="rt-label">${esc(katNev(r))} · ${r.perc} perc</p>
       <h2 id="shname">${esc(r.nev)}</h2>
-      ${frBlokk}${ing}${lep}
+      ${frBlokk}${ingHead}${lep}
       ${r.megj ? `<p class="rt-note">${esc(r.megj)}</p>` : ''}
-      <div class="rt-sh-act">
-        <button class="btn btn-p" data-quick="${r.id}">+ Mai étrendhez</button>
+      <div class="rt-sh-act rt-noprint">
+        ${lepesek.length ? `<button class="btn btn-p" data-cook="${r.id}">Főzés indítása</button>` : ''}
+        <button class="btn btn-s" data-quick="${r.id}">+ Mai étrendhez</button>
         <button class="btn btn-s" data-fav="${r.id}">${favs.includes(r.id) ? '★ Kedvenc' : '☆ Kedvencnek'}</button>
+        <button class="btn btn-g" id="doPrint">Nyomtatás</button>
         ${r.own ? `<button class="btn btn-s" data-edit="${r.id}">Szerkesztés</button><button class="btn btn-d" id="askDel">Törlés</button>` : ''}
       </div>
       ${r.own ? `<div id="delBox"></div>` : ''}
     </div>`;
   openScrim();
+  el('doPrint').onclick = () => window.print();
+  el('sheet').querySelectorAll('[data-scale]').forEach(b => b.onclick = () => {
+    sheetScale = +b.dataset.scale;
+    el('sheet').querySelectorAll('[data-scale]').forEach(x => x.setAttribute('aria-pressed', x === b));
+    el('ingBlock').innerHTML = ingHtml(r, sheetScale);
+    el('scaleHint').hidden = sheetScale === 1;
+  });
   el('x').focus();
   if (el('askDel')) el('askDel').onclick = () => {
     el('delBox').innerHTML = `<div class="rt-confirm">
@@ -3339,8 +3692,16 @@ function openEditor(id) {
         <div class="rt-field"><label class="rt-label" for="f-perc">Összidő (perc)</label>
           <input id="f-perc" type="number" min="0" value="${r ? r.perc : 20}"></div>
       </div>
-      <div class="rt-field"><label class="rt-label" for="f-hozz">Hozzávalók — egy sorba egy</label>
-        <textarea id="f-hozz" placeholder="200 g csirkemell&#10;250 g brokkoli">${r && r.a1 ? esc(r.a1.hozz.join('\n')) : ''}</textarea></div>
+      <div class="rt-field"><label class="rt-label" for="f-hozz1">Hozzávalók — 1800 kcal-os keret, egy sorba egy</label>
+        <textarea id="f-hozz1" placeholder="200 g csirkemell&#10;250 g brokkoli">${r && r.a1 ? esc(r.a1.hozz.join('\n')) : ''}</textarea></div>
+      <label style="display:flex;align-items:center;gap:8px;margin:-6px 0 14px;font-size:13.5px;color:var(--ink-60)">
+        <input type="checkbox" id="f-same" ${(!r || !r.a2 || sameList(r.a1 && r.a1.hozz, r.a2 && r.a2.hozz)) ? 'checked' : ''} style="width:17px;height:17px">
+        Ugyanazok a hozzávalók mindkét kerethez</label>
+      <div class="rt-field" id="f-hozz2-wrap" ${(!r || !r.a2 || sameList(r.a1 && r.a1.hozz, r.a2 && r.a2.hozz)) ? 'hidden' : ''}>
+        <label class="rt-label" for="f-hozz2">Hozzávalók — 1450 kcal-os keret, egy sorba egy</label>
+        <textarea id="f-hozz2" placeholder="150 g csirkemell&#10;200 g brokkoli">${r && r.a2 ? esc(r.a2.hozz.join('\n')) : ''}</textarea>
+        <button type="button" class="btn btn-g btn-sm" id="f-copy1" style="margin-top:8px">Másolás az 1800-asból</button>
+      </div>
       <div class="rt-field"><label class="rt-label" for="f-lep">Elkészítés — egy sorba egy lépés</label>
         <textarea id="f-lep" placeholder="Fűszerezd be a csirkét.&#10;Süsd 200 fokon 25 percig.">${r ? esc(((r.lep && r.lep.length) ? r.lep : (r.a1 && r.a1.lep) || []).join('\n')) : ''}</textarea></div>
       <p class="rt-h3 rt-label">Makrók — 1800 kcal-os keret</p>
@@ -3366,19 +3727,23 @@ function openEditor(id) {
   openScrim();
   el('f-nev').focus();
   el('cancel').onclick = closeSheet;
+  el('f-same').onchange = e => { el('f-hozz2-wrap').hidden = e.target.checked; };
+  el('f-copy1').onclick = () => { el('f-hozz2').value = el('f-hozz1').value; };
   el('dosave').onclick = async () => {
     const nev = el('f-nev').value.trim();
     if (!nev) return fail('Adj nevet a receptnek.');
     if (!el('k1').value.trim()) return fail('Az 1800-as keret kalóriaértéke kell — enélkül nem tudom a csíkot kirajzolni.');
-    const hozz = el('f-hozz').value.split('\n').map(s => s.trim()).filter(Boolean);
+    const hozz1 = el('f-hozz1').value.split('\n').map(s => s.trim()).filter(Boolean);
+    const same = el('f-same').checked;
+    const hozz2 = same ? hozz1 : el('f-hozz2').value.split('\n').map(s => s.trim()).filter(Boolean);
     const lep = el('f-lep').value.split('\n').map(s => s.trim()).filter(Boolean);
     const mk = (k,p,c,z) => ({ kcal:+el(k).value||0, p:+el(p).value||0, c:+el(c).value||0, f:+el(z).value||0 });
     const slots = el('f-slot').value.split(',');
     const rec = { id: r ? r.id : 'o' + Date.now(), own: true, nev, slots,
       kat: slots.map(s => SLOTNEV[s]).join(' / '), perc: +el('f-perc').value || 0, megj: '',
       lep,
-      a1: { makro: mk('k1','p1','c1','z1'), hozz },
-      a2: el('k2').value.trim() ? { makro: mk('k2','p2','c2','z2'), hozz } : null };
+      a1: { makro: mk('k1','p1','c1','z1'), hozz: hozz1 },
+      a2: el('k2').value.trim() ? { makro: mk('k2','p2','c2','z2'), hozz: hozz2 } : null };
     const uj = !r;
     own = r ? own.map(x => x.id === r.id ? rec : x) : own.concat([rec]);
     await save(KEYS.own, own);
@@ -3476,11 +3841,12 @@ function openAccount() {
           Firebase-projektet, és be kell másolnod a hozzáférési adatait a fájl elejére,
           a <code>FIREBASE_CONFIG</code> objektumba. Kérdezz rá, és lépésről lépésre végigviszlek rajta.
         </p>
+        ${settingsBlokk()}
         ${backupBlokk()}
       </div>`;
     openScrim();
     el('x').focus();
-    bindBackup();
+    bindSettings(); bindBackup();
     return;
   }
   if (fbUser) {
@@ -3494,14 +3860,57 @@ function openAccount() {
           <span class="rt-sync-badge rt-sync-on">Élő</span>
         </div>
         <div class="rt-sh-act"><button class="btn btn-d" id="signout">Kijelentkezés</button></div>
+        ${settingsBlokk()}
         ${backupBlokk()}
       </div>`;
     openScrim();
-    bindBackup();
+    bindSettings(); bindBackup();
     el('signout').onclick = async () => { await fbAuth.signOut(); fbUser = null; drawAccount(); closeSheet(); toast('Kijelentkeztél — az adatok ezen az eszközön maradnak'); };
     return;
   }
   renderAuthForm('signin');
+}
+
+/* ---------- beállítások: keretnevek és célok ---------- */
+function settingsBlokk() {
+  return `
+    <p class="rt-h3 rt-label">Kalóriakeretek</p>
+    <p style="margin:0 0 14px;font-size:13.5px;color:var(--ink-60)">
+      Két keret van — ennyi fér a receptadatokba —, de a nevük, a kalória- és a fehérjecéljuk szabadon állítható.</p>
+    <div class="rt-2">
+      ${FRAMES.map((f, i) => `
+        <div>
+          <div class="rt-field"><label class="rt-label" for="s-nev${i}">${i + 1}. keret neve</label>
+            <input id="s-nev${i}" value="${esc(f.nev)}"></div>
+          <div class="rt-field"><label class="rt-label" for="s-kcal${i}">Napi kcal-cél</label>
+            <input id="s-kcal${i}" type="number" min="1" value="${f.cel}"></div>
+          <div class="rt-field"><label class="rt-label" for="s-prot${i}">Napi fehérjecél (g)</label>
+            <input id="s-prot${i}" type="number" min="0" value="${f.prot}"></div>
+        </div>`).join('')}
+    </div>
+    <div class="rt-sh-act" style="margin-top:0">
+      <button class="btn btn-s" id="doSettings">Beállítások mentése</button>
+    </div>
+    <div id="settingsErr"></div>`;
+}
+function bindSettings() {
+  const b = el('doSettings'); if (!b) return;
+  b.onclick = async () => {
+    const vals = [0, 1].map(i => ({
+      nev: el(`s-nev${i}`).value.trim() || FRAMES[i].nev,
+      cel: +el(`s-kcal${i}`).value,
+      prot: +el(`s-prot${i}`).value,
+    }));
+    if (vals.some(v => !v.cel || v.cel < 1)) {
+      el('settingsErr').innerHTML = `<p class="rt-err" style="margin-top:14px">A kcal-célnak pozitívnak kell lennie.</p>`;
+      return;
+    }
+    applyBeallitasok({ frames: vals });
+    await save(KEYS.beallitasok, { frames: FRAMES });
+    redrawAll(); drawAccount();
+    el('settingsErr').innerHTML = '';
+    toast('Beállítások elmentve');
+  };
 }
 
 function renderAuthForm(mode, msg) {
@@ -3664,7 +4073,7 @@ document.addEventListener('click', async e => {
     await save(KEYS.etrend, etrend);
     redrawAll();
     const t = napOsszeg(key, 'a1');
-    toast(`A nap kitöltve — ${t.kcal} kcal az 1800-as keretben`, true);
+    toast(`A nap kitöltve — ${t.kcal} kcal ${nevElotag(FRAMES[0])} ${keretNev(FRAMES[0])} keretben`, true);
     return;
   }
   const cd = e.target.closest('[data-copyday]'); if (cd) return openCopyDay(cd.dataset.copyday);
@@ -3718,11 +4127,13 @@ document.addEventListener('click', async e => {
     return;
   }
   if (e.target.id === 'x' || e.target.id === 'scrim') return closeSheet();
+  const cookBtn = e.target.closest('[data-cook]'); if (cookBtn) return openCooking(cookBtn.dataset.cook);
   const card = e.target.closest('[data-open]'); if (card) openSheet(card.dataset.open);
 });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSheet(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { if (cookState) closeCooking(); else closeSheet(); } });
 
 (async () => {
+  applyBeallitasok(await load(KEYS.beallitasok, null));
   favs = await load(KEYS.fav, []);
   own = await load(KEYS.own, []);
   own.forEach(r => { if (!r.slots) r.slots = slotsOf(r); });
